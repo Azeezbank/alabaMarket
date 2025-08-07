@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { create } from 'domain';
 const prisma = new PrismaClient();
 
 passport.use(
@@ -21,9 +22,13 @@ passport.use(
           user = await prisma.user.create({
             data: {
               email: email!,
-              name: profile.displayName,
               googleId: profile.id,
+              profile: {
+                create: {
+              name: profile.displayName,
             },
+          }
+        }
           });
         }
 
