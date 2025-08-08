@@ -21,15 +21,25 @@ model user {
   savedItems   Product[]  @relation("SavedProducts")
   profile    Profile?
   reviews     ProductReview[]
+  shop       SellerShop[]
 }
 
 model Profile {
   id     String    @id @default(uuid)   @db.Uuid
   name  String
-  profile_pic     String
+  profile_pic     String?
   userId      String
   user    user  @relation(fields: [userId], references: [id])
-  role      String
+  role      String?
+  status    String?
+}
+
+model SellerStore {
+  id   String   @id    @default(uuid)    @db.Uuid
+  userId   String
+  user user @relation(fields: [userId], references: [id])
+  storeName     String?
+  createdAt    DateTime   @default(now())
 }
 
 model ProductCat {
@@ -83,7 +93,6 @@ model Like {
   user      user     @relation(fields: [userId], references: [id])
   productId String
   product   Product  @relation(fields: [productId], references: [id])
-
   @@unique([userId, productId]) // user can like a product only once
 }
 
@@ -114,4 +123,17 @@ model Notification {
   type      String   // e.g., 'order', 'promo', 'system'
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model SellerShop {
+  id   String   @id    @default(uuid())   @db.Uuid
+  name    String
+  logo    String
+  description    String
+  address    String
+  contact    String
+  most_sell    String
+  userId    String
+  user     user   @relation(fields: [userId], references: [id])
+  createdAt    DateTime    @default(now())
 }

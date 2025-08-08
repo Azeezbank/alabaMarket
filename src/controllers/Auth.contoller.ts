@@ -5,8 +5,14 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import { sendEmail } from '../utils/mailer';
-import { sendOtpSms } from '../utils/sendsms'
+import twilio from 'twilio';
 dotenv.config();
+
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID!;
+const authToken = process.env.TWILIO_AUTH_TOKEN!;
+const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID!; // or set from number
+const client = twilio(accountSid, authToken);
 
 const jwt_secret_key = process.env.JWT_SECRET;
 
@@ -31,6 +37,7 @@ export const register = async (req: Request, res: Response) => {
 
     // Generate a random OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes expiry
     const hashed = await bcrypt.hash(password, 10);
 
@@ -40,7 +47,7 @@ export const register = async (req: Request, res: Response) => {
         email,
         phone,
         password: hashed,
-        otp: otp,
+        otp: otpHash,
         expiresAt: expiresAt
       }
     });
@@ -56,10 +63,14 @@ export const register = async (req: Request, res: Response) => {
       `)
     } else if (phone) {
       //Sent otp to user's phone number through sms
-      await sendOtpSms(phone, otp);
+      await client.messages.create({
+      body: `Your verification code is ${otp}`,
+      to: phone,
+      messagingServiceSid
+    });
     }
 
-    res.status(201).json({ message: 'User registered successfully. OTP sent.' });
+    res.status(201).json({ message: 'User registered successfully. OTP sent.', phone, email });
   } catch (err: any) {
     console.error('Failed to register user', err);
     return res.status(500).json({ message: 'Failed to register user' });
@@ -70,33 +81,33 @@ export const register = async (req: Request, res: Response) => {
 //Verify otp controller
 export const verifyOTP = async (req: Request, res: Response) => {
   const { otp } = req.body;
+  const { email, phone } = req.query;
 
   try {
+    if (!otp) return res.status(400).json({ message: 'OTP is required' });
     const user = await prisma.user.findFirst({
-      where: { otp }, orderBy: { createdAt: 'desc' },
+      where: { 
+        OR: [{ email: email as string }, { phone: phone as string }],
+       }, orderBy: { createdAt: 'desc' },
     })
 
-    if (!user || otp !== user.otp) {
-      return res.status(400).json({ message: 'Invalid OTP' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
     if (user.expiresAt < new Date()) {
       return res.status(410).json({ message: 'OTP expired' })
     }
 
-    //Delete verification otp
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { otp: null}
-    })
+     const isMatch = await bcrypt.compare(otp, user.otp);
+     if (!isMatch) return res.status(400).json({ message: 'Invalid OTP' });
 
     // Set a flag to indicate the user is verified
     await prisma.user.update({
-      where: { id: user.id},
-      data: {
-        sign_up_verify: true,
-      }
+      where: { id: user.id },
+      data: { otp: null, sign_up_verify: true, expiresAt: null}
     })
+
 
     res.status(200).json({ message: 'OTP verified, user authenticated' })
   } catch (err: any) {
@@ -112,6 +123,7 @@ export const resendOtp = async (req: Request, res: Response) => {
   const email = req.query.email as string;
 
   const Otp =  Math.floor(100000 + Math.random() * 900000).toString();
+  const otpHash = await bcrypt.hash(Otp, 10);
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 mins
 
   try {
@@ -136,7 +148,7 @@ export const resendOtp = async (req: Request, res: Response) => {
     await prisma.user.update({
       where: { id: existing.id},
         data: {
-          otp: Otp,
+          otp: otpHash,
           expiresAt: expiresAt
         }
       })
@@ -152,10 +164,10 @@ export const resendOtp = async (req: Request, res: Response) => {
       `)
     } else if (phone) {
       //Sent otp to user's phone number through sms
-      await sendOtpSms(phone, Otp);
+      await client.messages.create({ body: `Your login code is ${Otp}`, to: phone, messagingServiceSid });
     }
 
-    res.status(200).json({ message: 'New OTP sent successfully.' })
+    res.status(200).json({ message: 'New OTP sent successfully.', phone, email })
   } catch (err) {
     return res.status(500).json({ message: 'Failed to resend OTP', error: err })
   }
@@ -163,74 +175,23 @@ export const resendOtp = async (req: Request, res: Response) => {
 
 // Login: Generate and send OTP
 export const loginUser = async (req: Request, res: Response) => {
-  const { phone, email } = req.body;
-
+  const { phone, email, password } = req.body;
+     try {
   if (!phone && !email) {
     return res.status(400).json({ message: "Phone or email is required" });
   }
 
-  const user = await prisma.user.findUnique({ where: {
+  const user = await prisma.user.findFirst({ where: {
     OR: [{ phone }, {email}] } });
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
+  if (!user || user.sign_up_verify !== true) {
+    return res.status(404).json({ message: "User not found, or user not verified" });
   }
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString() // e.g. 6-digit code
-  const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+  const isMatch = await bcrypt.compare(password, user.password);
+     if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      otp,
-      expiresAt: otpExpiresAt,
-    },
-  });
-
-  // Send OTP via email or SMS 
-    if (email) {
-      await sendEmail(email, 'Email veriification',
-        `
-      <h1>Welcome to Alabamarket</h1> <br/> 
-      <p>Your OTP is: <strong>${otp}</strong></p>
-      <p>Please use this OTP to verify your account.</p>
-        <p>Thank you for registering!</p>
-      `)
-    } else if (phone) {
-      //Sent otp to user's phone number through sms
-      await sendOtpSms(phone, otp);
-    }
-
-  res.status(200).json({ message: "OTP sent to phone" });
-};
-
-// Verify OTP during login
-export const verifyLoginOTP = async (req: Request, res: Response) => {
-  const { otp } = req.body;
-
-  const user = await prisma.user.findUnique({ where: { otp } });
-
-  if (!user) {
-    return res.status(400).json({ message: "No OTP record found" });
-  }
-
-  const now = new Date();
-
-  if (user.otp !== otp) {
-    return res.status(400).json({ message: "Invalid OTP" });
-  }
-
-  if (user.expiresAt < now) {
-    return res.status(400).json({ message: "OTP has expired" });
-  }
-
-  // Clear OTP after successful verification
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { otp: null, expiresAt: null },
-    });
-
-    // Generate JWT token
+     // Generate JWT token
     const token = jwt.sign(
       {
         userId: user.id,
@@ -250,6 +211,62 @@ export const verifyLoginOTP = async (req: Request, res: Response) => {
     path: "/",
   });
 
-
-  res.status(200).json({ message: "Login successful" });
+  res.status(200).json({ message: "OTP sent to phone", phone, email });
+} catch (err: any) {
+    console.error('Failed to login user', err);
+    return res.status(500).json({ message: 'Failed to login user' });
+  }
 };
+
+// // Verify OTP during login
+// export const verifyLoginOTP = async (req: Request, res: Response) => {
+//   const { otp } = req.body;
+//   const { email, phone } = req.query;
+
+//   const user = await prisma.user.findFirst({ where: { 
+//     OR: [{ email: email as string }, { phone: phone as string }], }});
+
+//   if (!user) {
+//     return res.status(400).json({ message: "No user record found" });
+//   }
+
+//   const now = new Date();
+
+//   if (user.expiresAt < now) {
+//     return res.status(400).json({ message: "OTP has expired" });
+//   }
+
+//   const isMatch = await bcrypt.compare(otp, user.otp);
+//   if (!isMatch) return res.status(400).json({ message: 'Invalid OTP' });
+
+//   // Generate JWT token
+//     const token = jwt.sign(
+//       {
+//         userId: user.id,
+//         email: user.email,
+//         phone: user.phone,
+//       },
+//       jwt_secret_key!,
+//       { expiresIn: "1h" } // token valid for 1 hour
+//     );
+
+//   // Clear OTP after successful verification
+//     await prisma.user.update({
+//       where: { id: user.id },
+//       data: { otp: null, expiresAt: null },
+//     });
+
+    
+
+//   // Set cookie with JWT (HTTPOnly and Secure for production)
+//   res.cookie("token", token, {
+//     httpOnly: true,
+//     secure: true,
+//     maxAge: 60 * 60 * 1000, // 1 hour in milliseconds
+//     sameSite: "none",
+//     path: "/",
+//   });
+
+
+//   res.status(200).json({ message: "Login successful" });
+// };
