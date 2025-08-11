@@ -1,0 +1,27 @@
+import express from "express";
+import { upload } from "../middlewares/upload.multer";
+import { createShop, getShopdetails, updateShopDetails, updateShopStatus, deleteShop } from "../controllers/seller/Shop";
+import { authenticate } from "@/middlewares/auth.middleware";
+import { SellerVerification, updateVerificationIdCard } from "@/controllers/seller/SellerVerification";
+import { SellerListing, FetchSellerListings, PauseSellerListing, EditSellerListing, DeleteSellerListing  } from '@/controllers/seller/Listing';
+import { createComment, getCommentsByProduct } from '@/controllers/seller/listing.comment';
+import { getNotifications } from '@/controllers/seller/Notification';
+
+const router = express.Router();
+
+router.post("/create/shop", authenticate, upload.single("file"), createShop);
+router.get("/shop/details", authenticate, getShopdetails);
+router.post("/seller/vefication", authenticate, upload.fields([{ name: "idCard", maxCount: 1}, {name: "passport", maxCount: 1}]), SellerVerification);
+router.post("/update/seller/vefication", authenticate, upload.fields([{ name: "idCard", maxCount: 1}]), updateVerificationIdCard);
+router.put('/listing/pause', authenticate, PauseSellerListing);
+router.get("/notifications", authenticate, getNotifications);
+router.post("/comments", authenticate, createComment);
+router.put("/update/shop", authenticate, upload.single('file'), updateShopDetails);
+router.delete('/shop/delete', authenticate, deleteShop);
+router.put("/shop/status/update", authenticate, updateShopStatus);
+router.post("/upload/listing/:shopId", authenticate, upload.fields([{ name: "productImage", maxCount: 1}, {name: "productVideo", maxCount: 1}]), SellerListing);
+router.get("/listing/:productId", authenticate, FetchSellerListings);
+router.put("/update/listing/:productId", authenticate, upload.fields([{ name: "productImage", maxCount: 1}, {name: "productVideo", maxCount: 1}]), EditSellerListing);
+router.delete("/delete/listing/:productId", authenticate, DeleteSellerListing);
+router.get("/comments/product/:productId", getCommentsByProduct);
+export default router;

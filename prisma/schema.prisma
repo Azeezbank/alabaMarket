@@ -7,133 +7,207 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
-  id             String    @id @default(uuid())   @db.Uuid
-  email          String?   @unique
-  phone          String?   @unique
-  password       String?
-  otp            String
-  expiresAt      DateTime    
-  sign_up_verify     Boolean   @default(false)
-  googleId       String    @unique
-  createdAt      DateTime  @default(now())
-  product       Product[]
-  savedItems   Product[]  @relation("SavedProducts")
-  profile    Profile?
-  reviews     ProductReview[]
-  shop       SellerShop[]
+model User {
+  id                 String              @id @default(uuid()) @db.Uuid
+  email              String?             @unique
+  phone              String?             @unique
+  password           String?
+  otp                String
+  expiresAt          DateTime
+  sign_up_verify     Boolean             @default(false)
+  googleId           String              @unique
+  createdAt          DateTime            @default(now())
+  product            Product[]
+  savedItems         Product[]           @relation("SavedProducts")
+  profile            Profile?
+  reviews            ProductReview[]
+  shop               SellerShop[]
+  sellerVerification SellerVerification?
+  comment            Comment[]
+  notification       Notification[]
+  sellerStore        SellerStore[]
+  Like               Like[]
 }
 
 model Profile {
-  id     String    @id @default(uuid)   @db.Uuid
-  name  String
-  profile_pic     String?
-  userId      String
-  user    user  @relation(fields: [userId], references: [id])
-  role      String?
-  status    String?
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  profile_pic String?
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id])
+  role        String  @default("Buyer")
+  status      String?
 }
 
+//delete
 model SellerStore {
-  id   String   @id    @default(uuid)    @db.Uuid
-  userId   String
-  user user @relation(fields: [userId], references: [id])
-  storeName     String?
-  createdAt    DateTime   @default(now())
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  storeName String?
+  createdAt DateTime @default(now())
 }
 
-model ProductCat {
-  id   String    @id     @default(uuid())     @db.Uuid
-  name   String
-  image   String?
-  createdAt     DateTime     @default(now())
-  products Product[]
+//Comma
+model Category {
+  id    String  @id @default(uuid())
+  image String?
 }
 
 model Product {
-  id       String   @id   @default(uuid())  @db.Uuid
-  name     String
-  condition  String?
-  price      Decimal?   @db.Decimal(10, 2)    @default(0.00)
+  id              String          @id @default(uuid()) @db.Uuid
+  name            String
+  userId          String
+  promoted        Boolean         @default(false)
+  isActive        Boolean         @default(true)
+  status          String?         @default("Pending")
+  isPause         Boolean         @default(false)
+  shopId          String
+  photos          ProductPhoto[]
+  video           ProductVideo[]
+  pricing         ProductPricing?
+  productCategory ProductCat[]
+  comment         Comment[]
+  shop            SellerShop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  seller          User            @relation(fields: [userId], references: [id])
+  likes           Like[]
+
+  //Pending
   power      String?
   warranty   String?
-  productCatId  String
-  category      ProductCat   @relation(fields: [productCatId], references: [id])
-  description   String?
-  location      String?
-  promoted      Boolean     @default(false)
-  negotiable    Boolean      @default(false)
-  createdAt     DateTime     @default(now())
-  updatedAt   DateTime  @updatedAt
-  reviews     ProductReview[]
-  images       ProductImage[]
-  userId        String
-  seller       user     @relation(fields: [userId], references: [id])
-  savedByUsers user[]     @relation("SavedProducts")
+  location   String?
+  negotiable Boolean        @default(false)
+  reviews    ProductReview?
+  savedBy    User[]         @relation("SavedProducts")
 }
 
-model Comment {
-  id     String   @id   @default(uuid())  @db.Uuid
-  content   String
-  createdAt DateTime @default(now())
-
-  // Relations
-  userId    String
-  user      user     @relation(fields: [userId], references: [id])
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
+model ProductCat {
+  id           String   @id @default(uuid())
+  productId    String
+  mainCategory String
+  subCategory  String
+  createdAt    DateTime @default(now())
+  product      Product  @relation(fields: [productId], references: [id])
 }
 
-model Like {
-  id     String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-
-  // Relations
-  userId    String
-  user      user     @relation(fields: [userId], references: [id])
+model ProductPhoto {
+  id        String   @id @default(uuid()) @db.Uuid
+  url       String? // image URL or path
   productId String
   product   Product  @relation(fields: [productId], references: [id])
-  @@unique([userId, productId]) // user can like a product only once
+  createdAt DateTime @default(now())
+}
+
+model ProductVideo {
+  id        String   @id @default(uuid())
+  productId String
+  url       String?
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model ProductPricing {
+  id          String   @id @default(uuid())
+  productId   String   @unique
+  price       Decimal  @default(0.00) @db.Decimal(10, 2)
+  priceStatus String?
+  condition   String?
+  description String?
+  createdAt   DateTime @default(now())
+  product     Product  @relation(fields: [productId], references: [id])
 }
 
 model ProductReview {
   id        String   @id @default(uuid()) @db.Uuid
-  rating    Int      // 1 to 5 stars
+  rating    Int // 1 to 5 stars
   comment   String?
-  productId String
+  productId String   @unique
   product   Product  @relation(fields: [productId], references: [id])
   userId    String
-  user      user     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
 
-model ProductImage {
-  id         String   @id @default(uuid()) @db.Uuid
-  url        String?   // image URL or path
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id])
-  createdAt  DateTime @default(now())
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  content   String
+  productId String
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Like {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
 }
 
 model Notification {
-  id    String    @id     @default(uuid())    @db.Uuid
-  user      user     @relation(fields: [userId], references: [id])
-  userId    String   @db.Uuid
-  message   String
-  type      String   // e.g., 'order', 'promo', 'system'
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String
+  message    String?
+  receiverId String
+  type       String?
+  isRead     Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model SellerShop {
-  id   String   @id    @default(uuid())   @db.Uuid
-  name    String
-  logo    String
-  description    String
-  address    String
-  contact    String
-  most_sell    String
-  userId    String
-  user     user   @relation(fields: [userId], references: [id])
-  createdAt    DateTime    @default(now())
+  id           String    @id @default(uuid()) @db.Uuid
+  storeName    String?
+  logo         String?
+  description  String?
+  storeAddress String?
+  most_sell    String?
+  storeEmail   String?
+  phoneNumber  String?
+  userId       String    @unique
+  isActive     Boolean   @default(true)
+  product      Product[]
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+}
+
+model SellerVerification {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  ID_card    String?
+  selfie     String?
+  terms      Boolean  @default(false)
+  isVerified Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model BoostListing {
+  id            String     @id @default(uuid())
+  standardboost Standard[]
+  featuredboost Featured[]
+}
+
+model Standard {
+  id             String       @id @default(uuid())
+  period         String
+  boostListingId String
+  boosting       BoostListing @relation(fields: [boostListingId], references: [id])
+  pricing        Decimal      @default(0.00) @db.Decimal(10, 2)
+}
+
+model Featured {
+  id             String       @id @default(uuid())
+  period         String
+  boostListingId String
+  boosting       BoostListing @relation(fields: [boostListingId], references: [id])
+  pricing        Decimal      @default(0.00) @db.Decimal(10, 2)
 }
