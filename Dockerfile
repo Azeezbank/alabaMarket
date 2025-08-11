@@ -1,21 +1,22 @@
-# USE official Node.js image
-FROM Bnode:18-alpine
 
-#Create app directory
+# Use official Node.js image
+FROM node:18-alpine
+
+# Create app directory
 WORKDIR /app
 
-#Install dependencies
+# Install dependencies
 COPY package*.json ./
-RUN npm Install
+RUN npm install
 
-#Copy APP SOURCE
+# Copy app source code
 COPY . .
 
-#Build if there is build step
-RUN npm run build
+# Build (only if needed for frontend or TS compilation)
+# RUN npm run build
 
-#Expose port
+# Expose port
 EXPOSE 3000
 
-#Start app
-CMD ["npm", "Start"]
+# Start app
+CMD ["npm", "run", "dev"]

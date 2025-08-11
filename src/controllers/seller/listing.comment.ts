@@ -13,7 +13,7 @@ export const createComment = async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const comment = await prisma.Comment.create({
+    const comment = await prisma.comment.create({
       data: {
         content,
         productId,
@@ -36,7 +36,7 @@ export const getCommentsByProduct = async (req: Request, res: Response) => {
   const productId = req.params.productId;
 
   try {
-    const comments = await prisma.Comment.findMany({
+    const comments = await prisma.comment.findMany({
       where: { productId },
       orderBy: { createdAt: "desc" },
       include: { user: true } // include commenter info
