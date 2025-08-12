@@ -2,6 +2,7 @@ import { Response, Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import prisma from "@/prisma";
 import { AuthRequest } from "../../middlewares/auth.middleware";
+import bcrypt from 'bcryptjs';
 
 export const UpdateInfo = async (req: AuthRequest, res: Response) => {
     const userId = (req.user as JwtPayload)?.id;
@@ -31,9 +32,19 @@ export const ChangePassword = async (req: AuthRequest, res: Response) => {
         if (newPassword !== confirmedPassword) {
             console.log('Password mismatched, caanot update password');
             return res.status(400).json({message: 'new password must tally with confirmed password'});
-
-
         }
+
+        const user = await prisma.user.findFirst({ where: {id: userId}, select: { password: true}});
+        if (!user) {
+            return res.status(404).json({message: 'No user found'});
+        }
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            console.log('Password Mismatch');
+            return res.status(400).json({message: 'Incorrect password'});
+        }
+
+        await prisma.user.update({ where:  {id: userId}, data: {password: confirmedPassword}})
     } catch (err: any) {
         console.error('Failed to change password')
     }

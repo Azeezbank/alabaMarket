@@ -1,22 +1,23 @@
+# Base image with Node.js
+FROM node:18
 
-# Use official Node.js image
-FROM node:18-alpine
-
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Copy package.json and package-lock.json first (for caching)
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy app source code
+# Copy all project files
 COPY . .
 
-# Build (only if needed for frontend or TS compilation)
-# RUN npm run build
+# Generate Prisma client
+RUN npx prisma generate
 
-# Expose port
+# Expose the port Express runs on
 EXPOSE 3000
 
-# Start app
-CMD ["npm", "Start"]
+# Start the app
+CMD ["npm", "start"]

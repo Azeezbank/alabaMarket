@@ -28,7 +28,11 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
         user: {
           select: {
             id: true,
-            name: true,
+            profile: {
+              select: {
+                name: true
+              }
+            }
           }
         }
       },

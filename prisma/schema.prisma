@@ -37,7 +37,7 @@ model Profile {
   name        String?
   profile_pic String?
   userId      String  @unique @db.Uuid
-  user        User    @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   role        String  @default("Buyer")
   status      String?
 }

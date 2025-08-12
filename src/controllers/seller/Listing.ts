@@ -28,7 +28,7 @@ export const SellerListing = async (req: AuthRequest, res: Response) => {
     });
 
 
-    const newProduct = await prisma.Product.create({
+    const newProduct = await prisma.product.create({
       data: {
         name,
         userId,
@@ -98,10 +98,10 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
 
   try {
     // Get total count
-    const total = await prisma.Product.count({ where: { userId } });
+    const total = await prisma.product.count({ where: { userId } });
 
     // Fetch paginated products
-    const products = await prisma.Product.findMany({
+    const products = await prisma.product.findMany({
       where: { userId, shop: {
       isActive: true // Only from active shops
     } },
@@ -133,7 +133,7 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
 
   try {
     // Find existing product, verify ownership
-    const existingProduct = await prisma.Product.findFirst({
+    const existingProduct = await prisma.product.findFirst({
       where: { id: productId },
       include: { photos: true, video: true, pricing: true, productCategory: true }
     });
@@ -172,7 +172,7 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
     }
 
     // Update product and relations
-    const updatedProduct = await prisma.Product.update({
+    const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: {
         name,
@@ -236,7 +236,7 @@ export const DeleteSellerListing = async (req: AuthRequest, res: Response) => {
   const productId = req.params.id; // or req.body.productId
 
   try {
-    const existingProduct = await prisma.Product.findFirst({
+    const existingProduct = await prisma.product.findFirst({
       where: { id: productId }
     });
 
@@ -250,7 +250,7 @@ export const DeleteSellerListing = async (req: AuthRequest, res: Response) => {
 
     // Optionally: delete images/videos from ImageKit here
 
-    await prisma.Product.delete({
+    await prisma.product.delete({
       where: { id: productId }
     });
 
@@ -268,7 +268,7 @@ export const PauseSellerListing = async (req: AuthRequest, res: Response) => {
   const productId = req.params.id; // or req.body.productId
 
   try {
-    const existingProduct = await prisma.Product.findFirst({
+    const existingProduct = await prisma.product.findFirst({
       where: { id: productId }
     });
 
@@ -282,7 +282,7 @@ export const PauseSellerListing = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: "Not authorized to pause this product" });
     }
 
-    const updatedProduct = await prisma.Product.update({
+    const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: { isPause: !existingProduct.isPause } // Toggle pause status
     });
