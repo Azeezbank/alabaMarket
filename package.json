@@ -1,6 +1,5 @@
 {
   "name": "alabamarket",
-  "type": "module",
   "main": "dist/index.js",
   "private": true,
   "scripts": {

@@ -9,13 +9,12 @@ datasource db {
 
 model User {
   id                 String              @id @default(uuid()) @db.Uuid
-  email              String?             @unique
-  phone              String?             @unique
-  password           String?
-  otp                String
-  expiresAt          DateTime
+  email              String             @unique
+  phone              String             @unique
+  password           String
+  otp                String?
+  expiresAt          DateTime?
   sign_up_verify     Boolean             @default(false)
-  googleId           String              @unique
   createdAt          DateTime            @default(now())
   product            Product[]
   savedItems         Product[]           @relation("SavedProducts")
@@ -29,11 +28,15 @@ model User {
   Like               Like[]
 }
 
+model SubAdmin {
+  id       String              @id @default(uuid()) @db.Uuid
+}
+
 model Profile {
   id          String  @id @default(uuid()) @db.Uuid
-  name        String
+  name        String?
   profile_pic String?
-  userId      String  @unique
+  userId      String  @unique @db.Uuid
   user        User    @relation(fields: [userId], references: [id])
   role        String  @default("Buyer")
   status      String?
@@ -42,7 +45,7 @@ model Profile {
 //delete
 model SellerStore {
   id        String   @id @default(uuid()) @db.Uuid
-  userId    String
+  userId    String    @db.Uuid
   user      User     @relation(fields: [userId], references: [id])
   storeName String?
   createdAt DateTime @default(now())
@@ -50,19 +53,19 @@ model SellerStore {
 
 //Comma
 model Category {
-  id    String  @id @default(uuid())
+  id    String  @id @default(uuid()) @db.Uuid
   image String?
 }
 
 model Product {
   id              String          @id @default(uuid()) @db.Uuid
   name            String
-  userId          String
+  userId          String    @db.Uuid
   promoted        Boolean         @default(false)
   isActive        Boolean         @default(true)
   status          String?         @default("Pending")
   isPause         Boolean         @default(false)
-  shopId          String
+  shopId          String      @db.Uuid
   photos          ProductPhoto[]
   video           ProductVideo[]
   pricing         ProductPricing?
@@ -84,8 +87,8 @@ model Product {
 }
 
 model ProductCat {
-  id           String   @id @default(uuid())
-  productId    String
+  id           String   @id @default(uuid())    @db.Uuid
+  productId    String      @db.Uuid
   mainCategory String
   subCategory  String
   createdAt    DateTime @default(now())
@@ -95,21 +98,21 @@ model ProductCat {
 model ProductPhoto {
   id        String   @id @default(uuid()) @db.Uuid
   url       String? // image URL or path
-  productId String
+  productId String      @db.Uuid
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
 }
 
 model ProductVideo {
-  id        String   @id @default(uuid())
-  productId String
+  id        String   @id @default(uuid())    @db.Uuid
+  productId String     @db.Uuid
   url       String?
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
 }
 
 model ProductPricing {
-  id          String   @id @default(uuid())
+  id          String   @id @default(uuid())       @db.Uuid
   productId   String   @unique
   price       Decimal  @default(0.00) @db.Decimal(10, 2)
   priceStatus String?
@@ -123,9 +126,9 @@ model ProductReview {
   id        String   @id @default(uuid()) @db.Uuid
   rating    Int // 1 to 5 stars
   comment   String?
-  productId String   @unique
+  productId String   @unique    @db.Uuid
   product   Product  @relation(fields: [productId], references: [id])
-  userId    String
+  userId    String    @db.Uuid
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
@@ -133,8 +136,8 @@ model ProductReview {
 model Comment {
   id        String   @id @default(uuid()) @db.Uuid
   content   String
-  productId String
-  userId    String
+  productId String   @db.Uuid
+  userId    String    @db.Uuid
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
@@ -143,9 +146,9 @@ model Comment {
 model Like {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
-  userId    String
+  userId    String    @db.Uuid
   user      User     @relation(fields: [userId], references: [id])
-  productId String
+  productId String    @db.Uuid
   product   Product  @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
@@ -153,9 +156,9 @@ model Like {
 
 model Notification {
   id         String   @id @default(uuid()) @db.Uuid
-  userId     String
+  userId     String    @db.Uuid
   message    String?
-  receiverId String
+  receiverId String      @db.Uuid
   type       String?
   isRead     Boolean  @default(false)
   isActive   Boolean  @default(true)
@@ -172,7 +175,7 @@ model SellerShop {
   most_sell    String?
   storeEmail   String?
   phoneNumber  String?
-  userId       String    @unique
+  userId       String    @unique   @db.Uuid
   isActive     Boolean   @default(true)
   product      Product[]
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -180,8 +183,8 @@ model SellerShop {
 }
 
 model SellerVerification {
-  id         String   @id @default(uuid())
-  userId     String   @unique
+  id         String   @id @default(uuid())    @db.Uuid
+  userId     String   @unique    @db.Uuid
   ID_card    String?
   selfie     String?
   terms      Boolean  @default(false)
@@ -191,23 +194,23 @@ model SellerVerification {
 }
 
 model BoostListing {
-  id            String     @id @default(uuid())
+  id            String     @id @default(uuid())   @db.Uuid
   standardboost Standard[]
   featuredboost Featured[]
 }
 
 model Standard {
-  id             String       @id @default(uuid())
+  id             String       @id @default(uuid())   @db.Uuid
   period         String
-  boostListingId String
+  boostListingId String    @db.Uuid
   boosting       BoostListing @relation(fields: [boostListingId], references: [id])
   pricing        Decimal      @default(0.00) @db.Decimal(10, 2)
 }
 
 model Featured {
-  id             String       @id @default(uuid())
+  id             String       @id @default(uuid())    @db.Uuid
   period         String
-  boostListingId String
+  boostListingId String      @db.Uuid
   boosting       BoostListing @relation(fields: [boostListingId], references: [id])
   pricing        Decimal      @default(0.00) @db.Decimal(10, 2)
 }

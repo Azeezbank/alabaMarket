@@ -91,7 +91,7 @@ export const verifyOTP = async (req: Request, res: Response) => {
        }, orderBy: { createdAt: 'desc' },
     })
 
-    if (!user) {
+    if (!user || !user.expiresAt || !user.otp) {
       return res.status(404).json({ message: 'User not found' });
     }
 
@@ -131,11 +131,11 @@ export const resendOtp = async (req: Request, res: Response) => {
     const existing = await prisma.user.findFirst({
       where: {
         OR: [{ phone }, { email }],
+      },
         orderBy: { createdAt: 'desc' }
-      }
     })
 
-    if (!existing) {
+    if (!existing || !existing.expiresAt) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
