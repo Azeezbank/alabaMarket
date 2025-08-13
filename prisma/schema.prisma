@@ -20,12 +20,11 @@ model User {
   savedItems         Product[]           @relation("SavedProducts")
   profile            Profile?
   reviews            ProductReview[]
-  shop               SellerShop[]
+  sellerShop               SellerShop[]
   sellerVerification SellerVerification?
   comment            Comment[]
   notification       Notification[]
-  sellerStore        SellerStore[]
-  Like               Like[]
+  like               Like[]
 }
 
 model SubAdmin {
@@ -40,15 +39,7 @@ model Profile {
   user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   role        String  @default("Buyer")
   status      String?
-}
-
-//delete
-model SellerStore {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String    @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
-  storeName String?
-  createdAt DateTime @default(now())
+  isVerified  Boolean   @default(false)
 }
 
 //Comma

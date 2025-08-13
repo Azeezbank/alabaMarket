@@ -1,8 +1,8 @@
 import { Response, Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
-import prisma from '@/prisma';
-import { AuthRequest } from "../../middlewares/auth.middleware";
-import { imagekit } from '../../service/Imagekit';
+import prisma from '../../prisma.client.js';
+import { AuthRequest } from "../../middlewares/auth.middleware.js";
+import { imagekit } from '../../service/Imagekit.js';
 
 
 export const SellerListing = async (req: AuthRequest, res: Response) => {

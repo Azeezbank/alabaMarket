@@ -2,9 +2,9 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
-import logout from '@/routes/Logout.js';
-import auth from './routes/Auth.route';
-import sellerShop from './routes/Seller.route';
+import logout from './routes/Logout.js';
+import auth from './routes/Auth.route.js';
+import sellerShop from './routes/Seller.route.js';
 
 
 

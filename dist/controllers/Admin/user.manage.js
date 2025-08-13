@@ -1,11 +1,6 @@
-import { Request, Response } from "express";
-import { JwtPayload } from "jsonwebtoken";
-import { AuthRequest } from '../../middlewares/auth.middleware.js';
 import prisma from "../../prisma.client.js";
-
-
 //Fetch all buyers
-export const GetBuyers = async (req: AuthRequest, res: Response) => {
+export const GetBuyers = async (req, res) => {
     try {
         const role = 'Buyer';
         const buyers = await prisma.profile.findMany({
@@ -17,17 +12,16 @@ export const GetBuyers = async (req: AuthRequest, res: Response) => {
                     }
                 }
             }
-        })
-
+        });
         res.status(200).json(buyers);
-    } catch (err: any) {
+    }
+    catch (err) {
         console.log('Failed to select buyers', err);
         return res.status(500).json({ message: 'Something went wrong, Failed to select buyers' });
     }
 };
-
 //Fetch all sellers
-export const Getsellers = async (req: AuthRequest, res: Response) => {
+export const Getsellers = async (req, res) => {
     try {
         const role = 'Seller';
         const sellers = await prisma.user.findMany({
@@ -57,7 +51,7 @@ export const Getsellers = async (req: AuthRequest, res: Response) => {
                         },
                         _count: {
                             select: {
-                                product: true,     // count products per shop
+                                product: true, // count products per shop
                             },
                         },
                     }
@@ -65,18 +59,16 @@ export const Getsellers = async (req: AuthRequest, res: Response) => {
             }
         });
         res.status(200).json(sellers);
-    } catch (err: any) {
+    }
+    catch (err) {
         console.log('Failed to select buyers', err);
         return res.status(500).json({ message: 'Something went wrong, Failed to select buyers' });
     }
 };
-
-
 //Delete Buyer
-export const DeleteUser = async (req: AuthRequest, res: Response) => {
-    const adminId = (req.user as JwtPayload)?.id;
+export const DeleteUser = async (req, res) => {
+    const adminId = req.user?.id;
     const customerId = req.params.customerId;
-
     try {
         const admin = await prisma.user.findFirst({
             where: { id: adminId },
@@ -86,24 +78,20 @@ export const DeleteUser = async (req: AuthRequest, res: Response) => {
                 }
             }
         });
-
         if (!admin || admin.profile?.role !== 'Admin') {
             console.log('Not authorized, only availabele for admin');
             return res.status(404).json({ message: "Unauthorized, Only available for admin" });
         }
-
         await prisma.user.delete({ where: { id: customerId } });
-
         res.status(200).json({ message: 'Customer Deleted successfully' });
-    } catch (err: any) {
+    }
+    catch (err) {
         console.error('Failed to delete customer', err);
         return res.status(500).json({ message: 'Something went wrong, failed to delete user' });
     }
 };
-
-
 //Update user infomation
-export const UpdateUser = async (req: AuthRequest, res: Response) => {
+export const UpdateUser = async (req, res) => {
     const { email, name, phoneNumber, role } = req.body;
     const customerId = req.params.customerId;
     try {
@@ -117,17 +105,15 @@ export const UpdateUser = async (req: AuthRequest, res: Response) => {
                     }
                 }
             }
-        })
-
+        });
         res.status(200).json({ message: 'User Infomation updated successfully' });
-    } catch (err: any) {
+    }
+    catch (err) {
         console.error('Soemthing went wrong, failed to update user infomation');
     }
 };
-
-
 //Update seller's infomation
-export const UpdateSellers = async (req: AuthRequest, res: Response) => {
+export const UpdateSellers = async (req, res) => {
     const { status, isVerified, storeName, email, name, phoneNumber } = req.body;
     const customerId = req.params.customerId;
     try {
@@ -144,17 +130,17 @@ export const UpdateSellers = async (req: AuthRequest, res: Response) => {
                 },
                 sellerShop: {
                     update: {
-                        where: {userId: customerId},
+                        where: { userId: customerId },
                         data: {
-                        storeName: storeName,
+                            storeName: storeName,
                         }
                     }
                 }
             }
-        })
-
+        });
         res.status(200).json({ message: 'User Infomation updated successfully' });
-    } catch (err: any) {
+    }
+    catch (err) {
         console.error('Soemthing went wrong, failed to update user infomation');
     }
 };

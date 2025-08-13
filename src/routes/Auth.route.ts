@@ -1,9 +1,9 @@
 // Authentication routes
 import express from 'express';
-import { register } from '../controllers/Auth.contoller';
-import { verifyOTP } from '../controllers/Auth.contoller';
-import { resendOtp } from '../controllers/Auth.contoller';
-import { loginUser } from '../controllers/Auth.contoller';
+import { register } from '../controllers/Auth.contoller.js';
+import { verifyOTP } from '../controllers/Auth.contoller.js';
+import { resendOtp } from '../controllers/Auth.contoller.js';
+import { loginUser } from '../controllers/Auth.contoller.js';
 const router = express.Router();
 
 // register new user

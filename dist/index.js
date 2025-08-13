@@ -1,18 +1,26 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-console.log("Starting app...");
-const express_1 = __importDefault(require("express"));
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-const PORT = process.env.PORT || 5000;
-app.use(express_1.default.json());
+import express from 'express';
+import cookieParser from "cookie-parser";
+import dotenv from 'dotenv';
+import logout from './routes/Logout.js';
+import auth from './routes/Auth.route.js';
+import sellerShop from './routes/Seller.route.js';
+dotenv.config();
+const app = express();
+app.use(express.json());
+app.use(cookieParser());
+// app.use(passport.initialize());
+const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send('Welcome to Alabamarket API');
 });
+// google authentication routes
+// app.use('/api/google/auth', googleAuth);
+// authentication routes for Email and phone number
+app.use('/api/auth', auth);
+//Seller shoup
+app.use('/api/seller', sellerShop);
+//Logout route
+app.use('/api/logout', logout);
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

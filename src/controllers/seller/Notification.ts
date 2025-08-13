@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
-import prisma from "@/prisma";
-import { AuthRequest } from "../../middlewares/auth.middleware";
+import prisma from "../../prisma.client.js";
+import { AuthRequest } from "../../middlewares/auth.middleware.js";
 
 
 

@@ -1,10 +1,10 @@
 // //Authentication controller
-import prisma from '../prisma';
+import prisma from '../prisma.client.js';
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { sendEmail } from '../utils/mailer';
+import { sendEmail } from '../utils/mailer.js';
 import twilio from 'twilio';
 dotenv.config();
 
