@@ -4,7 +4,7 @@ import prisma from '../../prisma.client.js';
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { imagekit } from '../../service/Imagekit.js';
 
-
+//Create product
 export const SellerListing = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
   const shopId = req.params.shopId;
@@ -213,6 +213,7 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
             }
           }
         }
+        
       },
       include: {
         productCategory: true,

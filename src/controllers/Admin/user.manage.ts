@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { AuthRequest } from '../../middlewares/auth.middleware.js';
 import prisma from "../../prisma.client.js";
+import { profile } from "console";
 
 
 //Fetch all buyers
@@ -158,3 +159,73 @@ export const UpdateSellers = async (req: AuthRequest, res: Response) => {
         console.error('Soemthing went wrong, failed to update user infomation');
     }
 };
+
+
+//Get seller's rating
+export const SellerRating = async (req: AuthRequest, res: Response) => {
+  const sellerId = req.params.sellerId;
+
+  try {
+    const ration = await prisma.sellerRating.findMany({  where: { userId: sellerId }, 
+    include: {
+        customer: {
+            select: {
+                id: true,
+                profile: {
+                    select: {
+                        profile_pic: true,
+                        name: true
+                    }
+                }
+            }
+        }
+    }
+    })
+  } catch (err: any) {
+    console.error('Failed to select sellers rating', err)
+    return res.status(500).json({message: 'Failed to select sellers rating'});
+  }
+};
+
+//Get store activities
+export const StoreActivities = async (req: AuthRequest, res: Response) => {
+    const sellerId = req.params.sellerId;
+    try {
+        const activities = await prisma.storeActivities.findMany({ where: {userId: sellerId}, 
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                role: true
+                            }
+                        }
+                    }
+                }
+            }
+    })
+    res.status(200).json(activities)
+        }
+     catch (err: any) {
+        console.log('Failed to select shop activities')
+    }
+};
+
+//Reject listing and create notification
+export const createNotification = async (req: AuthRequest, res: Response) => {
+    const sellerId = req.params.sellerId;
+    const userId = (req.user as JwtPayload)?.id;
+    const { message, type } = req.body;
+    try {
+        await prisma.notification.create({
+            data: {
+                userId, message, receiverId: sellerId, type
+            }
+        })
+        res.status(201).json({message: 'Notification created sucessfully'})
+    } catch (err: any) {
+        console.error('Failed to create reject listing notification', err);
+        return res.status(500).json({message: 'Failed to create reject listing notification'});
+    }
+}

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import logout from './routes/Logout.js';
 import auth from './routes/Auth.route.js';
 import sellerShop from './routes/Seller.route.js';
+import bodyParser from "body-parser";
 
 
 
@@ -12,6 +13,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(cookieParser());
 // app.use(passport.initialize());
 
