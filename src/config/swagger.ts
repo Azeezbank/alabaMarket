@@ -13,6 +13,11 @@ const options: swaggerJSDoc.Options = {
     servers: [
       {
         url: "http://localhost:3000/",
+        description: "Local development",
+      },
+      {
+        url: "https://api.alabamarket.com/",
+        description: "Production server",
       },
     ],
     components: {
