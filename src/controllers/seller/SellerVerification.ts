@@ -74,7 +74,7 @@ export const updateVerificationIdCard = async (req: AuthRequest, res: Response) 
             }
         });
 
-        res.status(200).json({ message: "File updated successfully" });
+        res.status(200).json({ message: "File updated successfully", updatedRecord });
     } catch (err: any) {
         console.error("Failed to update file", err);
         return res.status(500).json({ message: "Failed to update file" });

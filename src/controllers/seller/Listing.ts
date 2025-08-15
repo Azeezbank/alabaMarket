@@ -4,16 +4,16 @@ import prisma from '../../prisma.client.js';
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { imagekit } from '../../service/Imagekit.js';
 
-//Create product
-export const SellerListing = async (req: AuthRequest, res: Response) => {
+
+//Create product details
+export const productDetails = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
   const shopId = req.params.shopId;
-  const { name, condition, price, priceStatus, description, mainCategory, subCategory } = req.body;
-
+  const { name } = req.body;
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    // Upload image
+     // Upload image
     const uploadedImage = await imagekit.upload({
       file: files.productImage[0].buffer,
       fileName: files.productImage[0].originalname,
@@ -27,63 +27,94 @@ export const SellerListing = async (req: AuthRequest, res: Response) => {
       folder: "/uploads/productVideo"
     });
 
-
     const newProduct = await prisma.product.create({
       data: {
         name,
         userId,
         shopId,
-
-        //Product image
-        photos: {
-          create: [
-            {
-              url: uploadedImage.url, // from ImageKit
-            }
-          ]
-        },
-
-        // Product Videos
-        video: {
-          create: [
-            {
-              url: uploadedVideo.url, // from ImageKit
-            }
-          ]
-        },
-
-        // Product Pricing
-        pricing: {
-          create: {
-            price,
-            priceStatus,
-            condition,
-            description
+          productPhoto: {
+            create: [{
+              url: uploadedImage.url, 
+            }]
+          },
+          productVideo: {
+            create: [{
+              url: uploadedVideo.url
+            }]
           }
-        },
-
-        // Product Category (relation)
-        productCategory: {
-          create: {
-            mainCategory,
-            subCategory
-          }
-        },
-      },
-      include: {
-        productCategory: true,
-        photos: true,
-        video: true,
-        pricing: true
-      }
-    });
-
-    res.status(201).json({ message: 'Product listing successful' })
+  },
+  include: {
+    productPhoto: true, productVideo: true
+  }
+})
+res.status(200).json({message: 'product details inserted', newProduct })
   } catch (err: any) {
-    console.error("Error creating product listing:", err);
-    return res.status(500).json({ message: "Failed to create product listing" });
+    console.error('Something went wrong, Failed to insert dedails', err)
+    return res.status(500).json({message: 'Something went wrong, Failed to insert dedails'})
+  }
+};
+
+//Update product pricing
+export const productPricing = async (req: AuthRequest, res: Response) => {
+  const { price, priceStatus, condition, description } = req.body;
+  const productId = req.query.productId as string;
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        productPricing: {
+          update: {
+            price, priceStatus, condition, description
+          }
+        }
+      }
+    })
+
+    res.status(200).json({message: "Pricing updated"});
+  } catch (err: any) {
+    console.error('Failed to update pricing', err) 
+    return res.status(500).json({message: 'Something went wrong, failed to update pricing'})
   }
 }
+
+//update category
+export const productcategory = async (req: AuthRequest, res: Response) => {
+  const {  mainCategory, subCategory } = req.body;
+  const productId = req.query.productId as string
+  try {
+    await prisma.product.update({ where: { id: productId},
+      data: {
+      productCategory: {
+        update: {
+        mainCategory, subCategory
+        }
+      }
+      }
+  })
+  res.status(200).json({message: 'Smething went wrong, Failed to update product category'})
+  } catch (err: any) {
+    console.error('Smething went wrong, Failed to update product category', err)
+    return res.status(500).json({message: 'Smething went wrong, Failed to update product category'})
+  }
+}
+
+//update product promotion
+export const productPromotion = async (req: AuthRequest, res: Response) => {
+  const listingPromotion = req.body.listingPromotion;
+  const productId = req.query.productId as string
+  try {
+    await prisma.product.update({ where: {id: productId}, 
+    data: {
+      listingPromotion
+    }
+    })
+
+    res.status(200).json({message: 'Promotion updated'})
+  } catch (err: any) {
+    console.log('Failed to update promotion', err)
+    return res.status(500).json({message: 'Something went wrong, Faiked to update promotion'})
+  }
+};
 
 
 
@@ -106,9 +137,9 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
       isActive: true // Only from active shops
     } },
       include: {
-        photos: true,
-        video: true,
-        pricing: true,
+        productPhoto: true,
+        productVideo: true,
+        productPricing: true,
         productCategory: true
       },
       orderBy: { createdAt: 'desc' },
@@ -135,7 +166,6 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
     // Find existing product, verify ownership
     const existingProduct = await prisma.product.findFirst({
       where: { id: productId },
-      include: { photos: true, video: true, pricing: true, productCategory: true }
     });
 
     if (!existingProduct) {
@@ -145,56 +175,14 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: "Not authorized to edit this product" });
     }
 
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-
-    // Handle new image upload if provided
-    let uploadedImageUrl = existingProduct.photos[0]?.url;
-    if (files?.productImage?.length) {
-      const uploadedImage = await imagekit.upload({
-        file: files.productImage[0].buffer,
-        fileName: files.productImage[0].originalname,
-        folder: "/uploads/productImage"
-      });
-      uploadedImageUrl = uploadedImage.url;
-      // Optionally delete old image from ImageKit here
-    }
-
-    // Handle new video upload if provided
-    let uploadedVideoUrl = existingProduct.video[0]?.url;
-    if (files?.productVideo?.length) {
-      const uploadedVideo = await imagekit.upload({
-        file: files.productVideo[0].buffer,
-        fileName: files.productVideo[0].originalname,
-        folder: "/uploads/productVideo"
-      });
-      uploadedVideoUrl = uploadedVideo.url;
-      // Optionally delete old video from ImageKit here
-    }
-
     // Update product and relations
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: {
         name,
 
-        // Update photos relation
-        photos: {
-          updateMany: {
-            where: { productId: productId },
-            data: { url: uploadedImageUrl }
-          }
-        },
-
-        // Update video relation
-        video: {
-          updateMany: {
-            where: { productId: productId },
-            data: { url: uploadedVideoUrl }
-          }
-        },
-
         // Update pricing relation
-        pricing: {
+        productPricing: {
           update: {
             price,
             priceStatus,
@@ -205,21 +193,18 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
 
         // Update product category relation
         productCategory: {
-          updateMany: {
-            where: { productId: productId },
-            data: {
+          update: {
               mainCategory,
               subCategory
-            }
-          }
         }
         
       },
+    },
       include: {
         productCategory: true,
-        photos: true,
-        video: true,
-        pricing: true
+        productPhoto: true,
+        productVideo: true,
+        productPricing: true
       }
     });
 
@@ -292,5 +277,87 @@ export const PauseSellerListing = async (req: AuthRequest, res: Response) => {
   } catch (err: any) {
     console.error("Error updating product listing pause status:", err);
     res.status(500).json({ message: "Failed to update product listing pause status" });
+  }
+};
+
+//Select Active listing
+export const activeListing = async (req: AuthRequest, res: Response) => {
+  try {
+    const activeListing = await prisma.product.findMany({
+      where: { isActive: true}
+    })
+
+    res.status(200).json(activeListing)
+  } catch (err: any) {
+    console.error('Something went wrong, Failed to select active listen', err)
+    return res.status(500).json({message: 'Something went wrong'})
+  }
+};
+
+//Selct all paid boost plan
+export const BoostPlans = async (req: AuthRequest, res: Response) => {
+  try {
+    const plans = await prisma.boostPackages.findMany({
+      select: {
+        id: true, plan: true,
+      }
+    })
+
+    res.status(200).json(plans)
+  } catch (err: any) {
+    console.error('Failed to select plan', err)
+    return res.status(500).json({message: 'Failed to select plan'})
+  }
+};
+
+//Select price with respect to plan and period
+export const planPrice = async (req: AuthRequest, res: Response) => {
+  const { plan, period } = req.body;
+  //period should be weekly, monthly or annually
+  try {
+    let duration;
+    if (period === "weekly") {
+  duration = 'weekly';
+} else if (period === "monthly") {
+  duration = 'monthly';
+} else if (period === "annually") {
+  duration = 'annually'
+} else {
+  return res.status(400).json({message: 'Please provide period'})
+}
+    const price = await prisma.boostPackages.findFirst({ where: { plan },
+    select: {
+      [duration]: true
+    }
+    });
+    res.status(200).json(price)
+  } catch (err: any) {
+    console.error('Failed to select price', err)
+    return res.status(500).json({message: 'Something went wrong, Failed to select price'})
+  }
+}
+
+//Boost Ad
+export const BoostAd = async (req: AuthRequest, res: Response) => {
+  const productId = req.params.productId;
+  const userId = (req.user as JwtPayload)?.id;
+  const { productName, plan, period, price } = req.body;
+  try {
+    await prisma.boostAd.create({
+      data: {
+         productId, productName, plan, period, price
+      }
+    });
+
+    const message = "You have new submission for Boost Ad";
+    const type = 'Boosted Ad';
+    await prisma.notification.create({
+      data: {
+        userId, message, type,
+      }
+    })
+    res.status(200).json({message: 'Boost Submitted For Reviews'})
+  } catch (err: any) {
+    console.error('Something went wrong, Failed to submit boosting')
   }
 };

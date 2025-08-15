@@ -229,3 +229,33 @@ export const createNotification = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({message: 'Failed to create reject listing notification'});
     }
 }
+
+// Update user role
+export const updateUserRoleToSeller = async (req: AuthRequest, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    await prisma.user.update({
+      where: { email },
+      data: { 
+        profile: {
+            upsert: {
+                create: { role: 'Seller' },
+                update: { role: 'Seller' },
+            }
+        }
+      },
+    });
+
+    res.status(200).json({
+      message: 'Role updated to Seller successfully'
+    });
+  } catch (err: any) {
+      console.error('Internal server error', err)
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

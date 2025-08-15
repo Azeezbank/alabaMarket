@@ -38,7 +38,7 @@ export const ChangePassword = async (req: AuthRequest, res: Response) => {
         if (!user) {
             return res.status(404).json({message: 'No user found'});
         }
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        const isMatch = await bcrypt.compare(currentPassword, user.password!);
         if (!isMatch) {
             console.log('Password Mismatch');
             return res.status(400).json({message: 'Incorrect password'});

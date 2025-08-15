@@ -144,3 +144,97 @@ export const UpdateSellers = async (req, res) => {
         console.error('Soemthing went wrong, failed to update user infomation');
     }
 };
+//Get seller's rating
+export const SellerRating = async (req, res) => {
+    const sellerId = req.params.sellerId;
+    try {
+        const ration = await prisma.sellerRating.findMany({ where: { userId: sellerId },
+            include: {
+                customer: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                profile_pic: true,
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    catch (err) {
+        console.error('Failed to select sellers rating', err);
+        return res.status(500).json({ message: 'Failed to select sellers rating' });
+    }
+};
+//Get store activities
+export const StoreActivities = async (req, res) => {
+    const sellerId = req.params.sellerId;
+    try {
+        const activities = await prisma.storeActivities.findMany({ where: { userId: sellerId },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                role: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        res.status(200).json(activities);
+    }
+    catch (err) {
+        console.log('Failed to select shop activities');
+    }
+};
+//Reject listing and create notification
+export const createNotification = async (req, res) => {
+    const sellerId = req.params.sellerId;
+    const userId = req.user?.id;
+    const { message, type } = req.body;
+    try {
+        await prisma.notification.create({
+            data: {
+                userId, message, receiverId: sellerId, type
+            }
+        });
+        res.status(201).json({ message: 'Notification created sucessfully' });
+    }
+    catch (err) {
+        console.error('Failed to create reject listing notification', err);
+        return res.status(500).json({ message: 'Failed to create reject listing notification' });
+    }
+};
+// Update user role
+export const updateUserRoleToSeller = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+        await prisma.user.update({
+            where: { email },
+            data: {
+                profile: {
+                    upsert: {
+                        create: { role: 'Seller' },
+                        update: { role: 'Seller' },
+                    }
+                }
+            },
+        });
+        res.status(200).json({
+            message: 'Role updated to Seller successfully'
+        });
+    }
+    catch (err) {
+        console.error('Internal server error', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
