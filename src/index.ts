@@ -8,6 +8,12 @@ import seller from './routes/Seller.route.js';
 import bodyParser from "body-parser";
 import admin from './routes/Admin.js';
 import { setupSwagger } from "./config/swagger.js";
+import http from "http";
+import { Server } from "socket.io";
+import { initializeSocket } from "./routes/Messages.js";
+import chat from './routes/Messages.js';
+import { registerSocketHandlers } from './routes/Video.js';
+import buyer from './routes/Buyer.js';
 
 
 
@@ -28,19 +34,40 @@ app.get('/', (req: Request, res: Response) => {
 })
 
 // sign up and verify mail and phone number
-app.use('/api/auth', auth)
+app.use('/api/auth', auth);
 
 //Admin
-app.use('/api/admin', admin)
+app.use('/api/admin', admin);
 
 //Seller shoup
-app.use('/api/seller', seller)
+app.use('/api/seller', seller);
+
+//Buyer endpoints
+app.use('/api/buyer', buyer);
+
+//Messages
+app.use('/api/chat', chat)
 
 //Logout route
 app.use('/api/logout', logout)
 
 
+//Socket.io for chat and video supporting WebRTC
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*", // we can restrict this later
+        methods: ["GET", "POST"]
+    }
+});
 
-app.listen(PORT, () => {
+// Initialize socket events for chat
+initializeSocket(io);
+
+//initialize  socket for video call signaling
+registerSocketHandlers(io);
+
+
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

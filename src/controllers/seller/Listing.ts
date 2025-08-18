@@ -118,7 +118,7 @@ export const productPromotion = async (req: AuthRequest, res: Response) => {
 
 
 
-//Fetch all seller listings
+//Fetch all seller listings including the shop details
 export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
 
@@ -140,7 +140,18 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true
+        productCategory: true,
+        user: {
+          select: { createdAt: true,
+          sellerShop: {
+            select: { storeName: true,
+            }
+          },
+            sellerVerification: {
+              select: { isVerified: true}
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -150,7 +161,7 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
     res.status(200).json({page, limit, total, totalPages: Math.ceil(total / limit), products});
   } catch (err: any) {
     console.error("Error fetching product listings:", err);
-    res.status(500).json({ message: "Failed to fetch product listings" });
+    res.status(500).json({ message: "Failed to fetch seller's product listings" });
   }
 };
 
@@ -338,14 +349,14 @@ export const planPrice = async (req: AuthRequest, res: Response) => {
 }
 
 //Boost Ad
-export const BoostAd = async (req: AuthRequest, res: Response) => {
+export const createBoostAd = async (req: AuthRequest, res: Response) => {
   const productId = req.params.productId;
   const userId = (req.user as JwtPayload)?.id;
   const { productName, plan, period, price } = req.body;
   try {
     await prisma.boostAd.create({
       data: {
-         productId, productName, plan, period, price
+         productId, userId, productName, plan, period, price
       }
     });
 
@@ -357,6 +368,23 @@ export const BoostAd = async (req: AuthRequest, res: Response) => {
       }
     })
     res.status(200).json({message: 'Boost Submitted For Reviews'})
+  } catch (err: any) {
+    console.error('Something went wrong, Failed to submit boosting')
+  }
+};
+
+//Select sellers Boost adds
+export const fetchBoostAd = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
+  
+  try {
+    const sellerBoost = await prisma.boostAd.findMany({ where: { userId },
+      select: {
+         id: true, productId: true, productName: true, plan: true, period: true, price: true
+      }
+    });
+
+    res.status(200).json(sellerBoost)
   } catch (err: any) {
     console.error('Something went wrong, Failed to submit boosting')
   }

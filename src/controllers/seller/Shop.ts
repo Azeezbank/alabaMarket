@@ -72,7 +72,7 @@ export const getShopdetails = async (req: AuthRequest, res: Response) => {
 // Update shop details
 export const updateShopDetails = async (req: AuthRequest, res: Response) => {
     const userId = (req.user as JwtPayload)?.id;
-    const { logo, storeName, storeAddress, storeEmail, phoneNumber } = req.body;
+    const { storeOwner, storeName, storeAddress, storeEmail, phoneNumber } = req.body;
     try {
 
         if (!req.file) {
@@ -88,18 +88,15 @@ export const updateShopDetails = async (req: AuthRequest, res: Response) => {
         const updatedStore = await prisma.sellerShop.update({
             where: { userId: userId },
             data: {
-                logo,
+                logo: result.url,
                 storeName,
                 storeAddress,
                 storeEmail,
-                phoneNumber
-
-            },
-            include: {
+                phoneNumber,
                 user: {
-                    include: {
-                        profile: {
-                    select: { name: true }
+                    update: {
+                    profile: {
+                    update: { name: storeOwner }
                 }
             }
         }

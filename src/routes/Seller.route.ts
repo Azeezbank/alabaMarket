@@ -3,7 +3,7 @@ import { upload } from "../middlewares/upload.multer.js";
 import { createShop, getShopdetails, updateShopDetails, updateShopStatus, deleteShop } from "../controllers/seller/Shop.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { SellerVerification, updateVerificationIdCard } from "../controllers/seller/SellerVerification.js";
-import { productDetails, productPricing, productcategory, productPromotion, FetchSellerListings, EditSellerListing, DeleteSellerListing, PauseSellerListing, activeListing, BoostPlans, planPrice, BoostAd } from '../controllers/seller/Listing.js';
+import { productDetails, productPricing, productcategory, productPromotion, FetchSellerListings, EditSellerListing, DeleteSellerListing, PauseSellerListing, activeListing, BoostPlans, planPrice, createBoostAd, fetchBoostAd } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
 import { getNotifications } from '../controllers/seller/Notification.js';
 
@@ -23,7 +23,8 @@ router.put("/update/shop", authenticate, upload.single('file'), updateShopDetail
 router.get("/seller/listing", authenticate, FetchSellerListings);
 router.get('/active/listing', authenticate, activeListing);
 router.get('/boost/plans', authenticate, BoostPlans);
-router.post('/boost/ads', authenticate, BoostAd);
+router.post('/boost/ads', authenticate, createBoostAd);
+router.get('/boost/ads', authenticate, fetchBoostAd);
 router.get('/plan/price', authenticate, planPrice);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);

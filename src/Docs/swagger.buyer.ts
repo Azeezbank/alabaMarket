@@ -1,0 +1,780 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Buyer
+ *   description: Buyer account management and profile updates
+ */
+
+/**
+ * @swagger
+ * /api/buyer/account:
+ *   put:
+ *     summary: Update buyer account/profile
+ *     tags: [Buyer]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Buyer's name
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Buyer's email
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Buyer's phone number
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Profile picture
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Profile updated successfully
+ *       400:
+ *         description: No file uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
+ *       500:
+ *         description: Failed to update buyer profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to update buyer profile
+ */
+
+
+/**
+ * @swagger
+ * /api/buyer/listing/categories:
+ *   get:
+ *     summary: Fetch all product categories
+ *     tags: [Buyer]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of categories retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     description: Category ID
+ *                   name:
+ *                     type: string
+ *                     description: Category name
+ *                   image:
+ *                     type: string
+ *                     description: Category image URL
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Date the category was created
+ *                   _count:
+ *                     type: object
+ *                     properties:
+ *                       product:
+ *                         type: integer
+ *                         description: Number of products in this category
+ *       500:
+ *         description: Failed to fetch categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to select categories
+ */
+
+/**
+ * @swagger
+ * /api/buyer/like/unlike/{productId}:
+ *   post:
+ *     summary: Like or unlike a product
+ *     tags: [Buyer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product to like/unlike
+ *     responses:
+ *       201:
+ *         description: Product liked or unliked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Likes/unliked successfully
+ *                 likeCount:
+ *                   type: integer
+ *                   example: 10
+ *       500:
+ *         description: Failed to like/unlike the product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to Like or unlike product
+ */
+
+/**
+ * @swagger
+ * /api/buyer/love/{productId}:
+ *   post:
+ *     summary: Love or unlove a product
+ *     tags: [Buyer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product to love/unlove
+ *     responses:
+ *       201:
+ *         description: Product loved or unloved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Loved successfully
+ *                 loveCount:
+ *                   type: integer
+ *                   example: 5
+ *       500:
+ *         description: Failed to love/unlove the product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to Like or unlove product
+ */
+
+
+/**
+ * @swagger
+ * /api/buyer/rating/{userId}/{productId}:
+ *   put:
+ *     summary: Create or update product rating by buyer
+ *     tags: [Buyer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the user
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               stars:
+ *                 type: number
+ *                 description: Star rating
+ *               comment:
+ *                 type: string
+ *                 description: Review comment
+ *     responses:
+ *       200:
+ *         description: Product rated successfully
+ *       500:
+ *         description: Failed to rate product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to rate product
+ */
+
+/**
+ * @swagger
+ * /api/buyer/average/rating/{productId}:
+ *   get:
+ *     summary: Get average rating and reviews for a product
+ *     tags: [Buyer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product
+ *     responses:
+ *       200:
+ *         description: Average rating and reviews retrieved successfully
+ *       500:
+ *         description: Failed to get product rating
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to rate product
+ */
+
+/**
+ * @swagger
+ * /api/buyer/rating/distribution/{productId}:
+ *   get:
+ *     summary: Get rating distribution (number of 1–5 stars) for a product
+ *     tags: [Buyer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product
+ *     responses:
+ *       200:
+ *         description: Rating distribution retrieved successfully
+ *       500:
+ *         description: Failed to get rating distribution
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to get rating distribution
+ */
+
+/**
+ * @swagger
+ * /api/buyer/active/seller/listing:
+ *   get:
+ *     summary: Fetch all active products including seller details
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: Active products fetched successfully
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/popular/listing:
+ *   get:
+ *     summary: Filter listings by product name
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Name of the product to filter
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Filtered products fetched successfully
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/listing/price/range:
+ *   get:
+ *     summary: Filter listings by price range
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: fromAmount
+ *         schema:
+ *           type: number
+ *         required: true
+ *       - in: query
+ *         name: toAmount
+ *         schema:
+ *           type: number
+ *         required: true
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Products fetched successfully within price range
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/listing/price/less:
+ *   get:
+ *     summary: Filter listings by price less than a value
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: fromAmount
+ *         schema:
+ *           type: number
+ *         required: true
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Products fetched successfully below price
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/listing/price/greater:
+ *   get:
+ *     summary: Filter listings by price greater than a value
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: fromAmount
+ *         schema:
+ *           type: number
+ *         required: true
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Products fetched successfully above price
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/all/listing:
+ *   get:
+ *     summary: Fetch all active products (all sellers)
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: All products fetched successfully
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/verified/seller/listing:
+ *   get:
+ *     summary: Fetch products from verified sellers
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Products from verified sellers fetched successfully
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/unverified/seller/listing:
+ *   get:
+ *     summary: Fetch products from unverified sellers
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Products from unverified sellers fetched successfully
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/listing/condition:
+ *   get:
+ *     summary: Fetch products by condition (e.g., Brand new, Neatly Used)
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: condition
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Products fetched successfully by condition
+ *       500:
+ *         description: Failed to fetch product listings
+ */
+
+/**
+ * @swagger
+ * /api/buyer/listing/owner/details/{productId}:
+ *   get:
+ *     summary: Fetch product owner and store details
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product
+ *     responses:
+ *       200:
+ *         description: Product owner fetched successfully
+ *       500:
+ *         description: Failed to fetch product owner
+ */
+
+/**
+ * @swagger
+ * /api/buyer/report/liating/{productId}:
+ *   post:
+ *     summary: Create a product report
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Report submitted successfully
+ *       500:
+ *         description: Failed to submit report
+ */
+
+/**
+ * @swagger
+ * /api/buyer/saved/listing/{productId}:
+ *   post:
+ *     summary: Bookmark/save a product
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       201:
+ *         description: Product saved successfully
+ *       500:
+ *         description: Failed to bookmark product
+ */
+
+/**
+ * @swagger
+ * /api/buyer/saved/product:
+ *   get:
+ *     summary: Fetch all saved/bookmarked products for the user
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Saved products fetched successfully
+ *       500:
+ *         description: Failed to fetch saved products
+ */
+
+
+/**
+ * @swagger
+ * tags:
+ *   name: Buyer Notifications
+ *   description: Endpoints for managing buyer notifications
+ */
+
+/**
+ * @swagger
+ * /api/buyer/all/notification:
+ *   get:
+ *     summary: Fetch all notifications for the logged-in buyer
+ *     tags: [Buyer Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of notifications per page
+ *     responses:
+ *       200:
+ *         description: Notifications fetched successfully
+ *       500:
+ *         description: Failed to fetch notifications
+ */
+
+/**
+ * @swagger
+ * /api/buyer/all/read/notification:
+ *   get:
+ *     summary: Fetch all read notifications for the logged-in buyer
+ *     tags: [Buyer Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Read notifications fetched successfully
+ *       500:
+ *         description: Failed to fetch notifications
+ */
+
+/**
+ * @swagger
+ * /api/buyer/all/unread/notification:
+ *   get:
+ *     summary: Fetch all unread notifications for the logged-in buyer
+ *     tags: [Buyer Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Unread notifications fetched successfully
+ *       500:
+ *         description: Failed to fetch notifications
+ */
+
+
+/**
+ * @swagger
+ * tags:
+ *   name: Buyer Questions
+ *   description: Leave questions for admin or seller
+ */
+
+/**
+ * @swagger
+ * /api/buyer/question:
+ *   post:
+ *     summary: Submit a question to admin or seller
+ *     tags: [Buyer Questions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: receiverId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the admin or seller receiving the question
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               question:
+ *                 type: string
+ *                 example: "What is the delivery time for this product?"
+ *     responses:
+ *       200:
+ *         description: Question submitted successfully
+ *       500:
+ *         description: Failed to submit question
+ */

@@ -67,13 +67,13 @@ router.post("/register", async (req, res) => {
         from: "no-reply@alabamarket.com",
         to: email,
         subject: "Verify your email",
-        html: `<p>Your verification code is sent to your main <b>${verificationOTP}</b></p>`,
+        html: `<p>Your verification code is <b>${verificationOTP}</b>. This code will expire in 5 minutes. If you didn't request this, please ignore this message</p>`,
       });
     } else if (phone) {
       await twilioClient.messages.create({
         to: phone,
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID!,
-        body: `Your verification code is ${verificationOTP}`,
+        body: `Your verification code is <b>${verificationOTP}</b>. This code will expire in 5 minutes. If you didn't request this, please ignore this message`,
       });
     }
 
@@ -162,7 +162,9 @@ router.post("/login", async (req, res) => {
       await twilioClient.messages.create({
         to: phone,
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID!,
-        body: `Your login code is ${loginOtp}`,
+        body: `Your verification code is <b>${loginOtp}</b>. This code 
+        will expire in 5 minutes. If you didn't request this, please 
+        ignore this message`,
       });
     }
 

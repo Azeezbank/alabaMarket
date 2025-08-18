@@ -958,3 +958,123 @@
  *       500:
  *         description: Failed to submit boosting
  */
+
+/**
+ * @swagger
+ * /api/seller/boost/ads:
+ *   get:
+ *     summary: Fetch all boost ads for the authenticated user
+ *     tags:
+ *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved boost ads
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "boost_123"
+ *                   productId:
+ *                     type: string
+ *                     example: "prod_456"
+ *                   productName:
+ *                     type: string
+ *                     example: "Wireless Headphones"
+ *                   plan:
+ *                     type: string
+ *                     example: "Premium"
+ *                   period:
+ *                     type: string
+ *                     example: "30 days"
+ *                   price:
+ *                     type: number
+ *                     example: 49.99
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Failed to fetch boost ads
+ */
+
+/**
+ * @swagger
+ * /api/seller/notifications:
+ *   get:
+ *     summary: Get notifications for the authenticated user
+ *     tags:
+ *       - Notifications
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: Page number for pagination (default is 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Number of notifications per page (default is 10)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 notifications:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "notif_123"
+ *                       message:
+ *                         type: string
+ *                         example: "You have a new message"
+ *                       type:
+ *                         type: string
+ *                         example: "message"
+ *                       isRead:
+ *                         type: boolean
+ *                         example: false
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-08-15T12:34:56.000Z"
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             example: "user_456"
+ *                           profile:
+ *                             type: object
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                                 example: "John Doe"
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Failed to fetch notifications
+ */

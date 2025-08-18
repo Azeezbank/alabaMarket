@@ -2,7 +2,142 @@ import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { AuthRequest } from '../../middlewares/auth.middleware.js';
 import prisma from "../../prisma.client.js";
-import { profile } from "console";
+import { Resend } from "resend";
+import bcrypt from "bcryptjs";
+
+
+// Resend setup
+const resend = new Resend(process.env.RESEND_API_KEY!);
+
+
+
+//Fetch total numbers of users
+export const getUsers = async (req: AuthRequest, res: Response) => {
+    try {
+        const buyers = await prisma.user.count();
+
+        res.status(200).json(buyers);
+    } catch (err: any) {
+        console.log('Failed to count users', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to count users' });
+    }
+};
+
+//Get total number of shops
+export const getShops = async (req: AuthRequest, res: Response) => {
+    try {
+        const stores = await prisma.sellerShop.count();
+
+        res.status(200).json(stores);
+    } catch (err: any) {
+        console.log('Failed to count stores', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to count Stores' });
+    }
+};
+
+//Get all active listingd
+export const getActiveListing = async (req: AuthRequest, res: Response) => {
+    try {
+        const listing = await prisma.product.count({ where: { isActive: true}});
+
+        res.status(200).json(listing);
+    } catch (err: any) {
+        console.log('Failed to count active listing', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to count active listing' });
+    }
+};
+
+//Fetch activities for admin
+export const activities = async (req: AuthRequest, res: Response) => {
+    try {
+        const activities = await prisma.activities.findMany({
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        res.status(200).json(activities);
+    } catch (err: any) {
+        console.error('Something went wrong, failed to fetch activities', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to fetch activities'})
+    }
+};
+
+//Add new admin
+export const newadmin = async (req: AuthRequest, res: Response) => {
+    const userId = (req.user as JwtPayload)?.id;
+    const { email, password, name, role, status } = req.body;
+    try {
+        //Check if user already axist
+        const isExist = await prisma.user.findUnique({ where: { email }})
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        if (!isExist) {
+            await prisma.user.create({
+                data: {
+                    email, password: hashedPassword,
+                    profile: {
+                        create: {
+                        name, role, status
+                        }
+                    }
+                }
+            })
+            await resend.emails.send({
+        from: "no-reply@alabamarket.com",
+        to: email,
+        subject: "New Invite",
+        html: `<p>You have been invited to be one of the admin at Alabamarket, please <a href="www.alabamarket.com">Click Here</a> sign in now and update your password, <br/>
+        Your Login details: <br/>
+        Email: <b>${email} <br/>
+        Password: <b>${password}</b> <br/>
+        Please Ignore if this mail is not for you.</p>`
+      });
+            res.status(200).json({message: 'New admin invited successfully'})
+        }
+        if (isExist) {
+            // upgrade to admin if user already exist
+            await prisma.user.update({ where: { email },
+                data: {
+                    profile: {
+                        update: {
+                            role
+                        }
+                    }
+                }
+        })
+        await resend.emails.send({
+        from: "no-reply@alabamarket.com",
+        to: email,
+        subject: "New Invite",
+        html: `<p>You have been invited to be one of the admin at Alabamarket, and your new role is ${role} </p>`
+        });
+
+        const message = 'New user has been invited to be an admin';
+        const type = 'User Activity';
+        await prisma.notification.create({
+            data: {
+                userId, message, type
+            }
+        })
+        
+         res.status(200).json({message: 'New admin added successfully'})
+        }
+    } catch (err: any) {
+        console.error('Something went wrong, failed to add new admin', err)
+        return res.status(500).json({message: 'Something went wrong, failed to add or upgrade user new admin'})
+    }
+}
 
 
 //Fetch all buyers
