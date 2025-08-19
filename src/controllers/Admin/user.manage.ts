@@ -301,7 +301,7 @@ export const SellerRating = async (req: AuthRequest, res: Response) => {
   const sellerId = req.params.sellerId;
 
   try {
-    const ration = await prisma.sellerRating.findMany({  where: { userId: sellerId }, 
+    const rating = await prisma.sellerRating.findMany({  where: { userId: sellerId }, 
     include: {
         customer: {
             select: {
@@ -316,6 +316,8 @@ export const SellerRating = async (req: AuthRequest, res: Response) => {
         }
     }
     })
+
+    res.status(200).json(rating)
   } catch (err: any) {
     console.error('Failed to select sellers rating', err)
     return res.status(500).json({message: 'Failed to select sellers rating'});
@@ -347,23 +349,6 @@ export const StoreActivities = async (req: AuthRequest, res: Response) => {
     }
 };
 
-//Reject listing and create notification
-export const createNotification = async (req: AuthRequest, res: Response) => {
-    const sellerId = req.params.sellerId;
-    const userId = (req.user as JwtPayload)?.id;
-    const { message, type } = req.body;
-    try {
-        await prisma.notification.create({
-            data: {
-                userId, message, receiverId: sellerId, type
-            }
-        })
-        res.status(201).json({message: 'Notification created sucessfully'})
-    } catch (err: any) {
-        console.error('Failed to create reject listing notification', err);
-        return res.status(500).json({message: 'Failed to create reject listing notification'});
-    }
-}
 
 // Update user role
 export const updateUserRoleToSeller = async (req: AuthRequest, res: Response) => {
@@ -394,3 +379,23 @@ export const updateUserRoleToSeller = async (req: AuthRequest, res: Response) =>
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+//Send Payment reminder
+export const paymentReminder = async (req: AuthRequest, res: Response) => {
+    const message = req.body.message;
+    const userId = (req.user as JwtPayload)?.id;
+    const receiverId = req.params.receiverId as string;
+    const type = 'Campaign and ads';
+    try {
+        await prisma.notification.create({
+            data: {
+                userId, message, receiverId, type
+            }
+        })
+
+        res.status(200).json({ message: 'Payment notification sent successfully'})
+    } catch (err: any) {
+        console.error('Something went wrong, Failed to create notification', err)
+        return res.status(500).json({ message: 'Something went wrong, Failed to create notification'})
+    }
+}

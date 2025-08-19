@@ -369,7 +369,8 @@ export const createBoostAd = async (req: AuthRequest, res: Response) => {
     })
     res.status(200).json({message: 'Boost Submitted For Reviews'})
   } catch (err: any) {
-    console.error('Something went wrong, Failed to submit boosting')
+    console.error('Something went wrong, Failed to submit boosting', err)
+    return res.status(500).json({message: 'Something went wrong, Failed to submit boosting'})
   }
 };
 
@@ -386,6 +387,7 @@ export const fetchBoostAd = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json(sellerBoost)
   } catch (err: any) {
-    console.error('Something went wrong, Failed to submit boosting')
+    console.error('Something went wrong, Failed to submit boosting', err)
+    return res.status(500).json({message: 'Something went wrong, Failed to submit boosting'})
   }
 };

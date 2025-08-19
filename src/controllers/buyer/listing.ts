@@ -479,3 +479,33 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: 'Something went wrong, Failed to select saved products' })
   }
 };
+
+//Select only non expire boosted listing
+export const getActiveBoostAds = async (req: Request, res: Response) => {
+  try {
+    const today = new Date();
+
+    const activeBoosts = await prisma.boostAd.findMany({
+      where: {
+        endDate: {
+          gte: today, // not expired yet
+        },
+        status: "Active", // optional: only approved ones
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            profile: true, // adjust what you need
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.status(200).json(activeBoosts);
+  } catch (err: any) {
+    console.error("Failed to fetch active boost ads", err);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};

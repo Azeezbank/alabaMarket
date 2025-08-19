@@ -34,6 +34,7 @@ model User {
   sentMessages       Chat[]              @relation("SentMessages")
   receivedMessages   Chat[]              @relation("ReceivedMessages")
   activities         Activities[]
+  boostAd            BoostAd[]
 }
 
 model SubAdmin {
@@ -63,11 +64,11 @@ model Product {
   userId           String           @db.Uuid
   promoted         Boolean          @default(false)
   isActive         Boolean          @default(true)
-  pricingStatus    String?          @default("Pending")
+  pricingStatus    ProductpricingStatus          @default(Pending)
   isPause          Boolean          @default(false)
   shopId           String           @db.Uuid
   categoryId       String?          @db.Uuid
-  listingPromotion String?
+  listingPromotion ProductListingPromotion   @default(Free)
   productPhoto     ProductPhoto[]
   productVideo     ProductVideo[]
   productPricing   ProductPricing?
@@ -83,11 +84,22 @@ model Product {
   productReview    ProductReview[]
   savedProducts    SavedProducts[]
   love             Love[]
+  listingRejection    ListingRejection[]
 
   //Pending
   power    String?
   warranty String?
   location String?
+}
+
+enum ProductpricingStatus {
+  Approved
+  Pending
+  Rejected
+}
+enum ProductListingPromotion {
+  Free
+  Paid
 }
 
 model SavedProducts {
@@ -265,9 +277,20 @@ model BoostAd {
   plan        String?
   period      String
   price       Decimal  @default(0.00) @db.Decimal(10, 2)
-  status      String   @default("Pending")
+  status      BoostAdStatus   @default(Pending)
+  startDate    DateTime?
+  endDate     DateTime?
   product     Product  @relation(fields: [productId], references: [id])
-  updatedAt DateTime @updatedAt @default(now())
+  user     User?  @relation(fields: [userId], references: [id])
+  updatedAt   DateTime @updatedAt @default(now())
+  createdAt    DateTime   @default(now())
+}
+
+enum BoostAdStatus {
+  Active
+  Pending
+  Suspended
+  Paused
 }
 
 model BoostPackages {
@@ -276,8 +299,14 @@ model BoostPackages {
   weekly    Decimal  @default(0.00) @db.Decimal(10, 2)
   monthly   Decimal  @default(0.00) @db.Decimal(10, 2)
   annually  Decimal  @default(0.00) @db.Decimal(10, 2)
+  status   BoostPackagesStatus  @default(Active)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
+}
+
+enum BoostPackagesStatus {
+  Active
+  Inactive
 }
 
 model StoreActivities {
@@ -306,7 +335,7 @@ model Report {
   reason      String?
   description String
   createdAt   DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now())
+  updatedAt   DateTime @updatedAt @default(now())
 }
 
 model Question {
@@ -334,4 +363,33 @@ model Chat {
   sender     User     @relation("SentMessages", fields: [senderId], references: [id])
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   updatedAt DateTime @updatedAt @default(now())
+}
+
+model ListingRejection {
+  id        String   @id @default(uuid())  @db.Uuid
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String     @db.Uuid
+}
+
+model PromoBannerMgt {
+  id        String   @id @default(uuid())  @db.Uuid
+  image    String?
+  title     String
+  page     String
+  placement     String
+  uploadedBy       String?
+  startDate    DateTime?
+  endDate      DateTime?
+  status      PromoBannerMgtStatus
+  createdAt     DateTime  @default(now())
+}
+
+enum PromoBannerMgtStatus {
+  Active
+  Expire
+  Suspended
+  Inactive
 }

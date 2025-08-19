@@ -657,6 +657,54 @@
  *         description: Failed to fetch saved products
  */
 
+/**
+ * @swagger
+ * /api/buyer/all/active/boosted/listing:
+ *   get:
+ *     summary: Get all active boosted listings
+ *     description: Retrieve all boosted ads that have not yet expired and are marked as Active.
+ *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved active boosted ads
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     description: Unique ID of the boost ad
+ *                   startDate:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Boost start date
+ *                   endDate:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Boost expiration date
+ *                   status:
+ *                     type: string
+ *                     description: Current status of the boost (e.g., Active)
+ *                   user:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: User ID who owns the boost
+ *                       profile:
+ *                         type: object
+ *                         description: User profile data
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Something went wrong while fetching boosts
+ */
+
 
 /**
  * @swagger
