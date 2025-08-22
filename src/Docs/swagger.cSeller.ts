@@ -1,278 +1,11 @@
 /**
  * @swagger
  * tags:
- *   name: Auth
- *   description: Authentication endpoints
- */
-
-/**
- * @swagger
- * /api/auth/register:
- *   post:
- *     summary: Register a new user with email or phone
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: "user@example.com"
- *               phone:
- *                 type: string
- *                 example: "+1234567890"
- *               role:
- *                 type: string
- *                 example: "Buyer"
- *     responses:
- *       201:
- *         description: User registered and OTP sent
- *       400:
- *         description: Missing email/phone or already registered
- *       500:
- *         description: Server error
- */
-
-/**
- * @swagger
- * /api/auth/verify:
- *   post:
- *     summary: Verify user account using OTP
- *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: email
- *         schema:
- *           type: string
- *         required: false
- *       - in: query
- *         name: phone
- *         schema:
- *           type: string
- *         required: false
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               code:
- *                 type: string
- *                 example: "123456"
- *     responses:
- *       200:
- *         description: Account verified successfully
- *       400:
- *         description: Invalid or expired OTP
- *       404:
- *         description: User not found
- *       500:
- *         description: Server error
- */
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Request login OTP
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               phone:
- *                 type: string
- *     responses:
- *       200:
- *         description: Login OTP sent
- *       400:
- *         description: Missing email/phone
- *       403:
- *         description: User not verified
- *       404:
- *         description: User not found
- *       500:
- *         description: Server error
- */
-
-/**
- * @swagger
- * /api/auth/login/verify:
- *   post:
- *     summary: Verify login OTP and receive JWT token
- *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: email
- *         schema:
- *           type: string
- *         required: false
- *       - in: query
- *         name: phone
- *         schema:
- *           type: string
- *         required: false
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               code:
- *                 type: string
- *                 example: "123456"
- *     responses:
- *       200:
- *         description: Login successful, returns JWT token
- *       400:
- *         description: Invalid or expired OTP
- *       404:
- *         description: User not found
- *       500:
- *         description: Server error
- */
-
-/**
- * @swagger
- * tags:
- *   name: Admin
- *   description: Admin operations
- */
-
-/**
- * @swagger
- * /api/admin/create/category:
- *   post:
- *     summary: Create a new product category
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               category:
- *                 type: string
- *                 description: Name of the category
- *               file:
- *                 type: string
- *                 format: binary
- *                 description: Image file for the category
- *             required:
- *               - category
- *               - file
- *     responses:
- *       201:
- *         description: Category created successfully
- *         content:
- *           application/json:
- *             example:
- *               message: "Category created"
- *       400:
- *         description: No file uploaded
- *         content:
- *           application/json:
- *             example:
- *               message: "No file uploaded"
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             example:
- *               message: "Something went wrong, Failed to create category"
- */
-
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * tags:
- *   name: Admin
- *   description: Admin operations
- */
-
-/**
- * @swagger
- * /api/admin/all/categories:
- *   get:
- *     summary: Get all product categories
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of all categories
- *         content:
- *           application/json:
- *             example:
- *               - id: "1"
- *                 name: "Electronics"
- *                 image: "https://example.com/images/electronics.jpg"
- *               - id: "2"
- *                 name: "Clothing"
- *                 image: "https://example.com/images/clothing.jpg"
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             example:
- *               message: "Something went wrong"
+ *   name: Seller's Listing
+ *   description: Endpoints related to seller product listings
  */
 
 
-/**
- * @swagger
- * /api/admin/update-role-seller:
- *   put:
- *     summary: Update user role to Seller (Admin only)
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: user@example.com
- *     responses:
- *       200:
- *         description: Role updated successfully
- *       400:
- *         description: Email missing
- *       404:
- *         description: User not found
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Internal server error
- */
-
-//seller
 /**
  * @swagger
  * /api/seller/create/shop:
@@ -614,12 +347,7 @@
  *         description: Failed to update file
  */
 
-/**
- * @swagger
- * tags:
- *   name: Seller's Listing
- *   description: Endpoints related to seller product listings
- */
+
 
 /**
  * @swagger
@@ -694,33 +422,149 @@
 
 /**
  * @swagger
- * /api/seller/update/product/category:
- *   put:
- *     tags:
+ * /api/seller/listing/category:
+ *   get:
+ *     summary: Fetch all product categories
+ *     description: Retrieve all product categories with their IDs and names.
+ *     tags: 
  *       - Seller's Listing
- *     summary: Update product category
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "cat_12345"
+ *                   name:
+ *                     type: string
+ *                     example: "Electronics"
+ *       401:
+ *         description: Unauthorized, authentication required
+ *       500:
+ *         description: Server error, failed to select product category
+ */
+
+/**
+ * @swagger
+ * /api/seller/listing/subcategory/{categoryId}:
+ *   get:
+ *     summary: Fetch subcategories of a category
+ *     description: Retrieve subcategories belonging to a given category ID.
+ *     tags: 
+ *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - name: productId
- *         in: query
+ *       - in: path
+ *         name: categoryId
  *         required: true
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               mainCategory:
- *                 type: string
- *               subCategory:
- *                 type: string
+ *         description: The ID of the category
  *     responses:
  *       200:
- *         description: Product category updated
+ *         description: Successfully retrieved subcategories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "subcat_67890"
+ *                   name:
+ *                     type: string
+ *                     example: "Smartphones"
+ *       400:
+ *         description: Bad request, invalid category ID
+ *       401:
+ *         description: Unauthorized, authentication required
  *       500:
- *         description: Failed to update product category
+ *         description: Server error, failed to select sub product category
+ */
+
+/**
+ * @swagger
+ * /api/seller/update/product/category/{categoryId}/{subCategoryId}:
+ *   put:
+ *     summary: Update product category and subcategory
+ *     description: Update an existing product's category and subcategory by IDs.
+ *     tags: 
+ *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         description: ID of the category
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: subCategoryId
+ *         required: true
+ *         description: ID of the subcategory
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: productId
+ *         required: true
+ *         description: ID of the product to update
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product category updated successfully
+ *       400:
+ *         description: Invalid input or missing parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid request parameters
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Category, Subcategory, or Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product not found
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to update product category
  */
 
 /**
@@ -775,17 +619,34 @@
  *         description: Failed to fetch product listings
  */
 
+
 /**
  * @swagger
- * /api/seller/update/listing/{productId}:
+ * /api/seller/update/listing/{productId}/{categoryId}/subCategoryId:
  *   put:
- *     tags:
+ *     summary: Edit an existing product/listing
+ *     description: Update details of a seller's product listing. Only the owner of the product can edit it.
+ *     tags: 
  *       - Seller's Listing
- *     summary: Edit product or listing
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - name: productId
- *         in: path
+ *       - in: path
+ *         name: productId
  *         required: true
+ *         description: The ID of the product to update
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: categoryId
+ *         required: false
+ *         description: ID of the main category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: subCategoryId
+ *         required: false
+ *         description: ID of the sub-category
  *         schema:
  *           type: string
  *     requestBody:
@@ -797,23 +658,41 @@
  *             properties:
  *               name:
  *                 type: string
- *               price:
- *                 type: number
- *               priceStatus:
- *                 type: string
+ *                 example: "iPhone 13 Pro Max"
  *               condition:
  *                 type: string
+ *                 example: "New"
+ *               price:
+ *                 type: number
+ *                 example: 1500
+ *               priceStatus:
+ *                 type: string
+ *                 enum: [Fixed, Negotiable]
+ *                 example: "Negotiable"
  *               description:
  *                 type: string
- *               mainCategory:
+ *                 example: "A brand new iPhone 13 Pro Max with warranty."
+ *               categoryName:
  *                 type: string
- *               subCategory:
+ *                 example: "Electronics"
+ *               subCategoryName:
  *                 type: string
+ *                 example: "Smartphones"
  *     responses:
  *       200:
  *         description: Product listing updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Product listing updated successfully"
+ *                 updatedProduct:
+ *                   $ref: '#/components/schemas/Product'
  *       403:
- *         description: Not authorized
+ *         description: Not authorized to edit this product
  *       404:
  *         description: Product not found
  *       500:
@@ -896,13 +775,15 @@
  *         description: Failed to select plan
  */
 
+
 /**
  * @swagger
- * /api/seller/plan/price:
- *   get:
+ * /api/seller/boost/details:
+ *   post:
+ *     summary: Get boost plan details
  *     tags:
  *       - Seller's Listing
- *     summary: Select price with respect to plan and period
+ *     description: Retrieve details of a specific boost plan by providing the plan name in the request body.
  *     requestBody:
  *       required: true
  *       content:
@@ -912,16 +793,12 @@
  *             properties:
  *               plan:
  *                 type: string
- *               period:
- *                 type: string
- *                 enum: [weekly, monthly, annually]
+ *                 example: Gold
  *     responses:
  *       200:
- *         description: Price selected successfully
- *       400:
- *         description: Invalid period
+ *         description: Boost plan details retrieved successfully
  *       500:
- *         description: Failed to select price
+ *         description: Failed to select plan details
  */
 
 /**

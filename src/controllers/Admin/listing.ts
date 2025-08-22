@@ -2,8 +2,6 @@ import { Response, Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../prisma.client.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
-import { includes } from "better-auth/*";
-import { profile } from "console";
 
 
 //Fetch free listing
@@ -12,13 +10,14 @@ export const freeListing = async (req: AuthRequest, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     try {
-        const promotion = 'Free';
-        const listing = await prisma.product.findMany({
-            where: { listingPromotion: promotion },
+        const promotionType = 'Free';
+        const listing = await prisma.boostAd.findMany({
+            where: { type: promotionType },
             select: {
-                category: {
+                productId: true, plan: true, type: true, period: true, startDate: true, endDate: true, status: true, placement: true,
+                product: {
                     select: {
-                        name: true
+                        id: true, name: true, promoted: true, isActive: true, pricingStatus: true, isPause: true, shopId: true, categoryName: true, categoryId: true, subCategoryName: true, subCategoryId: true, status: true,
                     }
                 },
                 user: {
@@ -44,14 +43,21 @@ export const freeListing = async (req: AuthRequest, res: Response) => {
 }
 
 // reject free listing request
-export const rejectFreeListing = async (req: AuthRequest, res: Response) => {
+export const rejectListing = async (req: AuthRequest, res: Response) => {
     const productId = req.params.productId as string;
     const reason = req.body.reason;
     const userId = (req.user as JwtPayload)?.id;
     try {
-        await prisma.listingRejection.create({
+
+        await prisma.product.update({ where: { id: productId },
+        data: {
+            status: 'Rejected'
+        }
+        })
+
+        await prisma.actionLog.create({
             data: {
-                reason, productId
+                productId, type: 'Listing', action: 'Rejected', reason, performedBy: userId
             }
         });
 
@@ -70,11 +76,11 @@ export const rejectFreeListing = async (req: AuthRequest, res: Response) => {
 
         await prisma.notification.create({
             data: {
-                userId, message: reason, receiverId: owner?.user.id, type
+                senderId: userId, message: reason, receiverId: owner?.user.id, type
             }
         });
 
-        res.status(200).json({message: 'Listing Rejected'})
+        res.status(200).json({message: 'Listing Rejected and notificatiojn sent'})
     } catch (err: any) {
         console.error('Failed to reject Listing', err)
         return res.status(500).json({message: 'Something went wrong, Failed to reject Listing'})
@@ -84,6 +90,9 @@ export const rejectFreeListing = async (req: AuthRequest, res: Response) => {
 
 //Fetch all boost campaign review
 export const boostCampain = async (req: AuthRequest, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
     try {
     
         const campaign = await prisma.boostAd.findMany({
@@ -98,7 +107,9 @@ export const boostCampain = async (req: AuthRequest, res: Response) => {
                 }
             }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit
     })
 
     res.status(200).json(campaign)
@@ -112,7 +123,7 @@ export const boostCampain = async (req: AuthRequest, res: Response) => {
 export const updateCampaign = async (req: AuthRequest, res: Response) => {
     const userId = (req.user as JwtPayload)?.id;
     const campaignId = req.params.campaignId as string;
-    const { status, duration } = req.body;
+    const { status, duration } = req.body; //Duration in days
     
 const durationInDays = parseInt(duration.replace(/\D/g, ""), 10);
 
@@ -135,12 +146,12 @@ endDate.setDate(startDate.getDate() + durationInDays);
             startDate, endDate, status
         }
         })
-        const message = 'Your lidting boost Ads has been approved';
+        const message = 'Your listing boost Ads has been approved';
         const type = 'Boost Ads';
 
         await prisma.notification.create({
             data: {
-                userId, message, receiverId: seller?.user?.id, type
+                senderId: userId, message, receiverId: seller?.user?.id, type
             }
         })
 
@@ -152,7 +163,7 @@ endDate.setDate(startDate.getDate() + durationInDays);
 }
 
 //Pause or suspend listing boost status
-export const updateCampaignStatusm = async (req: AuthRequest, res: Response) => {
+export const updateCampaignStatus = async (req: AuthRequest, res: Response) => {
     const campaignId = req.params.campaignId as string;
     const userId = (req.user as JwtPayload)?.id;
     const { status, reason } = req.body;
@@ -173,15 +184,18 @@ export const updateCampaignStatusm = async (req: AuthRequest, res: Response) => 
             }
         }
         });
-        if (!seller) {
-            console.log('No seller found')
-        }
+
+        await prisma.actionLog.create({
+            data: {
+                boostAdId: campaignId, type: 'Boost Ads', reason, performedBy: userId
+            }
+        })
 
         const sellerIs = seller?.user?.id;
         const type = 'Boost Ads';
         await prisma.notification.create({
             data: {
-                userId, message: reason, receiverId: sellerIs, type
+                senderId: userId, message: reason, receiverId: sellerIs, type
             }
         })
 

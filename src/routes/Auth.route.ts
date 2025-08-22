@@ -55,7 +55,7 @@ router.post("/register", async (req, res) => {
         expiresAt: otpExpiresAt,
         profile: {
           create: {
-          role: role
+            role: role
           }
         }
       },
@@ -67,13 +67,13 @@ router.post("/register", async (req, res) => {
         from: "no-reply@alabamarket.com",
         to: email,
         subject: "Verify your email",
-        html: `<p>Your verification code is <b>${verificationOTP}</b>. This code will expire in 5 minutes. If you didn't request this, please ignore this message</p>`,
+        html: `<p>Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
       });
     } else if (phone) {
       await twilioClient.messages.create({
         to: phone,
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID!,
-        body: `Your verification code is <b>${verificationOTP}</b>. This code will expire in 5 minutes. If you didn't request this, please ignore this message`,
+        body: `Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.`,
       });
     }
 
@@ -92,7 +92,7 @@ router.post("/verify", async (req, res) => {
   const { code } = req.body;
   const phone = typeof req.query.phone === "string" ? req.query.phone : undefined;
   const email = typeof req.query.email === "string" ? req.query.email : undefined;
-  
+
   try {
     const user = await prisma.user.findFirst({
       where: {
@@ -117,6 +117,17 @@ router.post("/verify", async (req, res) => {
       where: { id: user.id },
       data: { sign_up_verify: true, otp: null, expiresAt: null },
     });
+
+    const userDetails = user.email || user.phone;
+
+    const message = `New member ${userDetails} has been registerd on your platform`;
+        const type = 'User Activity';
+
+        await prisma.notification.create({
+            data: {
+                senderId: user.id, message, type
+            }
+        })
 
     res.status(200).json({ message: "Account verified successfully." });
   } catch (err) {
@@ -156,15 +167,13 @@ router.post("/login", async (req, res) => {
         from: "no-reply@alabamarket.com",
         to: email,
         subject: "Your login code",
-        html: `<p>Your login code is <b>${loginOtp}</b></p>`,
+        html: `<p>Your AlabaMarket verification code is <b>${loginOtp}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
       });
     } else if (phone) {
       await twilioClient.messages.create({
         to: phone,
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID!,
-        body: `Your verification code is <b>${loginOtp}</b>. This code 
-        will expire in 5 minutes. If you didn't request this, please 
-        ignore this message`,
+        body: `Your AlabaMarket verification code is <b>${loginOtp}</b>. Don't share this code with anyone; our employees will never ask for the code.`,
       });
     }
 
@@ -181,8 +190,8 @@ router.post("/login/verify", async (req, res) => {
   const phone = typeof req.query.phone === "string" ? req.query.phone : undefined;
   const email = typeof req.query.email === "string" ? req.query.email : undefined;
   try {
-    const user = await prisma.user.findFirst({ 
-        where: {
+    const user = await prisma.user.findFirst({
+      where: {
         OR: [
           email ? { email } : {},
           phone ? { phone } : {},
@@ -210,7 +219,17 @@ router.post("/login/verify", async (req, res) => {
       data: { otp: null, expiresAt: null },
     });
 
-    res.status(200).json({message: 'Login successful', token, userInfo: user });
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { 
+        profile: {
+          update: {
+        lastVisit: new Date() }
+          }
+      }
+    });
+
+    res.status(200).json({ message: 'Login successful', token, userInfo: user });
   } catch (err) {
     console.error('Login verification failed', err)
     return res.status(500).json({ message: "Login verification failed" });

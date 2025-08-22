@@ -7,7 +7,6 @@ import { imagekit } from '../../service/Imagekit.js';
 
 export const SellerVerification = async (req: AuthRequest, res: Response) => {
     const userId = (req.user as JwtPayload)?.id;
-    // const terms = req.body.terms === 'true' ? true : false; // Convert terms to boolean
 
     try {
         if (!req.files) {
@@ -49,6 +48,7 @@ export const SellerVerification = async (req: AuthRequest, res: Response) => {
     }
 };
 
+//Update seller verification
 export const updateVerificationIdCard = async (req: AuthRequest, res: Response) => {
     const userid = (req.user as JwtPayload)?.id;
     try {

@@ -25,7 +25,6 @@ export const storeFetchActiveSellerListings = async (req: AuthRequest, res: Resp
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true,
         _count: {
           select: { likes: true, love: true }
         }
@@ -64,7 +63,6 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -114,8 +112,7 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
       include: {
         productPhoto: true,
         productVideo: true,
-        productPricing: true,
-        productCategory: true
+        productPricing: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -163,7 +160,6 @@ export const filterListingsByLessPrice = async (req: AuthRequest, res: Response)
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -211,7 +207,6 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -244,8 +239,7 @@ export const FetchAllSellerListings = async (req: AuthRequest, res: Response) =>
       include: {
         productPhoto: true,
         productVideo: true,
-        productPricing: true,
-        productCategory: true
+        productPricing: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -278,7 +272,6 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -310,8 +303,7 @@ export const fetchUnverifiedSellerListing = async (req: AuthRequest, res: Respon
       include: {
         productPhoto: true,
         productVideo: true,
-        productPricing: true,
-        productCategory: true
+        productPricing: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -345,7 +337,6 @@ export const fetchSellerListingByCondition = async (req: AuthRequest, res: Respo
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -455,7 +446,6 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true,
         user: {
           select: {
             id: true,

@@ -3,6 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import prisma from '../../prisma.client.js';
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { imagekit } from '../../service/Imagekit.js';
+import { Param } from "@prisma/client/runtime/library.js";
 
 
 //Create product details
@@ -13,7 +14,7 @@ export const productDetails = async (req: AuthRequest, res: Response) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-     // Upload image
+    // Upload image
     const uploadedImage = await imagekit.upload({
       file: files.productImage[0].buffer,
       fileName: files.productImage[0].originalname,
@@ -32,25 +33,25 @@ export const productDetails = async (req: AuthRequest, res: Response) => {
         name,
         userId,
         shopId,
-          productPhoto: {
-            create: [{
-              url: uploadedImage.url, 
-            }]
-          },
-          productVideo: {
-            create: [{
-              url: uploadedVideo.url
-            }]
-          }
-  },
-  include: {
-    productPhoto: true, productVideo: true
-  }
-})
-res.status(200).json({message: 'product details inserted', newProduct })
+        productPhoto: {
+          create: [{
+            url: uploadedImage.url,
+          }]
+        },
+        productVideo: {
+          create: [{
+            url: uploadedVideo.url
+          }]
+        }
+      },
+      include: {
+        productPhoto: true, productVideo: true
+      }
+    })
+    res.status(200).json({ message: 'product details inserted', newProduct })
   } catch (err: any) {
     console.error('Something went wrong, Failed to insert dedails', err)
-    return res.status(500).json({message: 'Something went wrong, Failed to insert dedails'})
+    return res.status(500).json({ message: 'Something went wrong, Failed to insert dedails' })
   }
 };
 
@@ -70,31 +71,77 @@ export const productPricing = async (req: AuthRequest, res: Response) => {
       }
     })
 
-    res.status(200).json({message: "Pricing updated"});
+    res.status(200).json({ message: "Pricing updated" });
   } catch (err: any) {
-    console.error('Failed to update pricing', err) 
-    return res.status(500).json({message: 'Something went wrong, failed to update pricing'})
+    console.error('Failed to update pricing', err)
+    return res.status(500).json({ message: 'Something went wrong, failed to update pricing' })
+  }
+}
+
+//fetch all category 
+export const allproductCategory = async (req: AuthRequest, res: Response) => {
+  try {
+    const category = await prisma.category.findMany({
+      select: {
+        id: true, name: true
+      }
+    })
+    res.status(200).json(category)
+  } catch (err: any) {
+    console.error('Failed to select category', err)
+    return res.status(500).json({ message: 'Something went wrong, failed to select product category' })
+  }
+}
+
+//Fetch sub category
+export const productSubCategory = async (req: AuthRequest, res: Response) => {
+  const categoryId = req.params.categoryId;
+  try {
+    const subCategory = await prisma.subCategory.findMany({
+      where: { categoryId },
+      select: {
+        id: true, name: true
+      }
+    })
+    res.status(200).json(subCategory)
+  } catch (err: any) {
+    console.error('Failed to select sub category', err)
+    return res.status(500).json({ message: 'Something went wrong, failed to select sub product category' })
   }
 }
 
 //update category
-export const productcategory = async (req: AuthRequest, res: Response) => {
-  const {  mainCategory, subCategory } = req.body;
+export const updateProductcategory = async (req: AuthRequest, res: Response) => {
+  const { categoryId, subCategoryId } = req.params;
   const productId = req.query.productId as string
   try {
-    await prisma.product.update({ where: { id: productId},
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+      select: {
+        name: true
+      }
+    })
+
+    const subCategory = await prisma.subCategory.findUnique({
+      where: { id: subCategoryId },
+      select: {
+        name: true
+      }
+    })
+
+    const categoryName = category?.name ?? null;
+    const subCategoryName = subCategory?.name ?? null;
+
+    await prisma.product.update({
+      where: { id: productId },
       data: {
-      productCategory: {
-        update: {
-        mainCategory, subCategory
-        }
+        categoryName, subCategoryName
       }
-      }
-  })
-  res.status(200).json({message: 'Smething went wrong, Failed to update product category'})
+    })
+    res.status(200).json({ message: 'Smething went wrong, Failed to update product category' })
   } catch (err: any) {
     console.error('Smething went wrong, Failed to update product category', err)
-    return res.status(500).json({message: 'Smething went wrong, Failed to update product category'})
+    return res.status(500).json({ message: 'Smething went wrong, Failed to update product category' })
   }
 }
 
@@ -103,16 +150,17 @@ export const productPromotion = async (req: AuthRequest, res: Response) => {
   const listingPromotion = req.body.listingPromotion;
   const productId = req.query.productId as string
   try {
-    await prisma.product.update({ where: {id: productId}, 
-    data: {
-      listingPromotion
-    }
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        listingPromotion
+      }
     })
 
-    res.status(200).json({message: 'Promotion updated'})
+    res.status(200).json({ message: 'Promotion updated' })
   } catch (err: any) {
     console.log('Failed to update promotion', err)
-    return res.status(500).json({message: 'Something went wrong, Faiked to update promotion'})
+    return res.status(500).json({ message: 'Something went wrong, Faiked to update promotion' })
   }
 };
 
@@ -122,7 +170,7 @@ export const productPromotion = async (req: AuthRequest, res: Response) => {
 export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
 
-    // Parse pagination query params with defaults
+  // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
@@ -133,22 +181,25 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
-      where: { userId, shop: {
-      isActive: true // Only from active shops
-    } },
+      where: {
+        userId, shop: {
+          isActive: true // Only from active shops
+        }
+      },
       include: {
         productPhoto: true,
         productVideo: true,
         productPricing: true,
-        productCategory: true,
         user: {
-          select: { createdAt: true,
-          sellerShop: {
-            select: { storeName: true,
-            }
-          },
+          select: {
+            createdAt: true,
+            sellerShop: {
+              select: {
+                storeName: true,
+              }
+            },
             sellerVerification: {
-              select: { isVerified: true}
+              select: { isVerified: true }
             }
           }
         }
@@ -158,7 +209,7 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
       take: limit
     });
 
-    res.status(200).json({page, limit, total, totalPages: Math.ceil(total / limit), products});
+    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
   } catch (err: any) {
     console.error("Error fetching product listings:", err);
     res.status(500).json({ message: "Failed to fetch seller's product listings" });
@@ -170,8 +221,8 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
 //Edit product or listing
 export const EditSellerListing = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
-  const productId = req.params.id; // or req.body.productId
-  const { name, condition, price, priceStatus, description, mainCategory, subCategory  } = req.body;
+  const { productId, categoryId, subCategoryId } = req.params; // or req.body.productId
+  const { name, condition, price, priceStatus, description, categoryName,  subCategoryName } = req.body;
 
   try {
     // Find existing product, verify ownership
@@ -191,7 +242,10 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
       where: { id: productId },
       data: {
         name,
-
+        categoryName,
+        subCategoryName,
+        categoryId,
+        subCategoryId,
         // Update pricing relation
         productPricing: {
           update: {
@@ -201,18 +255,8 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
             description
           }
         },
-
-        // Update product category relation
-        productCategory: {
-          update: {
-              mainCategory,
-              subCategory
-        }
-        
       },
-    },
       include: {
-        productCategory: true,
         productPhoto: true,
         productVideo: true,
         productPricing: true
@@ -295,99 +339,98 @@ export const PauseSellerListing = async (req: AuthRequest, res: Response) => {
 export const activeListing = async (req: AuthRequest, res: Response) => {
   try {
     const activeListing = await prisma.product.findMany({
-      where: { isActive: true}
+      where: { isActive: true }
     })
 
     res.status(200).json(activeListing)
   } catch (err: any) {
     console.error('Something went wrong, Failed to select active listen', err)
-    return res.status(500).json({message: 'Something went wrong'})
+    return res.status(500).json({ message: 'Something went wrong' })
   }
 };
 
-//Selct all paid boost plan
+//Selct all boost plan
 export const BoostPlans = async (req: AuthRequest, res: Response) => {
   try {
     const plans = await prisma.boostPackages.findMany({
       select: {
         id: true, plan: true,
+        boostPackagesDetails: {
+          select: {
+            id: true, duration: true, price: true, status: true
+          }
+        }
       }
     })
 
     res.status(200).json(plans)
   } catch (err: any) {
     console.error('Failed to select plan', err)
-    return res.status(500).json({message: 'Failed to select plan'})
+    return res.status(500).json({ message: 'Failed to select plan' })
   }
 };
 
-//Select price with respect to plan and period
-export const planPrice = async (req: AuthRequest, res: Response) => {
-  const { plan, period } = req.body;
-  //period should be weekly, monthly or annually
+//Select boost plan details
+export const boostDetails = async (req: AuthRequest, res: Response) => {
+  const { plan } = req.body;
   try {
-    let duration;
-    if (period === "weekly") {
-  duration = 'weekly';
-} else if (period === "monthly") {
-  duration = 'monthly';
-} else if (period === "annually") {
-  duration = 'annually'
-} else {
-  return res.status(400).json({message: 'Please provide period'})
-}
-    const price = await prisma.boostPackages.findFirst({ where: { plan },
-    select: {
-      [duration]: true
-    }
-    });
-    res.status(200).json(price)
+    const boostPlanDetails = await prisma.boostPackages.findMany({ where: {plan},
+      select: {
+        id: true, type: true,  placement: true,
+        boostPackagesDetails: {
+          select: {
+            duration: true, price: true, status: true
+          }
+        }
+      }
+    })
+
+    res.status(200).json(boostPlanDetails)
   } catch (err: any) {
-    console.error('Failed to select price', err)
-    return res.status(500).json({message: 'Something went wrong, Failed to select price'})
+    console.error('Failed to select plan details', err)
+    return res.status(500).json({ message: 'Failed to select plan details' })
   }
-}
+};
+
 
 //Boost Ad
 export const createBoostAd = async (req: AuthRequest, res: Response) => {
   const productId = req.params.productId;
   const userId = (req.user as JwtPayload)?.id;
-  const { productName, plan, period, price } = req.body;
+  const { productName, plan, type, period, price, placement } = req.body;
   try {
     await prisma.boostAd.create({
       data: {
-         productId, userId, productName, plan, period, price
+        productId, userId, productName, plan, type, period, price, placement
       }
     });
 
     const message = "You have new submission for Boost Ad";
-    const type = 'Boosted Ad';
+    const typeOfNotification = 'Boosted Ad';
     await prisma.notification.create({
       data: {
-        userId, message, type,
+        senderId: userId, message, type: typeOfNotification,
       }
     })
-    res.status(200).json({message: 'Boost Submitted For Reviews'})
+    res.status(200).json({ message: 'Boost Submitted For Reviews' })
   } catch (err: any) {
     console.error('Something went wrong, Failed to submit boosting', err)
-    return res.status(500).json({message: 'Something went wrong, Failed to submit boosting'})
+    return res.status(500).json({ message: 'Something went wrong, Failed to submit boosting' })
   }
 };
 
 //Select sellers Boost adds
 export const fetchBoostAd = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
-  
+
   try {
-    const sellerBoost = await prisma.boostAd.findMany({ where: { userId },
-      select: {
-         id: true, productId: true, productName: true, plan: true, period: true, price: true
-      }
+    const sellerBoost = await prisma.boostAd.findMany({
+      where: { userId },
     });
 
     res.status(200).json(sellerBoost)
   } catch (err: any) {
-    console.error('Something went wrong, Failed to submit boosting', err)
-    return res.status(500).json({message: 'Something went wrong, Failed to submit boosting'})
+    console.error('Something went wrong, Failed to select boosting', err)
+    return res.status(500).json({ message: 'Something went wrong, Failed to select boosting' })
   }
 };
