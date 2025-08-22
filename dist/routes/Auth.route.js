@@ -53,14 +53,14 @@ router.post("/register", async (req, res) => {
                 from: "no-reply@alabamarket.com",
                 to: email,
                 subject: "Verify your email",
-                html: `<p>Your verification code is sent to your main <b>${verificationOTP}</b></p>`,
+                html: `<p>Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
             });
         }
         else if (phone) {
             await twilioClient.messages.create({
                 to: phone,
                 messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-                body: `Your verification code is ${verificationOTP}`,
+                body: `Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.`,
             });
         }
         res.status(201).json({
@@ -99,6 +99,14 @@ router.post("/verify", async (req, res) => {
             where: { id: user.id },
             data: { sign_up_verify: true, otp: null, expiresAt: null },
         });
+        const userDetails = user.email || user.phone;
+        const message = `New member ${userDetails} has been registerd on your platform`;
+        const type = 'User Activity';
+        await prisma.notification.create({
+            data: {
+                senderId: user.id, message, type
+            }
+        });
         res.status(200).json({ message: "Account verified successfully." });
     }
     catch (err) {
@@ -132,14 +140,14 @@ router.post("/login", async (req, res) => {
                 from: "no-reply@alabamarket.com",
                 to: email,
                 subject: "Your login code",
-                html: `<p>Your login code is <b>${loginOtp}</b></p>`,
+                html: `<p>Your AlabaMarket verification code is <b>${loginOtp}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
             });
         }
         else if (phone) {
             await twilioClient.messages.create({
                 to: phone,
                 messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-                body: `Your login code is ${loginOtp}`,
+                body: `Your AlabaMarket verification code is <b>${loginOtp}</b>. Don't share this code with anyone; our employees will never ask for the code.`,
             });
         }
         res.status(200).json({ message: `Login OTP sent to your ${phone} ${email}`, userId: user.id });
@@ -175,6 +183,16 @@ router.post("/login/verify", async (req, res) => {
         await prisma.user.update({
             where: { id: user.id },
             data: { otp: null, expiresAt: null },
+        });
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                profile: {
+                    update: {
+                        lastVisit: new Date()
+                    }
+                }
+            }
         });
         res.status(200).json({ message: 'Login successful', token, userInfo: user });
     }

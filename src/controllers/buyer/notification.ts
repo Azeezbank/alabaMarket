@@ -13,11 +13,11 @@ export const getBuyerallNotifications = async (req: AuthRequest, res: Response) 
 
   try {
     const total = await prisma.notification.count({
-      where: { userId, isActive: true }
+      where: { senderId: userId, isActive: true }
     });
 
     const notifications = await prisma.notification.findMany({
-      where: { userId },
+      where: { senderId: userId },
       select: {
         id: true,
         message: true,
@@ -53,11 +53,11 @@ export const getBuyerReadNotifications = async (req: AuthRequest, res: Response)
 
   try {
     const total = await prisma.notification.count({
-      where: { userId, isActive: true }
+      where: { senderId: userId, isActive: true }
     });
 
     const notifications = await prisma.notification.findMany({
-      where: { userId, isRead: true },
+      where: { senderId: userId, isRead: true },
       select: {
         id: true,
         message: true,
@@ -94,11 +94,11 @@ export const getBuyerUnReadNotifications = async (req: AuthRequest, res: Respons
 
   try {
     const total = await prisma.notification.count({
-      where: { userId, isActive: true }
+      where: { senderId: userId, isActive: true }
     });
 
     const notifications = await prisma.notification.findMany({
-      where: { userId, isRead: false },
+      where: { senderId: userId, isRead: false },
       select: {
         id: true,
         message: true,

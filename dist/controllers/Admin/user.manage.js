@@ -1,4 +1,148 @@
 import prisma from "../../prisma.client.js";
+import { Resend } from "resend";
+import bcrypt from "bcryptjs";
+// Resend setup
+const resend = new Resend(process.env.RESEND_API_KEY);
+//Select all admins
+export const AllAdmin = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    try {
+        const admin = await prisma.profile.findMany({ where: { role: 'Admin' },
+            select: {
+                id: true, name: true, rank: true, status: true, lastVisit: true
+            },
+            skip,
+            take: limit
+        });
+        res.status(200).json(admin);
+    }
+    catch (err) {
+        console.error('Failed to select admin', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to select admins' });
+    }
+};
+//Fetch total numbers of users
+export const getUsers = async (req, res) => {
+    try {
+        const usersNo = await prisma.user.count();
+        res.status(200).json(usersNo);
+    }
+    catch (err) {
+        console.log('Failed to count users', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to count users' });
+    }
+};
+//Get total number of shops
+export const getShops = async (req, res) => {
+    try {
+        const stores = await prisma.sellerShop.count();
+        res.status(200).json(stores);
+    }
+    catch (err) {
+        console.log('Failed to count stores', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to count Stores' });
+    }
+};
+//Get all active listingd
+export const getActiveListing = async (req, res) => {
+    try {
+        const listings = await prisma.product.count({ where: { isActive: true } });
+        res.status(200).json(listings);
+    }
+    catch (err) {
+        console.log('Failed to count active listing', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to count active listing' });
+    }
+};
+//Fetch activities for admin
+export const activities = async (req, res) => {
+    try {
+        const activities = await prisma.activities.findMany({
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        res.status(200).json(activities);
+    }
+    catch (err) {
+        console.error('Something went wrong, failed to fetch activities', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to fetch activities' });
+    }
+};
+//Add new admin
+export const newadmin = async (req, res) => {
+    const userId = req.user?.id;
+    const { email, password, name, status, rank } = req.body;
+    try {
+        //Check if user already axist
+        const isExist = await prisma.user.findUnique({ where: { email } });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        if (!isExist) {
+            await prisma.user.create({
+                data: {
+                    email, password: hashedPassword,
+                    profile: {
+                        create: {
+                            name, role: 'Admin', rank, status
+                        }
+                    }
+                }
+            });
+            await resend.emails.send({
+                from: "no-reply@alabamarket.com",
+                to: email,
+                subject: "New Invite",
+                html: `<p>You have been invited to be one of the admin at Alabamarket, please <a href="www.alabamarket.com">Click Here</a> sign in now and update your password, <br/>
+        Your Login details: <br/>
+        Email: <b>${email} <br/>
+        Password: <b>${password}</b> <br/>
+        Please Ignore if this mail is not for you.</p>`
+            });
+            res.status(200).json({ message: 'New admin invited successfully' });
+        }
+        if (isExist) {
+            // upgrade to admin if user already exist
+            await prisma.user.update({ where: { email },
+                data: {
+                    profile: {
+                        update: {
+                            role: 'Admin', rank
+                        }
+                    }
+                }
+            });
+            await resend.emails.send({
+                from: "no-reply@alabamarket.com",
+                to: email,
+                subject: "New Invite",
+                html: `<p>You have been invited to be one of the admin at Alabamarket, and your new role is ${rank} </p>`
+            });
+            const message = 'New user has been invited to be an admin';
+            const type = 'User Activity';
+            await prisma.notification.create({
+                data: {
+                    senderId: userId, message, type
+                }
+            });
+            res.status(200).json({ message: 'New admin added successfully' });
+        }
+    }
+    catch (err) {
+        console.error('Something went wrong, failed to add new admin', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to add or upgrade user new admin' });
+    }
+};
 //Fetch all buyers
 export const GetBuyers = async (req, res) => {
     try {
@@ -148,7 +292,7 @@ export const UpdateSellers = async (req, res) => {
 export const SellerRating = async (req, res) => {
     const sellerId = req.params.sellerId;
     try {
-        const ration = await prisma.sellerRating.findMany({ where: { userId: sellerId },
+        const rating = await prisma.sellerRating.findMany({ where: { userId: sellerId },
             include: {
                 customer: {
                     select: {
@@ -163,6 +307,7 @@ export const SellerRating = async (req, res) => {
                 }
             }
         });
+        res.status(200).json(rating);
     }
     catch (err) {
         console.error('Failed to select sellers rating', err);
@@ -193,28 +338,10 @@ export const StoreActivities = async (req, res) => {
         console.log('Failed to select shop activities');
     }
 };
-//Reject listing and create notification
-export const createNotification = async (req, res) => {
-    const sellerId = req.params.sellerId;
-    const userId = req.user?.id;
-    const { message, type } = req.body;
-    try {
-        await prisma.notification.create({
-            data: {
-                userId, message, receiverId: sellerId, type
-            }
-        });
-        res.status(201).json({ message: 'Notification created sucessfully' });
-    }
-    catch (err) {
-        console.error('Failed to create reject listing notification', err);
-        return res.status(500).json({ message: 'Failed to create reject listing notification' });
-    }
-};
 // Update user role
-export const updateUserRoleToSeller = async (req, res) => {
+export const updateUserRole = async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, role } = req.body;
         if (!email) {
             return res.status(400).json({ message: 'Email is required' });
         }
@@ -222,10 +349,7 @@ export const updateUserRoleToSeller = async (req, res) => {
             where: { email },
             data: {
                 profile: {
-                    upsert: {
-                        create: { role: 'Seller' },
-                        update: { role: 'Seller' },
-                    }
+                    update: { role },
                 }
             },
         });
@@ -236,5 +360,112 @@ export const updateUserRoleToSeller = async (req, res) => {
     catch (err) {
         console.error('Internal server error', err);
         res.status(500).json({ message: 'Internal server error' });
+    }
+};
+//Send Payment reminder
+export const paymentReminder = async (req, res) => {
+    const message = req.body.message;
+    const userId = req.user?.id;
+    const receiverId = req.params.receiverId;
+    const type = 'Campaign and ads';
+    try {
+        await prisma.notification.create({
+            data: {
+                senderId: userId, message, receiverId, type
+            }
+        });
+        res.status(200).json({ message: 'Payment notification sent successfully' });
+    }
+    catch (err) {
+        console.error('Something went wrong, Failed to create notification', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to create notification' });
+    }
+};
+// Select all manage roles
+export const adminRoleManagement = async (req, res) => {
+    try {
+        const admins = await prisma.roleMgt.findMany({
+            select: {
+                id: true, roleName: true, description: true, number_of_user: true, permissions: true, createdAt: true
+            }
+        });
+        res.status(200).json(admins);
+    }
+    catch (err) {
+        console.error('Failed to select admins', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to select admins' });
+    }
+};
+//create new row
+export const newRole = async (req, res) => {
+    const { roleName, description } = req.body;
+    try {
+        await prisma.roleMgt.create({
+            data: {
+                roleName, description
+            }
+        });
+        res.status(201).json({ message: 'New role created successfully' });
+    }
+    catch (err) {
+        console.error('Failed to create new role', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to create new admin role' });
+    }
+};
+// Edit admin role
+export const editRole = async (req, res) => {
+    const { roleName } = req.body;
+    const roleId = req.params.roleId;
+    try {
+        await prisma.roleMgt.update({ where: { id: roleId },
+            data: {
+                roleName
+            }
+        });
+        res.status(200).json({ message: 'Role updated successfully' });
+    }
+    catch (err) {
+        console.error('failed to update role', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to update admin role' });
+    }
+};
+//suspend admin accout
+export const suspendAdmin = async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        await prisma.user.update({ where: { id: userId },
+            data: {
+                profile: {
+                    update: {
+                        status: 'Inactive'
+                    }
+                }
+            }
+        });
+        res.status(200).json({ message: 'admin suspended successfully' });
+    }
+    catch (err) {
+        console.error('failed to suspend admin', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to suspend admin' });
+    }
+};
+//Reactivate admin access
+export const reactivateAdminAccess = async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        await prisma.user.update({ where: { id: userId },
+            data: {
+                profile: {
+                    update: {
+                        status: 'Active'
+                    }
+                }
+            }
+        });
+        res.status(200).json({ message: 'admin activated successfully' });
+    }
+    catch (err) {
+        console.error('failed to reactivate admin', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to reactivate admin access' });
     }
 };

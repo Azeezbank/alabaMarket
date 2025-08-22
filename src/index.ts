@@ -2,7 +2,6 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
-import logout from './routes/Logout.js';
 import auth from './routes/Auth.route.js';
 import seller from './routes/Seller.route.js';
 import bodyParser from "body-parser";
@@ -47,9 +46,6 @@ app.use('/api/buyer', buyer);
 
 //Messages
 app.use('/api/chat', chat)
-
-//Logout route
-app.use('/api/logout', logout)
 
 
 //Socket.io for chat and video supporting WebRTC

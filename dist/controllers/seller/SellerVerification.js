@@ -2,7 +2,6 @@ import prisma from "../../prisma.client.js";
 import { imagekit } from '../../service/Imagekit.js';
 export const SellerVerification = async (req, res) => {
     const userId = req.user?.id;
-    // const terms = req.body.terms === 'true' ? true : false; // Convert terms to boolean
     try {
         if (!req.files) {
             console.error("No file uploaded");
@@ -37,6 +36,7 @@ export const SellerVerification = async (req, res) => {
         return res.status(500).json({ message: "Failed to upload files" });
     }
 };
+//Update seller verification
 export const updateVerificationIdCard = async (req, res) => {
     const userid = req.user?.id;
     try {

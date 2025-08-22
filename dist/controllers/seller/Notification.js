@@ -1,4 +1,5 @@
 import prisma from "../../prisma.client.js";
+//fetch all notification
 export const getNotifications = async (req, res) => {
     const receiverId = req.user?.id;
     const page = parseInt(req.query.page) || 1;
@@ -42,5 +43,133 @@ export const getNotifications = async (req, res) => {
     catch (error) {
         console.error("Error fetching notifications:", error);
         res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+};
+//Fetch notification where type is Listings
+export const listingNotification = async (req, res) => {
+    const receiverId = req.user?.id;
+    const type = 'Listing updates';
+    try {
+        const listingNotification = await prisma.notification.findMany({
+            where: { receiverId, type },
+            select: {
+                id: true,
+                message: true,
+                type: true,
+                isRead: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        res.status(200).json(listingNotification);
+    }
+    catch (err) {
+        console.error('Something went wrong, Failed to select listing notification');
+    }
+};
+//Fetch notification where type is video calls
+export const videoNotification = async (req, res) => {
+    const receiverId = req.user?.id;
+    const type = 'Video calls';
+    try {
+        const videoNotification = await prisma.notification.findMany({
+            where: { receiverId, type },
+            select: {
+                id: true,
+                message: true,
+                type: true,
+                isRead: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        res.status(200).json(videoNotification);
+    }
+    catch (err) {
+        console.error('Something went wrong, Failed to select listing notification');
+    }
+};
+//Fetch notification where type is performance/Boosted ads
+export const adNotification = async (req, res) => {
+    const receiverId = req.user?.id;
+    const type = 'Boosted ad';
+    try {
+        const adNotification = await prisma.notification.findMany({
+            where: { receiverId, type },
+            select: {
+                id: true,
+                message: true,
+                type: true,
+                isRead: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        res.status(200).json(adNotification);
+    }
+    catch (err) {
+        console.error('Something went wrong, Failed to select listing notification');
+    }
+};
+//Fetch notification where type is Review and ratings
+export const reviewNotification = async (req, res) => {
+    const receiverId = req.user?.id;
+    const type = 'Review and ratings';
+    try {
+        const reviewNotification = await prisma.notification.findMany({
+            where: { receiverId, type },
+            select: {
+                id: true,
+                message: true,
+                type: true,
+                isRead: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        res.status(200).json(reviewNotification);
+    }
+    catch (err) {
+        console.error('Something went wrong, Failed to select listing notification');
     }
 };

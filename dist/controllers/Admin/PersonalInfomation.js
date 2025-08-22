@@ -1,14 +1,26 @@
 import prisma from "../../prisma.client.js";
 import bcrypt from 'bcryptjs';
+import { imagekit } from '../../service/Imagekit.js';
+//Updare personal infomation
 export const UpdateInfo = async (req, res) => {
     const userId = req.user?.id;
     const { name, email, phoneNumber, role } = req.body;
     try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        // Upload file buffer to ImageKit
+        const result = await imagekit.upload({
+            file: req.file.buffer,
+            fileName: req.file.originalname,
+            folder: "/uploads/admin",
+        });
         await prisma.user.update({ where: { id: userId }, data: {
                 email: email, phone: phoneNumber,
                 profile: {
                     update: {
                         name: name,
+                        profile_pic: result.url,
                         role: role
                     }
                 }
@@ -29,7 +41,7 @@ export const ChangePassword = async (req, res) => {
             console.log('Password mismatched, caanot update password');
             return res.status(400).json({ message: 'new password must tally with confirmed password' });
         }
-        const user = await prisma.user.findFirst({ where: { id: userId }, select: { password: true } });
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { password: true } });
         if (!user) {
             return res.status(404).json({ message: 'No user found' });
         }

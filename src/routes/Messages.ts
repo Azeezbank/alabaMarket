@@ -1,8 +1,8 @@
 import express from 'express';
 import { Response, Request } from "express";
 import { Server, Socket } from "socket.io";
-import prisma from "../prisma.client";
-import { authenticate, AuthRequest } from "../middlewares/auth.middleware";
+import prisma from "../prisma.client.js";
+import { authenticate, AuthRequest } from "../middlewares/auth.middleware.js";
 const router = express.Router();
 
 // Track connected users (userId -> socketId)

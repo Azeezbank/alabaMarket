@@ -60,7 +60,7 @@ export const getShopdetails = async (req, res) => {
 // Update shop details
 export const updateShopDetails = async (req, res) => {
     const userId = req.user?.id;
-    const { logo, storeName, storeAddress, storeEmail, phoneNumber } = req.body;
+    const { storeOwner, storeName, storeAddress, storeEmail, phoneNumber } = req.body;
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No file uploaded" });
@@ -74,17 +74,15 @@ export const updateShopDetails = async (req, res) => {
         const updatedStore = await prisma.sellerShop.update({
             where: { userId: userId },
             data: {
-                logo,
+                logo: result.url,
                 storeName,
                 storeAddress,
                 storeEmail,
-                phoneNumber
-            },
-            include: {
+                phoneNumber,
                 user: {
-                    include: {
+                    update: {
                         profile: {
-                            select: { name: true }
+                            update: { name: storeOwner }
                         }
                     }
                 }
