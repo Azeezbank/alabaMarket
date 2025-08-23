@@ -236,4 +236,102 @@ router.post("/login/verify", async (req, res) => {
   }
 });
 
+//Resend otp for registration
+router.post("/resend-otp-register", async (req, res) => {
+  const { email, phone } = req.body;
+
+  if (!email && !phone) {
+    return res.status(400).json({ message: "Email or phone required" });
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: { OR: [{ email: email || undefined }, { phone: phone || undefined }] },
+    });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Only allow resend if user is NOT verified
+    if (user.sign_up_verify) {
+      return res.status(400).json({ message: "User already verified" });
+    }
+
+    const newOtp = generateOtp();
+    const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { otp: newOtp, expiresAt: otpExpiresAt },
+    });
+
+    if (email) {
+      await resend.emails.send({
+        from: "no-reply@alabamarket.com",
+        to: email,
+        subject: "Verify your email",
+        html: `<p>Your AlabaMarket verification code is <b>${newOtp}</b>. Don't share this code with anyone; our employees will never ask for it.</p>`,
+      });
+    } else if (phone) {
+      await twilioClient.messages.create({
+        to: phone,
+        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID!,
+        body: `Your AlabaMarket verification code is ${newOtp}. Don't share this code with anyone; our employees will never ask for it.`,
+      });
+    }
+
+    res.status(200).json({ message: `New verification OTP sent to your ${phone || email}` });
+  } catch (err) {
+    console.error("Resend OTP Register failed", err);
+    return res.status(500).json({ message: "Resend OTP failed" });
+  }
+});
+
+//Resend otp for login
+router.post("/resend/login/otp", async (req, res) => {
+  const { email, phone } = req.body;
+
+  if (!email && !phone) {
+    return res.status(400).json({ message: "Email or phone required" });
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: { OR: [{ email: email || undefined }, { phone: phone || undefined }] },
+    });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.sign_up_verify) {
+      return res.status(403).json({ message: "User not verified" });
+    }
+
+    const newOtp = generateOtp();
+    const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { otp: newOtp, expiresAt: otpExpiresAt },
+    });
+
+    if (email) {
+      await resend.emails.send({
+        from: "no-reply@alabamarket.com",
+        to: email,
+        subject: "Your new login code",
+        html: `<p>Your new AlabaMarket verification code is <b>${newOtp}</b>. Don't share this code with anyone; our employees will never ask for it.</p>`,
+      });
+    } else if (phone) {
+      await twilioClient.messages.create({
+        to: phone,
+        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID!,
+        body: `Your new AlabaMarket verification code is ${newOtp}. Don't share this code with anyone; our employees will never ask for it.`,
+      });
+    }
+
+    res.status(200).json({ message: `New OTP sent to your ${phone || email}` });
+  } catch (err) {
+    console.error("Resend OTP failed", err);
+    return res.status(500).json({ message: "Resend OTP failed" });
+  }
+});
+
+
 export default router;

@@ -355,6 +355,8 @@
  *   post:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Create product details
  *     parameters:
  *       - name: shopId
@@ -391,6 +393,8 @@
  *   put:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Update product pricing
  *     parameters:
  *       - name: productId
@@ -573,6 +577,8 @@
  *   put:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Update product promotion
  *     parameters:
  *       - name: productId
@@ -602,6 +608,8 @@
  *   get:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Fetch all seller listings
  *     parameters:
  *       - name: page
@@ -705,6 +713,8 @@
  *   delete:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Delete product or listing
  *     parameters:
  *       - name: productId
@@ -729,6 +739,8 @@
  *   put:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Pause or unpause a product listing
  *     parameters:
  *       - name: productId
@@ -753,6 +765,8 @@
  *   get:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Select active listings
  *     responses:
  *       200:
@@ -767,6 +781,8 @@
  *   get:
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     summary: Select all paid boost plans
  *     responses:
  *       200:
@@ -783,6 +799,8 @@
  *     summary: Get boost plan details
  *     tags:
  *       - Seller's Listing
+ *     security:
+ *       - bearerAuth: []
  *     description: Retrieve details of a specific boost plan by providing the plan name in the request body.
  *     requestBody:
  *       required: true
@@ -808,6 +826,8 @@
  *     tags:
  *       - Seller's Listing
  *     summary: Boost a product ad
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: productId
  *         in: path

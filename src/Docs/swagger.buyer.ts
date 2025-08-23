@@ -582,7 +582,7 @@
 
 /**
  * @swagger
- * /api/buyer/report/liating/{productId}:
+ * /api/buyer/report/listing/{productId}:
  *   post:
  *     summary: Create a product report
  *     tags: [Buyer Listings]
