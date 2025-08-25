@@ -759,21 +759,6 @@
  *         description: Failed to update product listing pause status
  */
 
-/**
- * @swagger
- * /api/seller/active/listing:
- *   get:
- *     tags:
- *       - Seller's Listing
- *     security:
- *       - bearerAuth: []
- *     summary: Select active listings
- *     responses:
- *       200:
- *         description: Active product listings
- *       500:
- *         description: Something went wrong
- */
 
 /**
  * @swagger

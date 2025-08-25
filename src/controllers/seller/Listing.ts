@@ -3,7 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import prisma from '../../prisma.client.js';
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { imagekit } from '../../service/Imagekit.js';
-import { Param } from "@prisma/client/runtime/library.js";
+import redis from '../../config/redisClient.js';
 
 
 //Create product details
@@ -80,13 +80,34 @@ export const productPricing = async (req: AuthRequest, res: Response) => {
 
 //fetch all category 
 export const allproductCategory = async (req: AuthRequest, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page -1) * limit;
+
+  const cachedKey = `category:page=${page}:limit=${limit}`;
   try {
+    const total = await prisma.category.count();
+    const cachedData = await redis.get(cachedKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedKey));
+    }
+
     const category = await prisma.category.findMany({
       select: {
         id: true, name: true
-      }
+      },
+      orderBy: { createdAt: 'desc'},
+      skip,
+      take: limit
     })
-    res.status(200).json(category)
+
+    const responseData = {
+      total, page, limit, totalPages: Math.ceil(total / limit ), category
+    }
+
+    await redis.set(cachedKey, JSON.stringify(responseData), "EX", 300);
+
+    res.status(200).json(responseData)
   } catch (err: any) {
     console.error('Failed to select category', err)
     return res.status(500).json({ message: 'Something went wrong, failed to select product category' })
@@ -335,19 +356,25 @@ export const PauseSellerListing = async (req: AuthRequest, res: Response) => {
   }
 };
 
-//Select Active listing
-export const activeListing = async (req: AuthRequest, res: Response) => {
-  try {
-    const activeListing = await prisma.product.findMany({
-      where: { isActive: true }
-    })
+// //Select Active listing
+// export const activeListing = async (req: AuthRequest, res: Response) => {
+//   const page = parseInt(req.query.page as string) || 1;
+//   const limit = parseInt(req.query.limit as string) || 10;
+//   const skip = (page - 1) * limit;
 
-    res.status(200).json(activeListing)
-  } catch (err: any) {
-    console.error('Something went wrong, Failed to select active listen', err)
-    return res.status(500).json({ message: 'Something went wrong' })
-  }
-};
+//   const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
+
+//   try {
+//     const activeListing = await prisma.product.findMany({
+//       where: { isActive: true }
+//     })
+
+//     res.status(200).json(activeListing)
+//   } catch (err: any) {
+//     console.error('Something went wrong, Failed to select active listen', err)
+//     return res.status(500).json({ message: 'Something went wrong' })
+//   }
+// };
 
 //Selct all boost plan
 export const BoostPlans = async (req: AuthRequest, res: Response) => {

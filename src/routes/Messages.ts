@@ -3,6 +3,10 @@ import { Response, Request } from "express";
 import { Server, Socket } from "socket.io";
 import prisma from "../prisma.client.js";
 import { authenticate, AuthRequest } from "../middlewares/auth.middleware.js";
+import { upload } from "../middlewares/upload.multer.js";
+import { imagekit } from '../service/Imagekit.js';
+import { JwtPayload } from 'jsonwebtoken';
+
 const router = express.Router();
 
 // Track connected users (userId -> socketId)
@@ -155,5 +159,38 @@ router.get('/:senderId/:receiverId', authenticate, async (req: AuthRequest, res:
     return res.status(500).json({ message: 'Something went wrong, Failed to select messages' })
   }
 });
+
+// Audio recording
+router.post('/audio/record/:receiverId', authenticate, upload.single("file"), async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
+  const receiverId = req.params.receiverId as string;
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    let extension = req.file.mimetype.split("/")[1];
+    if (extension === "mpeg") extension = "mp3";
+    const fileName = `voice_${Date.now()}.${extension}`;
+
+    const result = await imagekit.upload({
+      file: req.file.buffer, // actual file buffer
+      fileName, // give unique name
+      folder: "/voice_notes" // optional folder
+    });
+  
+    await prisma.chat.create({
+      data: {
+        senderId: userId, receiverId, content: result.url
+      }
+    })
+
+    // Save result.url to DB in message
+    res.json({ message: 'Recording sent successfully', audioUrl: result.url });
+  } catch (error: any) {
+    console.error("Voice upload error:", error);
+    return res.status(500).json({ message: 'Failed to send voice record', error });
+  }
+})
 
 export default router;

@@ -47,6 +47,7 @@ model Profile {
   role        ProfileRole @default(Buyer)
   rank        String?
   status      String?
+  googleId    String?
   isVerified  Boolean     @default(false)
   lastVisit   DateTime?   @default(now())
 }

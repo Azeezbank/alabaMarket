@@ -2,44 +2,65 @@ import { Response, Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../prisma.client.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
+import redis from "../../config/redisClient.js";
 
 
 //fetch all active products including the seller's store details
-export const storeFetchActiveSellerListings = async (req: AuthRequest, res: Response) => {
+// export const storeFetchActiveSellerListings = async (req: AuthRequest, res: Response) => {
 
-  // Parse pagination query params with defaults
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const skip = (page - 1) * limit;
+//   // Parse pagination query params with defaults
+//   const page = parseInt(req.query.page as string) || 1;
+//   const limit = parseInt(req.query.limit as string) || 10;
+//   const skip = (page - 1) * limit;
 
-  try {
-    // Get total count
-    const total = await prisma.product.count({ where: { isActive: true } });
+//   const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
 
-    // Fetch paginated products
-    const products = await prisma.product.findMany({
-      where: {
-        isActive: true // Only active listing
-      },
-      include: {
-        productPhoto: true,
-        productVideo: true,
-        productPricing: true,
-        _count: {
-          select: { likes: true, love: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit
-    });
+//   try {
+//     const today = new Date();
+    
+//     // Get total count
+//     const total = await prisma.product.count({ where: { isActive: true } });
 
-    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
-  } catch (err: any) {
-    console.error("Error fetching product listings:", err);
-    res.status(500).json({ message: "Failed to fetch product listings" });
-  }
-};
+//     // 1️ Check Redis cache first
+//     const cachedData = await redis.get(cacheKey);
+//     if (cachedData) {
+//       return res.status(200).json(JSON.parse(cachedData));
+//     }
+
+//     // Fetch paginated products
+//     const products = await prisma.product.findMany({
+//       where: {
+//         isActive: true // Only active listing
+//       },
+//       include: {
+//         productPhoto: true,
+//         productVideo: true,
+//         productPricing: true,
+//         _count: {
+//           select: { likes: true, love: true }
+//         }
+//       },
+//       orderBy: { createdAt: 'desc' },
+//       skip,
+//       take: limit
+//     });
+
+//     const responseData = {
+//       page,
+//       limit,
+//       total,
+//       totalPages: Math.ceil(total / limit),
+//       products,
+//     };
+
+//     await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
+//     res.status(200).json(responseData);
+//   } catch (err: any) {
+//     console.error("Error fetching product listings:", err);
+//     res.status(500).json({ message: "Failed to fetch product listings" });
+//   }
+// };
 
 //Filter listing by name/popular search
 export const filterpopularListings = async (req: AuthRequest, res: Response) => {
@@ -50,9 +71,16 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
+  const cacheKey = `popular_listings:page=${page}:limit=${limit}`;
   try {
     // Get total count
     const total = await prisma.product.count({ where: { name } });
+
+    // 1️ Check Redis cache first
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
@@ -69,7 +97,17 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
       take: limit
     });
 
-    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
+    const responseData = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      products,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
+    res.status(200).json(responseData);
   } catch (err: any) {
     console.error("Error fetching product listings:", err);
     res.status(500).json({ message: "Failed to fetch product listings" });
@@ -86,7 +124,14 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
+const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
   try {
+    // 1️ Check Redis cache first
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
     // Get total count
     const total = await prisma.product.count({
       where: {
@@ -119,7 +164,17 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
       take: limit
     });
 
-    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
+    const responseData = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      products,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
+    res.status(200).json(responseData);
   } catch (err: any) {
     console.error("Error fetching product listings:", err);
     res.status(500).json({ message: "Failed to fetch product listings" });
@@ -221,37 +276,37 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
 };
 
 
-//fetch all products active or no active
-export const FetchAllSellerListings = async (req: AuthRequest, res: Response) => {
+// //fetch all products active or no active
+// export const FetchAllSellerListings = async (req: AuthRequest, res: Response) => {
 
-  // Parse pagination query params with defaults
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const skip = (page - 1) * limit;
+//   // Parse pagination query params with defaults
+//   const page = parseInt(req.query.page as string) || 1;
+//   const limit = parseInt(req.query.limit as string) || 10;
+//   const skip = (page - 1) * limit;
 
-  try {
-    // Get total count
-    const total = await prisma.product.count();
+//   try {
+//     // Get total count
+//     const total = await prisma.product.count();
 
-    // Fetch paginated products
-    const products = await prisma.product.findMany({
-      where: { isActive: true },
-      include: {
-        productPhoto: true,
-        productVideo: true,
-        productPricing: true
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit
-    });
+//     // Fetch paginated products
+//     const products = await prisma.product.findMany({
+//       where: { isActive: true },
+//       include: {
+//         productPhoto: true,
+//         productVideo: true,
+//         productPricing: true
+//       },
+//       orderBy: { createdAt: 'desc' },
+//       skip,
+//       take: limit
+//     });
 
-    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
-  } catch (err: any) {
-    console.error("Error fetching product listings:", err);
-    res.status(500).json({ message: "Failed to fetch product listings" });
-  }
-};
+//     res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
+//   } catch (err: any) {
+//     console.error("Error fetching product listings:", err);
+//     res.status(500).json({ message: "Failed to fetch product listings" });
+//   }
+// };
 
 //Fetch listing from verified seller
 export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response) => {
@@ -261,9 +316,17 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
+  const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
+
   try {
     // Get total count
     const total = await prisma.product.count({ where: { isActive: true, user: { sellerVerification: { isVerified: true } } } });
+
+    // 1️ Check Redis cache first
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
@@ -278,7 +341,17 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
       take: limit
     });
 
-    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
+    const responseData = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      products,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
+    res.status(200).json(responseData);
   } catch (err: any) {
     console.error("Error fetching product listings:", err);
     res.status(500).json({ message: "Failed to fetch product listings" });
@@ -432,18 +505,17 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
   const skip = (page - 1) * limit;
 
   try {
-    const savedProductId = await prisma.savedProducts.findMany({
+      // Get total count for pagination
+    const total = await prisma.savedProducts.count({
       where: { userId },
-      select: { productId: true }
     });
 
-    const ids = savedProductId.map((s: { productId: string }) => s.productId);
-    const total = await prisma.savedProducts.count({ where: { userId } });
-
-    const products = await prisma.product.findMany({
-      where: { id: { in: ids } },
+    const savedProduct = await prisma.savedProducts.findMany({
+      where: { userId },
       include: {
-        productPhoto: true,
+        product: {
+          include: {
+            productPhoto: true,
         productVideo: true,
         productPricing: true,
         user: {
@@ -457,22 +529,38 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
             }
           }
         }
+          }
+        }
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'desc'},
       skip,
       take: limit
     });
 
-    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
+
+    res.status(200).json({ page, limit, total, data: savedProduct });
   } catch (err: any) {
     console.error('Failed to select saved products', err)
     return res.status(500).json({ message: 'Something went wrong, Failed to select saved products' })
   }
 };
 
-//Select only non expire boosted listing
-export const getActiveBoostAds = async (req: Request, res: Response) => {
+//Select only non expire, active free and paid boosted listing
+export const getActiveListing = async (req: Request, res: Response) => {
+  // Parse pagination query params with defaults
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+
+  const cacheKey = `active_listings:page=${page}:limit=${limit}`;
   try {
+
+       // 1️ Check Redis cache first
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const today = new Date();
 
     const activeBoosts = await prisma.boostAd.findMany({
@@ -481,8 +569,19 @@ export const getActiveBoostAds = async (req: Request, res: Response) => {
           gte: today, // not expired yet
         },
         status: "Active", // optional: only approved ones
+        product: {
+    status: "Approved",              // only active products
+  },
       },
       include: {
+        product: {
+        include: {
+        productPhoto: true,
+        productVideo: true,
+        productPricing: true,
+        _count: {
+          select: { likes: true, love: true },
+        },
         user: {
           select: {
             id: true,
@@ -490,10 +589,23 @@ export const getActiveBoostAds = async (req: Request, res: Response) => {
           },
         },
       },
+      },
+      },
       orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit
     });
 
-    res.status(200).json(activeBoosts);
+    const responseData = {
+      page,
+      limit,
+      total: activeBoosts.length,
+      activeBoosts,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
+    res.status(200).json(responseData);
   } catch (err: any) {
     console.error("Failed to fetch active boost ads", err);
     res.status(500).json({ message: "Something went wrong" });

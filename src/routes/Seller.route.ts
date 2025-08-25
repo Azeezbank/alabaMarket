@@ -4,7 +4,7 @@ import { createShop, getShopdetails, updateShopDetails, updateShopStatus, delete
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { SellerVerification, updateVerificationIdCard } from "../controllers/seller/SellerVerification.js";
 import { productDetails, productPricing, updateProductcategory, productPromotion, FetchSellerListings, 
-    EditSellerListing, DeleteSellerListing, PauseSellerListing, activeListing, BoostPlans, 
+    EditSellerListing, DeleteSellerListing, PauseSellerListing, BoostPlans, 
     boostDetails, createBoostAd, fetchBoostAd, allproductCategory, productSubCategory } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
 import { getNotifications } from '../controllers/seller/Notification.js';
@@ -23,7 +23,7 @@ router.get('/listing/category', authenticate, allproductCategory);
 router.put('/update/product/pricing', authenticate, productPricing);
 router.put("/update/shop", authenticate, upload.single('file'), updateShopDetails);
 router.get("/seller/listing", authenticate, FetchSellerListings);
-router.get('/active/listing', authenticate, activeListing);
+// router.get('/active/listing', authenticate, activeListing);
 router.get('/boost/plans', authenticate, BoostPlans);
 router.post('/boost/ads', authenticate, createBoostAd);
 router.post('/boost/plan/details', authenticate, boostDetails);

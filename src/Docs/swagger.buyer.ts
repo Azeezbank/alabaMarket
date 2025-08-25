@@ -309,31 +309,6 @@
  *                   example: Something went wrong, Failed to get rating distribution
  */
 
-/**
- * @swagger
- * /api/buyer/active/seller/listing:
- *   get:
- *     summary: Fetch all active products including seller details
- *     tags: [Buyer Listings]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: Page number for pagination
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: Number of items per page
- *     responses:
- *       200:
- *         description: Active products fetched successfully
- *       500:
- *         description: Failed to fetch product listings
- */
 
 /**
  * @swagger
@@ -453,30 +428,6 @@
  *     responses:
  *       200:
  *         description: Products fetched successfully above price
- *       500:
- *         description: Failed to fetch product listings
- */
-
-/**
- * @swagger
- * /api/buyer/all/listing:
- *   get:
- *     summary: Fetch all active products (all sellers)
- *     tags: [Buyer Listings]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: All products fetched successfully
  *       500:
  *         description: Failed to fetch product listings
  */
@@ -659,50 +610,113 @@
 
 /**
  * @swagger
- * /api/buyer/all/active/boosted/listing:
+ * /api/buyer/all/active/listing:
  *   get:
- *     summary: Get all active boosted listings
- *     description: Retrieve all boosted ads that have not yet expired and are marked as Active.
- *     tags: [Buyer Listings]
- *     security:
- *       - bearerAuth: []
+ *     summary: Get active free and paid boosted listings
+ *     description: >
+ *       Fetch all active boosted listings that are not expired.  
+ *       Includes product details, pricing, photos, videos, likes/loves count, and seller profile.  
+ *       Results are cached in Redis for 5 minutes (300 seconds).
+ *     tags:
+ *       - Listings
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of listings per page
  *     responses:
  *       200:
- *         description: Successfully retrieved active boosted ads
+ *         description: Successful response with active boosted listings
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     description: Unique ID of the boost ad
- *                   startDate:
- *                     type: string
- *                     format: date-time
- *                     description: Boost start date
- *                   endDate:
- *                     type: string
- *                     format: date-time
- *                     description: Boost expiration date
- *                   status:
- *                     type: string
- *                     description: Current status of the boost (e.g., Active)
- *                   user:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 total:
+ *                   type: integer
+ *                   example: 25
+ *                 activeBoosts:
+ *                   type: array
+ *                   items:
  *                     type: object
  *                     properties:
  *                       id:
  *                         type: string
- *                         description: User ID who owns the boost
- *                       profile:
+ *                         example: "boost_12345"
+ *                       endDate:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-09-15T23:59:59.000Z"
+ *                       status:
+ *                         type: string
+ *                         example: "Active"
+ *                       product:
  *                         type: object
- *                         description: User profile data
- *       401:
- *         description: Unauthorized - Authentication required
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             example: "prod_12345"
+ *                           status:
+ *                             type: string
+ *                             example: "Approved"
+ *                           productPhoto:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 url:
+ *                                   type: string
+ *                                   example: "https://cdn.example.com/photo1.jpg"
+ *                           productVideo:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 url:
+ *                                   type: string
+ *                                   example: "https://cdn.example.com/video1.mp4"
+ *                           productPricing:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 price:
+ *                                   type: number
+ *                                   example: 49.99
+ *                           _count:
+ *                             type: object
+ *                             properties:
+ *                               likes:
+ *                                 type: integer
+ *                                 example: 15
+ *                               love:
+ *                                 type: integer
+ *                                 example: 3
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                                 example: "user_123"
+ *                               profile:
+ *                                 type: object
+ *                                 additionalProperties: true
  *       500:
- *         description: Something went wrong while fetching boosts
+ *         description: Internal server error
  */
 
 

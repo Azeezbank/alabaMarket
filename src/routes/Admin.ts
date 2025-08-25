@@ -32,7 +32,7 @@ router.get('/seller/verification', authenticate, sellerVerificationReview);
 router.post('/create/ticket', authenticate, createTickets);
 router.get('/tickets', authenticate, getTickets);
 router.get('/all/admin', authenticate, AllAdmin);
-router.get('/total/user', authenticate, getUsers);
+router.get('/total/user/count', authenticate, getUsers);
 router.get('/total/shops', authenticate, getShops);
 router.get('/activities', authenticate, activities);
 router.get('/role/management', authenticate,  adminRoleManagement);
@@ -60,7 +60,7 @@ router.put('/reject/seller/verification/:verificationId', authenticate, rejectSe
 router.delete('/boost/package/:packageId', authenticate, deletePackages);
 router.put('/edit/boost/package/:packageId', authenticate, editBoostPackages);
 router.put('/update/promo/banner/:bannerId', authenticate, updateBanner);
-router.delete('promo/banner/:bannerId', authenticate, deleteBanner);
+router.delete('/promo/banner/:bannerId', authenticate, deleteBanner);
 router.put('/update/boosted/listing/:campaignId', authenticate, updateCampaign);
 router.put('/pause/suspend/boost/:campaignId', authenticate, updateCampaignStatus)
 router.put('/update/category/:categoryId', authenticate, upload.single('file'), updateProductCategories);

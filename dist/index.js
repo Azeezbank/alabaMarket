@@ -12,6 +12,7 @@ import { initializeSocket } from "./routes/Messages.js";
 import chat from './routes/Messages.js';
 import { registerSocketHandlers } from './routes/Video.js';
 import buyer from './routes/Buyer.js';
+import redis from './config/redisClient.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -23,6 +24,11 @@ const PORT = process.env.PORT || 3000;
 setupSwagger(app);
 app.get('/', (req, res) => {
     res.send('Welcome to Alabamarket API');
+});
+app.get("/redis", async (req, res) => {
+    await redis.set("testkey", "Hello Redis!. Hi, I'm connected");
+    const value = await redis.get("testkey");
+    res.send(`Redis value: ${value}`);
 });
 // sign up and verify mail and phone number
 app.use('/api/auth', auth);

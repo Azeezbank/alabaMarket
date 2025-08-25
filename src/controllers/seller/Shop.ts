@@ -3,6 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../prisma.client.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { imagekit } from '../../service/Imagekit.js';
+import redis from "../../config/redisClient.js";
 
 
 export const createShop = async (req: AuthRequest, res: Response) => {
@@ -51,16 +52,36 @@ export const createShop = async (req: AuthRequest, res: Response) => {
 //Fetch shop details
 export const getShopdetails = async (req: AuthRequest, res: Response) => {
     try {
+
+        let cachedStores;
+
+        try {
+            cachedStores = await redis.get("shop_details");
+        } catch (redisErr) {
+            console.warn("Redis unavailable, fetching from DB", redisErr);
+        }
+
+        if (cachedStores) {
+            console.log('Fetched from redis')
+            return res.status(200).json(JSON.parse(cachedStores));
+        }
+
         // Get all stores with owner's name
         const stores = await prisma.sellerShop.findMany({
             include: {
-            user: {
+                user: {
                     select: {
                         email: true,
                     }
                 }
             }
         })
+
+        try {
+            await redis.set("shop_details", JSON.stringify(stores), "EX", 300);
+        } catch (redisErr) {
+            console.warn("Failed to cache in Redis", redisErr);
+        }
 
         res.status(200).json(stores);
     } catch (err: any) {
@@ -75,32 +96,34 @@ export const updateShopDetails = async (req: AuthRequest, res: Response) => {
     const { storeOwner, storeName, storeAddress, storeEmail, phoneNumber } = req.body;
     try {
 
-        if (!req.file) {
-            return res.status(400).json({ message: "No file uploaded" });
+        let logoUrl;
+
+        if (req.file) {
+            // Upload file buffer to ImageKit only if a file is provided
+            const result = await imagekit.upload({
+                file: req.file.buffer,
+                fileName: req.file.originalname,
+                folder: "/uploads/seller_shop",
+            });
+            logoUrl = result.url;
         }
-        // Upload file buffer to ImageKit
-        const result = await imagekit.upload({
-            file: req.file.buffer,
-            fileName: req.file.originalname,
-            folder: "/uploads/seller_shop",
-        });
 
         const updatedStore = await prisma.sellerShop.update({
             where: { userId: userId },
             data: {
-                logo: result.url,
+                ...(logoUrl && { logo: logoUrl }), // only update logo if new file is uploaded
                 storeName,
                 storeAddress,
                 storeEmail,
                 phoneNumber,
                 user: {
                     update: {
-                    profile: {
-                    update: { name: storeOwner }
+                        profile: {
+                            update: { name: storeOwner }
+                        }
+                    }
                 }
             }
-        }
-    }
         });
 
         res.status(200).json({ mesage: "Shop details updated successfully" });
@@ -117,7 +140,7 @@ export const updateShopStatus = async (req: AuthRequest, res: Response) => {
 
     try {
         const shopStatus = await prisma.sellerShop.update({
-            where: { userId,  },
+            where: { userId, },
             data: { isActive }
         });
 

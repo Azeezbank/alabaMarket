@@ -13,7 +13,15 @@ export const upload = multer({
             "video/quicktime", // .mov
             "video/x-msvideo", // .avi
             "video/x-matroska", // .mkv
-            "application/pdf"
+            "application/pdf",
+            // audio
+            "audio/webm", // Chrome/Firefox recording
+            "audio/mpeg", // .mp3
+            "audio/mp3",
+            "audio/wav",
+            "audio/ogg",
+            "audio/mp4", // iOS Safari recording
+            "audio/m4a" // AAC / Apple format
         ];
         if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);

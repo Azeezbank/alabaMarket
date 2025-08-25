@@ -1,5 +1,73 @@
 /**
  * @swagger
+ * /api/chat/audio/record/{receiverId}:
+ *   post:
+ *     summary: Upload and send a voice note
+ *     description: Records and uploads a voice note to ImageKit, saves it as a chat message, and returns the audio URL.
+ *     tags:
+ *       - Chat
+ *     security:
+ *       - bearerAuth: []   # JWT authentication
+ *     parameters:
+ *       - in: path
+ *         name: receiverId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user receiving the voice note
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: The audio file to upload (e.g., webm, mp3, m4a)
+ *     responses:
+ *       201:
+ *         description: Voice note uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Recording sent successfully
+ *                 audioUrl:
+ *                   type: string
+ *                   example: "https://ik.imagekit.io/your_id/voice_notes/voice_172450885.mp3"
+ *       400:
+ *         description: No file uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
+ *       401:
+ *         description: Unauthorized (invalid or missing token)
+ *       500:
+ *         description: Failed to send voice record
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Failed to send voice record
+ */
+
+
+
+/**
+ * @swagger
  * tags:
  *   name: Chat
  *   description: Real-time chat messaging (via Socket.IO) and chat history

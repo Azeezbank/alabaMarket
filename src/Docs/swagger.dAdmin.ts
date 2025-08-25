@@ -253,7 +253,7 @@
 
 /**
  * @swagger
- * /api/admin/category:
+ * /api/admin/create/category:
  *   post:
  *     summary: Create a new product category
  *     description: Allows an admin to create a product category with image and status.
@@ -288,7 +288,7 @@
 
 /**
  * @swagger
- * /api/admin/category/{categoryId}:
+ * /api/admin/update/category/{categoryId}:
  *   put:
  *     summary: Update an existing product category
  *     description: Allows an admin to update a product category’s name, image, and status.
@@ -330,7 +330,7 @@
 
 /**
  * @swagger
- * /api/admin/categories:
+ * /api/admin/all/categories:
  *   get:
  *     summary: Fetch all product categories
  *     description: Retrieve all categories with counts of related subcategories and products.
@@ -346,7 +346,7 @@
 
 /**
  * @swagger
- * /api/admin/subcategories:
+ * /api/admin/all/subcategories:
  *   get:
  *     summary: Fetch all subcategories
  *     description: Retrieve all subcategories with their parent category name and product counts.
@@ -362,7 +362,7 @@
 
 /**
  * @swagger
- * /api/admin/subcategory:
+ * /api/admin/create/subcategory:
  *   post:
  *     summary: Create a new subcategory
  *     description: Allows an admin to create a subcategory under a parent category.
@@ -394,7 +394,7 @@
 
 /**
  * @swagger
- * /api/admin/banners:
+ * /api/admin//promotional/banner/mgt:
  *   get:
  *     summary: Fetch all promotional banners
  *     description: Retrieve all promotional banners with details such as title, placement, uploader, start and end date.
@@ -410,7 +410,7 @@
 
 /**
  * @swagger
- * /api/admin/banner:
+ * /api/admin/create/promo/banner:
  *   post:
  *     summary: Upload a new promotional banner
  *     description: Allows an admin to create a promotional banner with image, title, page, placement, and date range.
@@ -461,7 +461,7 @@
 
 /**
  * @swagger
- * /api/admin/banner/{bannerId}:
+ * /api/admin/update/promo/banner/{bannerId}:
  *   put:
  *     summary: Update an existing promotional banner
  *     description: Allows an admin to update a banner's details and image.
@@ -519,7 +519,7 @@
 
 /**
  * @swagger
- * /api/admin/banner/{bannerId}:
+ * /api/admin/promo/banner/{bannerId}:
  *   delete:
  *     summary: Delete a promotional banner
  *     description: Permanently remove a promotional banner by ID.
@@ -541,7 +541,7 @@
 
 /**
  * @swagger
- * /api/admin/packages:
+ * /api/admin/boost/packages:
  *   get:
  *     summary: Fetch all boost packages
  *     description: Retrieve all boost packages with their details.
@@ -568,7 +568,7 @@
 
 /**
  * @swagger
- * /api/admin/package:
+ * /api/admin/new/boost/packages:
  *   post:
  *     summary: Add a new boost package
  *     description: Allows an admin to add a boost package with multiple duration-price options.
@@ -617,7 +617,7 @@
 
 /**
  * @swagger
- * /api/admin/package/{packageId}:
+ * /api/admin/edit/boost/package/{packageId}:
  *   put:
  *     summary: Edit an existing boost package
  *     description: Allows an admin to update a boost package details and pricing options.
@@ -664,7 +664,7 @@
 
 /**
  * @swagger
- * /api/admin/package/{packageId}:
+ * /api/admin/boost/package/{packageId}:
  *   delete:
  *     summary: Delete a boost package
  *     description: Permanently remove a boost package by ID.
@@ -1003,7 +1003,7 @@
 
 /**
  * @swagger
- * /api/admin/all:
+ * /api/admin/all/admin:
  *   get:
  *     summary: Get all admins (paginated)
  *     tags: [admin]
@@ -1029,7 +1029,7 @@
 
 /**
  * @swagger
- * /api/admin/users/count:
+ * /api/admin/total/user/count:
  *   get:
  *     summary: Get total number of users
  *     tags: [admin]
@@ -1044,7 +1044,7 @@
 
 /**
  * @swagger
- * /api/admin/shops/count:
+ * /api/admin/total/shops:
  *   get:
  *     summary: Get total number of shops
  *     tags: [admin]
@@ -1059,7 +1059,7 @@
 
 /**
  * @swagger
- * /api/admin/listings/active:
+ * /api/admin/total/active/listing:
  *   get:
  *     summary: Get total number of active listings
  *     tags: [admin]
@@ -1089,7 +1089,7 @@
 
 /**
  * @swagger
- * /api/admin/new:
+ * /api/admin/new/admin:
  *   post:
  *     summary: Invite or promote a new admin
  *     tags: [admin]
@@ -1117,7 +1117,7 @@
 
 /**
  * @swagger
- * /api/admin/buyers:
+ * /api/admin/all/users:
  *   get:
  *     summary: Get all buyers
  *     tags: [admin]
@@ -1132,7 +1132,7 @@
 
 /**
  * @swagger
- * /api/admin/sellers:
+ * /api/admin/all/sellers:
  *   get:
  *     summary: Get all sellers
  *     tags: [admin]

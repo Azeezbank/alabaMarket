@@ -26,7 +26,7 @@ router.get('/seller/verification', authenticate, sellerVerificationReview);
 router.post('/create/ticket', authenticate, createTickets);
 router.get('/tickets', authenticate, getTickets);
 router.get('/all/admin', authenticate, AllAdmin);
-router.get('/total/user', authenticate, getUsers);
+router.get('/total/user/count', authenticate, getUsers);
 router.get('/total/shops', authenticate, getShops);
 router.get('/activities', authenticate, activities);
 router.get('/role/management', authenticate, adminRoleManagement);
