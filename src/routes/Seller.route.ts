@@ -3,9 +3,9 @@ import { upload } from "../middlewares/upload.multer.js";
 import { createShop, getShopdetails, updateShopDetails, updateShopStatus, deleteShop } from "../controllers/seller/Shop.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { SellerVerification, updateVerificationIdCard } from "../controllers/seller/SellerVerification.js";
-import { productDetails, productPricing, updateProductcategory, productPromotion, FetchSellerListings, 
+import { productDetails, productPricing, updateProductcategory, FetchSellerListings, 
     EditSellerListing, DeleteSellerListing, PauseSellerListing, BoostPlans, 
-    boostDetails, createBoostAd, fetchBoostAd, allproductCategory, productSubCategory } from '../controllers/seller/Listing.js';
+    boostDetails, upgradeListingBoost, fetchBoostAd, allproductCategory, productSubCategory } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
 import { getNotifications } from '../controllers/seller/Notification.js';
 
@@ -18,19 +18,18 @@ router.post("/update/seller/vefication", authenticate, upload.fields([{ name: "i
 router.put('/listing/pause', authenticate, PauseSellerListing);
 router.get("/notifications", authenticate, getNotifications);
 router.post("/comments", authenticate, createComment);
-router.put('/update/product/promotion', authenticate, productPromotion);
 router.get('/listing/category', authenticate, allproductCategory);
 router.put('/update/product/pricing', authenticate, productPricing);
 router.put("/update/shop", authenticate, upload.single('file'), updateShopDetails);
 router.get("/seller/listing", authenticate, FetchSellerListings);
 // router.get('/active/listing', authenticate, activeListing);
 router.get('/boost/plans', authenticate, BoostPlans);
-router.post('/boost/ads', authenticate, createBoostAd);
 router.post('/boost/plan/details', authenticate, boostDetails);
 router.get('/boost/ads', authenticate, fetchBoostAd);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);
 router.get('/listing/subcategory/:categoryId', authenticate, productSubCategory);
+router.put('/upgrade/boost/listing/:productId', authenticate, upgradeListingBoost);
 router.post('/create/product/:shopId', authenticate, upload.fields([{ name: 'productImage', maxCount: 1}, { name: "productReel", maxCount: 1}]), productDetails);
 router.delete("/delete/listing/:productId", authenticate, DeleteSellerListing);
 router.get("/comments/product/:productId", getCommentsByProduct);

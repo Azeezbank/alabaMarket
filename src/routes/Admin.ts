@@ -7,7 +7,7 @@ import { DeleteUser, UpdateUser, GetBuyers, Getsellers, SellerRating,
 newadmin, UpdateSellers, updateUserRole, paymentReminder,  adminRoleManagement, newRole, editRole,
 suspendAdmin, reactivateAdminAccess } from '../controllers/Admin/user.manage.js';
 import { productCategories, updateProductCategories, getCategories, getSubCategories, createSubCategories } from '../controllers/Admin/productCategory.js';
-import { freeListing, rejectListing, boostCampain, updateCampaign, updateCampaignStatus } from '../controllers/Admin/listing.js';
+import { freeListing, rejectListing, boostCampain, updateCampaign, updateCampaignStatus, approveListing } from '../controllers/Admin/listing.js';
 import { promoBannerMgt, createBanner, updateBanner, deleteBanner, boostPackages, newBoostPackages,
     editBoostPackages, deletePackages } from '../controllers/Admin/PromotionMtg.js'; 
 import { sellerVerificationReview, approveSellerVerification, rejectSellerVerification } from '../controllers/Admin/seller.verification.js';
@@ -17,6 +17,7 @@ const router = express.Router();
 
 router.get('/all/free/listing', authenticate, freeListing);
 router.put('/reject/listing/:productId', authenticate, rejectListing);
+router.put('/approve/listing/:productId', authenticate, approveListing);
 router.get('/boost/campaign/review', authenticate, boostCampain);
 router.put('/edit/info', authenticate, upload.single('file'), UpdateInfo);
 router.put('/change/password', authenticate, ChangePassword);

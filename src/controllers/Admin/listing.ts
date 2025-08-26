@@ -18,17 +18,17 @@ export const freeListing = async (req: AuthRequest, res: Response) => {
                 product: {
                     select: {
                         id: true, name: true, promoted: true, isActive: true, pricingStatus: true, isPause: true, shopId: true, categoryName: true, categoryId: true, subCategoryName: true, subCategoryId: true, status: true,
-                    }
-                },
-                user: {
-                    select: {
-                        profile: {
+                        user: {
                             select: {
-                                name: true, profile_pic: true
+                                profile: {
+                                    select: {
+                                        name: true, profile_pic: true
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                },
             },
             orderBy: { createdAt: 'desc' },
             skip,
@@ -42,6 +42,47 @@ export const freeListing = async (req: AuthRequest, res: Response) => {
     }
 }
 
+//Approve listing
+export const approveListing = async (req: AuthRequest, res: Response) => {
+    const productId = req.params.productId as string;
+    const userId = (req.user as JwtPayload)?.id;
+    try {
+
+        await prisma.product.update({
+            where: { id: productId },
+            data: {
+                status: 'Approved'
+            }
+        })
+
+        //Find product owner
+        const owner = await prisma.product.findUnique({
+            where: { id: productId },
+            select: {
+                user: {
+                    select: {
+                        id: true
+                    }
+                }
+            }
+        });
+
+        const type = 'Approved Listing';
+        const message = 'Your listing has benn approved';
+
+        await prisma.notification.create({
+            data: {
+                senderId: userId, message, receiverId: owner?.user.id, type
+            }
+        });
+
+        res.status(200).json({ message: 'Listing accepted and notificatiojn sent' })
+    } catch (err: any) {
+        console.error('Failed to Accept Listing', err)
+        return res.status(500).json({ message: 'Something went wrong, Failed to accept Listing' })
+    }
+}
+
 // reject free listing request
 export const rejectListing = async (req: AuthRequest, res: Response) => {
     const productId = req.params.productId as string;
@@ -49,10 +90,11 @@ export const rejectListing = async (req: AuthRequest, res: Response) => {
     const userId = (req.user as JwtPayload)?.id;
     try {
 
-        await prisma.product.update({ where: { id: productId },
-        data: {
-            status: 'Rejected'
-        }
+        await prisma.product.update({
+            where: { id: productId },
+            data: {
+                status: 'Rejected'
+            }
         })
 
         await prisma.actionLog.create({
@@ -62,14 +104,15 @@ export const rejectListing = async (req: AuthRequest, res: Response) => {
         });
 
         //Find product owner
-        const owner = await prisma.product.findUnique({ where: { id: productId},
-        select: {
-            user: {
-                select: {
-                    id: true
+        const owner = await prisma.product.findUnique({
+            where: { id: productId },
+            select: {
+                user: {
+                    select: {
+                        id: true
+                    }
                 }
             }
-        }
         });
 
         const type = 'Flagged Listing';
@@ -80,10 +123,10 @@ export const rejectListing = async (req: AuthRequest, res: Response) => {
             }
         });
 
-        res.status(200).json({message: 'Listing Rejected and notificatiojn sent'})
+        res.status(200).json({ message: 'Listing Rejected and notificatiojn sent' })
     } catch (err: any) {
         console.error('Failed to reject Listing', err)
-        return res.status(500).json({message: 'Something went wrong, Failed to reject Listing'})
+        return res.status(500).json({ message: 'Something went wrong, Failed to reject Listing' })
     }
 }
 
@@ -94,28 +137,28 @@ export const boostCampain = async (req: AuthRequest, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     try {
-    
+
         const campaign = await prisma.boostAd.findMany({
             include: {
                 user: {
-                    select: { 
+                    select: {
                         profile: {
                             select: {
-                            name: true
+                                name: true
                             }
                         }
+                    }
                 }
-            }
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit
-    })
+            },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
+        })
 
-    res.status(200).json(campaign)
+        res.status(200).json(campaign)
     } catch (err: any) {
         console.error('Failed to select boost campaign', err)
-        return res.status(500).json({ message: 'Somthing went wrong, Failed to select boost campaign'})
+        return res.status(500).json({ message: 'Somthing went wrong, Failed to select boost campaign' })
     }
 }
 
@@ -124,27 +167,42 @@ export const updateCampaign = async (req: AuthRequest, res: Response) => {
     const userId = (req.user as JwtPayload)?.id;
     const campaignId = req.params.campaignId as string;
     const { status, duration } = req.body; //Duration in days
-    
-const durationInDays = parseInt(duration.replace(/\D/g, ""), 10);
 
-const startDate = new Date();
-const endDate = new Date(startDate);
-endDate.setDate(startDate.getDate() + durationInDays);
+    let durationInDays;
+    if (duration === 'Weekly') {
+        durationInDays = 7
+    } else if (duration === 'Monthly') {
+        durationInDays = 30
+    } else if (duration === 'Quarterly') {
+        durationInDays = 90
+    } else if (duration === 'Yearly') {
+        durationInDays = 365
+    } else {
+        console.log('No pln period found')
+        durationInDays = 30
+
+    }
+
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + durationInDays);
     try {
         // find seller id
-        const seller = await  prisma.boostAd.findUnique({ where: {id: campaignId},
-        include: {
-            user: {
-                select: {
-                id: true
+        const seller = await prisma.boostAd.findUnique({
+            where: { id: campaignId },
+            include: {
+                user: {
+                    select: {
+                        id: true
+                    }
                 }
             }
-        }
         })
-        await prisma.boostAd.update({ where: {id: campaignId},
-        data: {
-            startDate, endDate, status
-        }
+        await prisma.boostAd.update({
+            where: { id: campaignId },
+            data: {
+                startDate, endDate, status
+            }
         })
         const message = 'Your listing boost Ads has been approved';
         const type = 'Boost Ads';
@@ -155,10 +213,10 @@ endDate.setDate(startDate.getDate() + durationInDays);
             }
         })
 
-        res.status(200).json({message: 'Boost campaign approved'})
+        res.status(200).json({ message: 'Boost campaign approved' })
     } catch (err: any) {
         console.error('Faied to approve ads', err)
-        return res.status(500).json({message: 'Something went wrong, failed to approve boost ad'})
+        return res.status(500).json({ message: 'Something went wrong, failed to approve boost ad' })
     }
 }
 
@@ -168,21 +226,23 @@ export const updateCampaignStatus = async (req: AuthRequest, res: Response) => {
     const userId = (req.user as JwtPayload)?.id;
     const { status, reason } = req.body;
     try {
-        await prisma.boostAd.update({ where: {id: campaignId}, 
-        data: {
-            status
-        }
+        await prisma.boostAd.update({
+            where: { id: campaignId },
+            data: {
+                status
+            }
         })
 
         // find seller id
-        const seller = await  prisma.boostAd.findUnique({ where: {id: campaignId},
-        include: {
-            user: {
-                select: {
-                id: true
+        const seller = await prisma.boostAd.findUnique({
+            where: { id: campaignId },
+            include: {
+                user: {
+                    select: {
+                        id: true
+                    }
                 }
             }
-        }
         });
 
         await prisma.actionLog.create({
@@ -199,9 +259,9 @@ export const updateCampaignStatus = async (req: AuthRequest, res: Response) => {
             }
         })
 
-        res.status(200).json({message: 'Boost updated successfully'})
+        res.status(200).json({ message: 'Boost updated successfully' })
     } catch (err: any) {
-        console.error('Failed to update campaign status', err) 
-        return res.status(500).json({message: 'Somrthing went wrong, Failed to update campaign status'})
+        console.error('Failed to update campaign status', err)
+        return res.status(500).json({ message: 'Somrthing went wrong, Failed to update campaign status' })
     }
 }

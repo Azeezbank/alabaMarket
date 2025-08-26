@@ -573,37 +573,6 @@
 
 /**
  * @swagger
- * /api/seller/update/product/promotion:
- *   put:
- *     tags:
- *       - Seller's Listing
- *     security:
- *       - bearerAuth: []
- *     summary: Update product promotion
- *     parameters:
- *       - name: productId
- *         in: query
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               listingPromotion:
- *                 type: string
- *     responses:
- *       200:
- *         description: Promotion updated
- *       500:
- *         description: Failed to update promotion
- */
-
-/**
- * @swagger
  * /api/seller/seller/listing:
  *   get:
  *     tags:
@@ -806,19 +775,21 @@
 
 /**
  * @swagger
- * /api/seller/boost/ads/{productId}:
- *   post:
+ * /api/seller/upgrade/boost/listing/{productId}:
+ *   put:
+ *     summary: Upgrade a product listing to a paid boosted ad
+ *     description: Updates a product's boost listing with a paid plan and creates a notification for the user.
  *     tags:
  *       - Seller's Listing
- *     summary: Boost a product ad
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: productId
- *         in: path
+ *       - in: path
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the product to upgrade
  *     requestBody:
  *       required: true
  *       content:
@@ -828,17 +799,38 @@
  *             properties:
  *               productName:
  *                 type: string
+ *                 example: Premium Organic Honey
  *               plan:
  *                 type: string
+ *                 example: Gold
  *               period:
  *                 type: string
+ *                 example: 30 days
  *               price:
  *                 type: number
+ *                 example: 5000
+ *               placement:
+ *                 type: string
+ *                 example: homepage
  *     responses:
  *       200:
- *         description: Boost submitted for review
+ *         description: Boost ad submission successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Boost Submitted For Reviews
+ *       400:
+ *         description: Bad request (e.g. invalid data)
+ *       401:
+ *         description: Unauthorized (user not authenticated)
+ *       404:
+ *         description: Product not found
  *       500:
- *         description: Failed to submit boosting
+ *         description: Internal server error
  */
 
 /**

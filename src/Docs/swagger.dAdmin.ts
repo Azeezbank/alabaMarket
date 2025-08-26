@@ -37,6 +37,41 @@
 
 /**
  * @swagger
+ * /api/admin/approve/listing/{productId}:
+ *   put:
+ *     summary: Approve a product listing
+ *     description: Approves a product listing by updating its status to "Approved" and sends a notification to the listing owner.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the product to approve
+ *     responses:
+ *       200:
+ *         description: Listing approved successfully and notification sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Listing accepted and notification sent
+ *       401:
+ *         description: Unauthorized, authentication required
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Something went wrong, Failed to accept Listing
+ */
+
+/**
+ * @swagger
  * /api/admin/reject/listing/{productId}:
  *   put:
  *     summary: Reject a product listing
@@ -125,7 +160,7 @@
  *                 example: "Approved"
  *               duration:
  *                 type: string
- *                 example: "7 days"
+ *                 example: "Weekly, Monthly, Quarterly or Annually"
  *     responses:
  *       200:
  *         description: Boost campaign approved and seller notified
@@ -394,7 +429,7 @@
 
 /**
  * @swagger
- * /api/admin//promotional/banner/mgt:
+ * /api/admin/promotional/banner/mgt:
  *   get:
  *     summary: Fetch all promotional banners
  *     description: Retrieve all promotional banners with details such as title, placement, uploader, start and end date.

@@ -14,43 +14,51 @@ export const productDetails = async (req: AuthRequest, res: Response) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    // Upload image
-    const uploadedImage = await imagekit.upload({
-      file: files.productImage[0].buffer,
-      fileName: files.productImage[0].originalname,
-      folder: "/uploads/productImage"
-    });
+    let uploadedImage;
+    let uploadedVideo;
 
-    // Upload video
-    const uploadedVideo = await imagekit.upload({
-      file: files.productVideo[0].buffer,
-      fileName: files.productVideo[0].originalname,
-      folder: "/uploads/productVideo"
-    });
+    // Upload image if provided
+    if (files?.productImage?.[0]) {
+      uploadedImage = await imagekit.upload({
+        file: files.productImage[0].buffer,
+        fileName: files.productImage[0].originalname,
+        folder: "/uploads/productImage"
+      });
+    }
+
+    // Upload video if provided
+    if (files?.productVideo?.[0]) {
+      uploadedVideo = await imagekit.upload({
+        file: files.productVideo[0].buffer,
+        fileName: files.productVideo[0].originalname,
+        folder: "/uploads/productVideo"
+      });
+    }
 
     const newProduct = await prisma.product.create({
       data: {
         name,
         userId,
         shopId,
-        productPhoto: {
-          create: [{
-            url: uploadedImage.url,
-          }]
-        },
-        productVideo: {
-          create: [{
-            url: uploadedVideo.url
-          }]
-        }
+        productPhoto: uploadedImage
+          ? {
+              create: [{ url: uploadedImage.url }]
+            }
+          : undefined,
+        productVideo: uploadedVideo
+          ? {
+              create: [{ url: uploadedVideo.url }]
+            }
+          : undefined,
       },
       include: {
-        productPhoto: true, productVideo: true
+        productPhoto: true,
+        productVideo: true
       }
-    })
+    });
     res.status(200).json({ message: 'product details inserted', newProduct })
   } catch (err: any) {
-    console.error('Something went wrong, Failed to insert dedails', err)
+    console.error('Something went wrong, Failed to insert details', err)
     return res.status(500).json({ message: 'Something went wrong, Failed to insert dedails' })
   }
 };
@@ -64,9 +72,14 @@ export const productPricing = async (req: AuthRequest, res: Response) => {
       where: { id: productId },
       data: {
         productPricing: {
+          upsert: {
+            create: {
+            price, priceStatus, condition, description
+          },
           update: {
             price, priceStatus, condition, description
           }
+        }
         }
       }
     })
@@ -166,27 +179,6 @@ export const updateProductcategory = async (req: AuthRequest, res: Response) => 
   }
 }
 
-//update product promotion
-export const productPromotion = async (req: AuthRequest, res: Response) => {
-  const listingPromotion = req.body.listingPromotion;
-  const productId = req.query.productId as string
-  try {
-    await prisma.product.update({
-      where: { id: productId },
-      data: {
-        listingPromotion
-      }
-    })
-
-    res.status(200).json({ message: 'Promotion updated' })
-  } catch (err: any) {
-    console.log('Failed to update promotion', err)
-    return res.status(500).json({ message: 'Something went wrong, Faiked to update promotion' })
-  }
-};
-
-
-
 //Fetch all seller listings including the shop details
 export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
@@ -284,6 +276,12 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
       }
     });
 
+    await prisma.boostAd.create({
+      data: {
+      productId, userId, plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
+      }
+    })
+
     res.status(200).json({ message: "Product listing updated successfully", updatedProduct });
   } catch (err: any) {
     console.error("Error updating product listing:", err);
@@ -309,8 +307,6 @@ export const DeleteSellerListing = async (req: AuthRequest, res: Response) => {
     if (existingProduct.userId !== userId) {
       return res.status(403).json({ message: "Not authorized to delete this product" });
     }
-
-    // Optionally: delete images/videos from ImageKit here
 
     await prisma.product.delete({
       where: { id: productId }
@@ -382,11 +378,11 @@ export const BoostPlans = async (req: AuthRequest, res: Response) => {
     const plans = await prisma.boostPackages.findMany({
       select: {
         id: true, plan: true,
-        boostPackagesDetails: {
-          select: {
-            id: true, duration: true, price: true, status: true
-          }
-        }
+        // boostPackagesDetails: {
+        //   select: {
+        //     id: true, duration: true, price: true, status: true
+        //   }
+        // }
       }
     })
 
@@ -420,15 +416,16 @@ export const boostDetails = async (req: AuthRequest, res: Response) => {
 };
 
 
-//Boost Ad
-export const createBoostAd = async (req: AuthRequest, res: Response) => {
+//Upgrade Boost listing
+export const upgradeListingBoost = async (req: AuthRequest, res: Response) => {
   const productId = req.params.productId;
   const userId = (req.user as JwtPayload)?.id;
-  const { productName, plan, type, period, price, placement } = req.body;
+  const { productName, plan, period, price, placement } = req.body;
   try {
-    await prisma.boostAd.create({
+
+    await prisma.boostAd.update({ where: {productId},
       data: {
-        productId, userId, productName, plan, type, period, price, placement
+        productName, plan, type: 'Paid', period, price, placement
       }
     });
 

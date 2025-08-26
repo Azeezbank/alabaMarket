@@ -617,8 +617,7 @@
  *       Fetch all active boosted listings that are not expired.  
  *       Includes product details, pricing, photos, videos, likes/loves count, and seller profile.  
  *       Results are cached in Redis for 5 minutes (300 seconds).
- *     tags:
- *       - Listings
+ *     tags: [Buyer Listings]
  *     parameters:
  *       - in: query
  *         name: page
@@ -715,6 +714,209 @@
  *                               profile:
  *                                 type: object
  *                                 additionalProperties: true
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/buyer/boosted/plan/listing:
+ *   get:
+ *     summary: Get active boosted listings by plan
+ *     description: Fetch all active, non-expired boosted product listings based on a selected boost plan.
+ *     tags: [Buyer Listings]
+ *     parameters:
+ *       - in: query
+ *         name: plan
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Boost plan type (e.g., Basic, Standard, Premium).
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination.
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of results per page.
+ *     responses:
+ *       200:
+ *         description: Successfully fetched active boosted listings by plan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 activePaidBoosts:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "boost_12345"
+ *                       plan:
+ *                         type: string
+ *                         example: "Premium"
+ *                       endDate:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-09-15T23:59:59.000Z"
+ *                       status:
+ *                         type: string
+ *                         example: "Active"
+ *                       product:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             example: "prod_12345"
+ *                           status:
+ *                             type: string
+ *                             example: "Approved"
+ *                           productPhoto:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 url:
+ *                                   type: string
+ *                                   example: "https://example.com/photo.jpg"
+ *                           productVideo:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 url:
+ *                                   type: string
+ *                                   example: "https://example.com/video.mp4"
+ *                           productPricing:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 price:
+ *                                   type: number
+ *                                   example: 25000
+ *                                 currency:
+ *                                   type: string
+ *                                   example: "NGN"
+ *                           _count:
+ *                             type: object
+ *                             properties:
+ *                               likes:
+ *                                 type: integer
+ *                                 example: 15
+ *                               love:
+ *                                 type: integer
+ *                                 example: 7
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                                 example: "user_12345"
+ *                               profile:
+ *                                 type: string
+ *                                 example: "https://example.com/profile.jpg"
+ *       400:
+ *         description: Invalid request parameters
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/buyer/free/boosted/listing:
+ *   get:
+ *     summary: Get all active free listings
+ *     description: Fetches all active, non-expired free boosted product listings with pagination. Results are cached for 5 minutes.
+ *     tags: [Buyer Listings]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of results per page
+ *     responses:
+ *       200:
+ *         description: A list of active free listings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 activePaidBoosts:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                       endDate:
+ *                         type: string
+ *                         format: date-time
+ *                       product:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           status:
+ *                             type: string
+ *                           productPhoto:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                           productVideo:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                           productPricing:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                           _count:
+ *                             type: object
+ *                             properties:
+ *                               likes:
+ *                                 type: integer
+ *                               love:
+ *                                 type: integer
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                               profile:
+ *                                 type: object
  *       500:
  *         description: Internal server error
  */

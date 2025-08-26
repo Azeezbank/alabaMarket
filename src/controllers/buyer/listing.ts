@@ -599,8 +599,144 @@ export const getActiveListing = async (req: Request, res: Response) => {
     const responseData = {
       page,
       limit,
-      total: activeBoosts.length,
       activeBoosts,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
+    res.status(200).json(responseData);
+  } catch (err: any) {
+    console.error("Failed to fetch active boost ads", err);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+// select listing by boost plan
+export const getActiveListingByPlan = async (req: Request, res: Response) => {
+  // Parse pagination query params with defaults
+  const plan = (req.query.plan as string);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+
+  const cacheKey = `active_boostedplan=${plan}:page=${page}:limit=${limit}`;
+  try {
+
+       // 1️ Check Redis cache first
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    const today = new Date();
+
+    const activePaidBoosts = await prisma.boostAd.findMany({
+      where: {
+        endDate: {
+          gte: today, // not expired yet
+        },
+        status: "Active", // optional: only approved ones
+        plan,
+        product: {
+    status: "Approved",              // only active products
+  },
+      },
+      include: {
+        product: {
+        include: {
+        productPhoto: true,
+        productVideo: true,
+        productPricing: true,
+        _count: {
+          select: { likes: true, love: true },
+        },
+        user: {
+          select: {
+            id: true,
+            profile: true, // adjust what you need
+          },
+        },
+      },
+      },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit
+    });
+
+    const responseData = {
+      page,
+      limit,
+      activePaidBoosts
+    };
+
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+
+    res.status(200).json(responseData);
+  } catch (err: any) {
+    console.error("Failed to fetch active boost ads", err);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+
+//Select all free listing
+export const getActiveFreeListing = async (req: Request, res: Response) => {
+  // Parse pagination query params with defaults
+  const plan = 'Free'
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+
+  const cacheKey = `active_freeboostedplan=${plan}:page=${page}:limit=${limit}`;
+  try {
+
+       // 1️ Check Redis cache first
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    const today = new Date();
+
+    const activePaidBoosts = await prisma.boostAd.findMany({
+      where: {
+        endDate: {
+          gte: today, // not expired yet
+        },
+        status: "Active", // optional: only approved ones
+        type: plan,
+        product: {
+    status: "Approved",              // only active products
+  },
+      },
+      include: {
+        product: {
+        include: {
+        productPhoto: true,
+        productVideo: true,
+        productPricing: true,
+        _count: {
+          select: { likes: true, love: true },
+        },
+        user: {
+          select: {
+            id: true,
+            profile: true, // adjust what you need
+          },
+        },
+      },
+      },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit
+    });
+
+    const responseData = {
+      page,
+      limit,
+      activePaidBoosts
     };
 
     await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);

@@ -19,13 +19,24 @@ export const productCategories = async (req: AuthRequest, res: Response) => {
                     folder: "/uploads/category",
                 });
 
-                await prisma.category.create({
+                let state;
+
+                if (status === 'true') {
+                    state = true
+                } else if (status === 'false') {
+                    state = false
+                } else {
+                    console.log("Invalid status value. Must be 'true' or 'false'.")
+        return res.status(400).json({ message: "Invalid status value. Must be 'true' or 'false'." });
+    }
+
+                const data = await prisma.category.create({
                     data: {
-                        image: result.url, name: categoryName, status
+                        image: result.url, name: categoryName, status: state
                     }
                 })
 
-                res.status(201).json({ message: 'Category created'})
+                res.status(201).json({ message: 'Category created', data})
     } catch (err: any) {
         console.error('Something went wrong, Failed to create category', err)
         return res.status(500).json({ message: 'Something went wrong, Failed to create category'});
