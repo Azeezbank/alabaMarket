@@ -25,8 +25,8 @@ RUN npx prisma generate
 # Expose the port Express runs on
 EXPOSE 3000
 
-# Run migrations / db push at runtime
-CMD npx prisma db push && npm start
+# Run db push then start the app
+CMD sh -c "npx prisma db push && npm start"
 
 # Start the app
 # CMD ["npm", "start"]
