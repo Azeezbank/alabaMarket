@@ -14,13 +14,19 @@ RUN npm install
 COPY . .
 
 # Compile TypeScript
-RUN npx tsc
+RUN rm -rf dist && npx tsc
 
 # Generate Prisma client
 RUN npx prisma generate
 
+# sync schema
+# RUN npx prisma db push
+
 # Expose the port Express runs on
 EXPOSE 3000
 
+# Run migrations / db push at runtime
+CMD npx prisma db push && npm start
+
 # Start the app
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
