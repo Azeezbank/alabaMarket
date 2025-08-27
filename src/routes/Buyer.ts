@@ -41,7 +41,7 @@ router.post('/love/:productId', authenticate, love);
 router.post('/report/listing/:productId', authenticate, productReport);
 router.get('/average/rating/:productId', authenticate, productReviewRatingAvg);
 router.get('/rating/distribution/:productId', authenticate, productratingDistribution);
-router.put('/rating/:userId/:productId', authenticate, productrating);
+router.put('/rating/:productId', authenticate, productrating);
 
 
 

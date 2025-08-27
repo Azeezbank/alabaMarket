@@ -202,19 +202,13 @@
 
 /**
  * @swagger
- * /api/buyer/rating/{userId}/{productId}:
+ * /api/buyer/rating/{productId}:
  *   put:
  *     summary: Create or update product rating by buyer
  *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: ID of the user
  *       - in: path
  *         name: productId
  *         schema:
@@ -227,16 +221,30 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - stars
  *             properties:
  *               stars:
- *                 type: number
- *                 description: Star rating
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 description: Star rating (1–5)
  *               comment:
  *                 type: string
  *                 description: Review comment
  *     responses:
  *       200:
  *         description: Product rated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product rated successfully
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Failed to rate product
  *         content:
@@ -618,6 +626,8 @@
  *       Includes product details, pricing, photos, videos, likes/loves count, and seller profile.  
  *       Results are cached in Redis for 5 minutes (300 seconds).
  *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -725,6 +735,8 @@
  *     summary: Get active boosted listings by plan
  *     description: Fetch all active, non-expired boosted product listings based on a selected boost plan.
  *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: plan
@@ -845,6 +857,8 @@
  *     summary: Get all active free listings
  *     description: Fetches all active, non-expired free boosted product listings with pagination. Results are cached for 5 minutes.
  *     tags: [Buyer Listings]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page

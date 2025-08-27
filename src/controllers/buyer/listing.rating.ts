@@ -2,13 +2,15 @@ import { Response, Request } from "express";
 // import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../prisma.client.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
+import { JwtPayload } from "jsonwebtoken";
 
 
 //Create or update product rating by buyer
 export const productrating = async (req: AuthRequest, res: Response) => {
-    const { userId, productId } = req.params;
-    const stars = Number(req.params.stars);
-    const comment = req.body;
+    const { productId } = req.params;
+    const userId = (req.user as JwtPayload)?.id;
+    const stars = parseInt(req.body.stars);
+    const comment = req.body.comment;
     try {
         await prisma.productReview.upsert({
             where: {
@@ -28,6 +30,8 @@ export const productrating = async (req: AuthRequest, res: Response) => {
                 userId: userId,
             }
         });
+
+        return res.status(200).json({ message: "Product rated successfully" });
     } catch (err: any) {
         console.error('Something went wrong, Failed to rate product', err)
         return res.status(500).json({ message: 'Something went wrong, Failed to rate product' })

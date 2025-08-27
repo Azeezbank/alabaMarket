@@ -172,7 +172,7 @@ export const updateProductcategory = async (req: AuthRequest, res: Response) => 
         categoryName, subCategoryName
       }
     })
-    res.status(200).json({ message: 'Smething went wrong, Failed to update product category' })
+    res.status(200).json({ message: 'Product Category updated successfully' })
   } catch (err: any) {
     console.error('Smething went wrong, Failed to update product category', err)
     return res.status(500).json({ message: 'Smething went wrong, Failed to update product category' })
@@ -276,9 +276,12 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    await prisma.boostAd.create({
-      data: {
-      productId, userId, plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
+    await prisma.boostAd.upsert({ where: {productId},
+      update: {
+      plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
+      },
+      create: {
+        productId, userId, plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
       }
     })
 
@@ -326,7 +329,7 @@ export const PauseSellerListing = async (req: AuthRequest, res: Response) => {
   const productId = req.params.id; // or req.body.productId
 
   try {
-    const existingProduct = await prisma.product.findFirst({
+    const existingProduct = await prisma.product.findUnique({
       where: { id: productId }
     });
 

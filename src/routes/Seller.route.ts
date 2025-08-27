@@ -24,7 +24,7 @@ router.put("/update/shop", authenticate, upload.single('file'), updateShopDetail
 router.get("/seller/listing", authenticate, FetchSellerListings);
 // router.get('/active/listing', authenticate, activeListing);
 router.get('/boost/plans', authenticate, BoostPlans);
-router.post('/boost/plan/details', authenticate, boostDetails);
+router.get('/boost/plan/details', authenticate, boostDetails);
 router.get('/boost/ads', authenticate, fetchBoostAd);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);

@@ -599,11 +599,11 @@
 
 /**
  * @swagger
- * /api/seller/update/listing/{productId}/{categoryId}/subCategoryId:
+ * /api/seller/update/listing/{productId}/{categoryId}/{subCategoryId}:
  *   put:
- *     summary: Edit an existing product/listing
- *     description: Update details of a seller's product listing. Only the owner of the product can edit it.
- *     tags: 
+ *     summary: Edit an existing product or listing
+ *     description: Update product details, category, sub-category, and pricing information. Only the product owner can edit their product.
+ *     tags:
  *       - Seller's Listing
  *     security:
  *       - bearerAuth: []
@@ -611,21 +611,21 @@
  *       - in: path
  *         name: productId
  *         required: true
+ *         schema:
+ *           type: string
  *         description: The ID of the product to update
- *         schema:
- *           type: string
- *       - in: query
+ *       - in: path
  *         name: categoryId
- *         required: false
- *         description: ID of the main category
+ *         required: true
  *         schema:
  *           type: string
- *       - in: query
+ *         description: The ID of the category
+ *       - in: path
  *         name: subCategoryId
- *         required: false
- *         description: ID of the sub-category
+ *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the sub-category
  *     requestBody:
  *       required: true
  *       content:
@@ -635,20 +635,20 @@
  *             properties:
  *               name:
  *                 type: string
- *                 example: "iPhone 13 Pro Max"
+ *                 example: "iPhone 14 Pro Max"
  *               condition:
  *                 type: string
  *                 example: "New"
  *               price:
  *                 type: number
- *                 example: 1500
+ *                 example: 1200
  *               priceStatus:
  *                 type: string
  *                 enum: [Fixed, Negotiable]
  *                 example: "Negotiable"
  *               description:
  *                 type: string
- *                 example: "A brand new iPhone 13 Pro Max with warranty."
+ *                 example: "Latest iPhone model with 128GB storage"
  *               categoryName:
  *                 type: string
  *                 example: "Electronics"
@@ -667,7 +667,8 @@
  *                   type: string
  *                   example: "Product listing updated successfully"
  *                 updatedProduct:
- *                   $ref: '#/components/schemas/Product'
+ *                   type: object
+ *                   description: Updated product details including relations
  *       403:
  *         description: Not authorized to edit this product
  *       404:
@@ -749,7 +750,7 @@
 /**
  * @swagger
  * /api/seller/boost/details:
- *   post:
+ *   get:
  *     summary: Get boost plan details
  *     tags:
  *       - Seller's Listing

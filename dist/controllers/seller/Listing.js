@@ -154,7 +154,7 @@ export const updateProductcategory = async (req, res) => {
                 categoryName, subCategoryName
             }
         });
-        res.status(200).json({ message: 'Smething went wrong, Failed to update product category' });
+        res.status(200).json({ message: 'Product Category updated successfully' });
     }
     catch (err) {
         console.error('Smething went wrong, Failed to update product category', err);
@@ -248,8 +248,11 @@ export const EditSellerListing = async (req, res) => {
                 productPricing: true
             }
         });
-        await prisma.boostAd.create({
-            data: {
+        await prisma.boostAd.upsert({ where: { productId },
+            update: {
+                plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
+            },
+            create: {
                 productId, userId, plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
             }
         });
@@ -289,7 +292,7 @@ export const PauseSellerListing = async (req, res) => {
     const userId = req.user?.id;
     const productId = req.params.id; // or req.body.productId
     try {
-        const existingProduct = await prisma.product.findFirst({
+        const existingProduct = await prisma.product.findUnique({
             where: { id: productId }
         });
         if (!existingProduct) {
