@@ -8,6 +8,167 @@
 
 /**
  * @swagger
+ * /api/admin//create/subscription/plan:
+ *   post:
+ *     summary: Create a new subscription plan
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *               - duration
+ *               - maxVisibleProducts
+ *               - placement
+ *               - maxVisible
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Free
+ *               price:
+ *                 type: number
+ *                 example: 1000
+ *               duration:
+ *                 type: string
+ *                 enum: [Weekly, Monthly, Quarterly, Annually]
+ *                 example: Monthly
+ *               maxVisibleProducts:
+ *                 type: integer
+ *                 example: 5
+ *               placement:
+ *                 type: string
+ *                 example: Golden Plan
+ *               maxVisible:
+ *                 type: integer
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Plan created successfully
+ *       500:
+ *         description: Failed to create subscription plan
+ */
+
+/**
+ * @swagger
+ * /api/admin/subscription/plan:
+ *   get:
+ *     summary: Get all subscription plans
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: List of subscription plans
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     format: uuid
+ *                   name:
+ *                     type: string
+ *                   price:
+ *                     type: number
+ *                   duration:
+ *                     type: string
+ *                   maxVisibleProducts:
+ *                     type: integer
+ *                   placement:
+ *                     type: string
+ *                   maxVisiblePerCat:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         maxVisible:
+ *                           type: integer
+ *       500:
+ *         description: Failed to fetch subscription plans
+ */
+
+/**
+ * @swagger
+ * /api/admin/edit/subcription/plan/{planId}:
+ *   put:
+ *     summary: Edit a subscription plan
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: planId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: The subscription plan ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               duration:
+ *                 type: string
+ *                 enum: [Weekly, Monthly, Quarterly, Annually]
+ *               maxVisibleProducts:
+ *                 type: integer
+ *               placement:
+ *                 type: string
+ *               maxVisible:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Plan updated successfully
+ *       404:
+ *         description: Plan not found
+ *       500:
+ *         description: Failed to edit subscription plan
+ */
+
+/**
+ * @swagger
+ * /api/admin/delete/subscription/plan/{planId}:
+ *   delete:
+ *     summary: Delete a subscription plan
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: planId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: The subscription plan ID
+ *     responses:
+ *       200:
+ *         description: Plan deleted successfully
+ *       404:
+ *         description: Plan not found
+ *       500:
+ *         description: Failed to delete subscription plan
+ */
+
+/**
+ * @swagger
  * /api/admin/all/free/listing:
  *   get:
  *     summary: Fetch free listings
@@ -101,107 +262,6 @@
  *         description: Listing rejected and notification sent
  *       500:
  *         description: Failed to reject listing
- */
-
-/**
- * @swagger
- * /api/admin/boost/campaign/review:
- *   get:
- *     summary: Fetch boost campaign reviews
- *     description: Retrieve all boost campaigns with pagination and associated user details.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number for pagination
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of records per page
- *     responses:
- *       200:
- *         description: List of boost campaigns
- *       500:
- *         description: Failed to fetch boost campaigns
- */
-
-/**
- * @swagger
- * /api/admin/update/boosted/listing/{campaignId}:
- *   put:
- *     summary: Approve or update a boost campaign
- *     description: Approve a campaign boost, set start/end dates, update status, and notify the seller.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: campaignId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the boost campaign
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 example: "Approved"
- *               duration:
- *                 type: string
- *                 example: "Weekly, Monthly, Quarterly or Annually"
- *     responses:
- *       200:
- *         description: Boost campaign approved and seller notified
- *       500:
- *         description: Failed to approve/update boost campaign
- */
-
-/**
- * @swagger
- * /api/admin/pause/suspend/boost/{campaignId}:
- *   put:
- *     summary: Pause or suspend a boost campaign
- *     description: Update the status of a boost campaign (e.g., paused/suspended), log the action, and notify the seller.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: campaignId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the boost campaign
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 example: "Paused"
- *               reason:
- *                 type: string
- *                 example: "Violation of campaign rules"
- *     responses:
- *       200:
- *         description: Boost campaign status updated and seller notified
- *       500:
- *         description: Failed to update boost campaign status
  */
 
 
@@ -426,298 +486,6 @@
  *         description: Failed to create subcategory
  */
 
-
-/**
- * @swagger
- * /api/admin/promotional/banner/mgt:
- *   get:
- *     summary: Fetch all promotional banners
- *     description: Retrieve all promotional banners with details such as title, placement, uploader, start and end date.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of promotional banners
- *       500:
- *         description: Failed to fetch banners
- */
-
-/**
- * @swagger
- * /api/admin/create/promo/banner:
- *   post:
- *     summary: Upload a new promotional banner
- *     description: Allows an admin to create a promotional banner with image, title, page, placement, and date range.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *                 example: "Summer Sale"
- *               page:
- *                 type: string
- *                 example: "Homepage"
- *               placement:
- *                 type: string
- *                 example: "Top Banner"
- *               startDate:
- *                 type: string
- *                 format: date
- *                 example: "2025-08-01"
- *               endDate:
- *                 type: string
- *                 format: date
- *                 example: "2025-08-31"
- *               status:
- *                 type: boolean
- *                 example: true
- *               file:
- *                 type: string
- *                 format: binary
- *                 description: Banner image
- *     responses:
- *       201:
- *         description: Banner created successfully
- *       400:
- *         description: No file uploaded
- *       404:
- *         description: No uploader found
- *       500:
- *         description: Failed to create banner
- */
-
-/**
- * @swagger
- * /api/admin/update/promo/banner/{bannerId}:
- *   put:
- *     summary: Update an existing promotional banner
- *     description: Allows an admin to update a banner's details and image.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: bannerId
- *         required: true
- *         schema:
- *           type: string
- *         description: Banner ID
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *                 example: "Updated Sale"
- *               page:
- *                 type: string
- *                 example: "Homepage"
- *               placement:
- *                 type: string
- *                 example: "Sidebar"
- *               startDate:
- *                 type: string
- *                 format: date
- *                 example: "2025-09-01"
- *               endDate:
- *                 type: string
- *                 format: date
- *                 example: "2025-09-30"
- *               status:
- *                 type: boolean
- *                 example: false
- *               file:
- *                 type: string
- *                 format: binary
- *                 description: Updated banner image
- *     responses:
- *       200:
- *         description: Banner updated successfully
- *       400:
- *         description: No file uploaded
- *       404:
- *         description: No uploader found
- *       500:
- *         description: Failed to update banner
- */
-
-/**
- * @swagger
- * /api/admin/promo/banner/{bannerId}:
- *   delete:
- *     summary: Delete a promotional banner
- *     description: Permanently remove a promotional banner by ID.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: bannerId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Banner deleted successfully
- *       500:
- *         description: Failed to delete banner
- */
-
-/**
- * @swagger
- * /api/admin/boost/packages:
- *   get:
- *     summary: Fetch all boost packages
- *     description: Retrieve all boost packages with their details.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 10
- *     responses:
- *       200:
- *         description: List of boost packages
- *       500:
- *         description: Failed to fetch boost packages
- */
-
-/**
- * @swagger
- * /api/admin/new/boost/packages:
- *   post:
- *     summary: Add a new boost package
- *     description: Allows an admin to add a boost package with multiple duration-price options.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               plan:
- *                 type: string
- *                 example: "Premium Boost"
- *               type:
- *                 type: string
- *                 example: "Listing"
- *               placement:
- *                 type: string
- *                 example: "Homepage"
- *               duration1:
- *                 type: integer
- *                 example: 7
- *               price1:
- *                 type: number
- *                 example: 9.99
- *               duration2:
- *                 type: integer
- *                 example: 14
- *               price2:
- *                 type: number
- *                 example: 17.99
- *               status:
- *                 type: boolean
- *                 example: true
- *     responses:
- *       200:
- *         description: Boost package added successfully
- *       400:
- *         description: At least one duration & price is required
- *       500:
- *         description: Failed to add package
- */
-
-/**
- * @swagger
- * /api/admin/edit/boost/package/{packageId}:
- *   put:
- *     summary: Edit an existing boost package
- *     description: Allows an admin to update a boost package details and pricing options.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: packageId
- *         required: true
- *         schema:
- *           type: string
- *         description: Package ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               plan:
- *                 type: string
- *                 example: "Updated Premium Boost"
- *               type:
- *                 type: string
- *                 example: "Banner"
- *               placement:
- *                 type: string
- *                 example: "Sidebar"
- *               duration1:
- *                 type: integer
- *                 example: 30
- *               price1:
- *                 type: number
- *                 example: 29.99
- *     responses:
- *       200:
- *         description: Boost package updated successfully
- *       400:
- *         description: At least one duration & price is required
- *       500:
- *         description: Failed to update package
- */
-
-/**
- * @swagger
- * /api/admin/boost/package/{packageId}:
- *   delete:
- *     summary: Delete a boost package
- *     description: Permanently remove a boost package by ID.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: packageId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Boost package deleted successfully
- *       500:
- *         description: Failed to delete package
- */
 
 /**
  * @swagger

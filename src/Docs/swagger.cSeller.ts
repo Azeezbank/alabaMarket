@@ -1,7 +1,7 @@
 /**
  * @swagger
  * tags:
- *   name: Seller's Listing
+ *   name: Seller
  *   description: Endpoints related to seller product listings
  */
 
@@ -12,7 +12,7 @@
  *   post:
  *     summary: Create a new shop
  *     tags:
- *       - Seller Shop
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -87,7 +87,7 @@
  *   get:
  *     summary: Get all shop details
  *     tags:
- *       - Seller Shop
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -136,7 +136,7 @@
  *   put:
  *     summary: Update shop details
  *     tags:
- *       - Seller Shop
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -174,7 +174,7 @@
  *   put:
  *     summary: Update shop active status
  *     tags:
- *       - Seller Shop
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -215,7 +215,7 @@
  *   delete:
  *     summary: Delete a shop
  *     tags:
- *       - Seller Shop
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -263,7 +263,7 @@
  *   post:
  *     summary: Upload seller verification documents (ID card and passport)
  *     tags:
- *       - Seller Verification
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -317,7 +317,7 @@
  *   post:
  *     summary: Update seller verification ID card
  *     tags:
- *       - Seller Verification
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -354,7 +354,7 @@
  * /api/seller/create/product/{shopId}:
  *   post:
  *     tags:
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     summary: Create product details
@@ -392,7 +392,7 @@
  * /api/seller/update/product/pricing:
  *   put:
  *     tags:
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     summary: Update product pricing
@@ -431,7 +431,7 @@
  *     summary: Fetch all product categories
  *     description: Retrieve all product categories with their IDs and names.
  *     tags: 
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -463,7 +463,7 @@
  *     summary: Fetch subcategories of a category
  *     description: Retrieve subcategories belonging to a given category ID.
  *     tags: 
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -504,7 +504,7 @@
  *     summary: Update product category and subcategory
  *     description: Update an existing product's category and subcategory by IDs.
  *     tags: 
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -571,29 +571,96 @@
  *                   example: Something went wrong, Failed to update product category
  */
 
+
 /**
  * @swagger
  * /api/seller/seller/listing:
  *   get:
+ *     summary: Fetch seller's product listings detailes to populate product for publish
+ *     description: Retrieve a paginated list of products for the authenticated seller, including photos, videos, pricing, and shop details.
  *     tags:
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
- *     summary: Fetch all seller listings
  *     parameters:
- *       - name: page
- *         in: query
+ *       - in: query
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Optional product ID to filter by a specific product
+ *       - in: query
+ *         name: page
  *         schema:
  *           type: integer
- *       - name: limit
- *         in: query
+ *           default: 1
+ *         required: false
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
  *         schema:
  *           type: integer
+ *           default: 10
+ *         required: false
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of seller products
+ *         description: Successfully fetched seller's product listings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of products
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Total number of pages
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       productPhoto:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       productVideo:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       productPricing:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                           sellerShop:
+ *                             type: object
+ *                             properties:
+ *                               storeName:
+ *                                 type: string
+ *                           sellerVerification:
+ *                             type: object
+ *                             properties:
+ *                               isVerified:
+ *                                 type: boolean
  *       500:
- *         description: Failed to fetch product listings
+ *         description: Failed to fetch seller's product listings
  */
 
 
@@ -604,7 +671,7 @@
  *     summary: Edit an existing product or listing
  *     description: Update product details, category, sub-category, and pricing information. Only the product owner can edit their product.
  *     tags:
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -679,10 +746,105 @@
 
 /**
  * @swagger
+ * /api/seller/listings/seller:
+ *   get:
+ *     summary: Fetch all seller's product listings
+ *     description: Retrieve all product listings for the authenticated seller with pagination support.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         description: Optional product ID to filter by (not currently applied in query).
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page.
+ *     responses:
+ *       200:
+ *         description: A list of seller's product listings.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 total:
+ *                   type: integer
+ *                   example: 25
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 3
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "prod_12345"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-08-30T12:34:56.000Z"
+ *                       productPhoto:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       productVideo:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       productPricing:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                           sellerShop:
+ *                             type: object
+ *                             properties:
+ *                               storeName:
+ *                                 type: string
+ *                           sellerVerification:
+ *                             type: object
+ *                             properties:
+ *                               isVerified:
+ *                                 type: boolean
+ *                                 example: true
+ *       401:
+ *         description: Unauthorized - missing or invalid token.
+ *       500:
+ *         description: Server error while fetching seller's product listings.
+ */
+
+/**
+ * @swagger
  * /api/seller/delete/listing/{productId}:
  *   delete:
  *     tags:
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     summary: Delete product or listing
@@ -708,7 +870,7 @@
  * /api/seller/listing/pause:
  *   put:
  *     tags:
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     summary: Pause or unpause a product listing
@@ -729,59 +891,17 @@
  *         description: Failed to update product listing pause status
  */
 
-
 /**
  * @swagger
- * /api/seller/boost/plans:
- *   get:
+ * /api/seller/toggle/listing/visibility/{productId}:
+ *   patch:
+ *     summary: Toggle product visibility
+ *     description: >
+ *       Seller can mark a product as visible or invisible depending on their subscription plan limits.  
+ *       If the seller has no active subscription or it has expired, the system defaults to the "Free" plan.  
+ *       Visibility is limited globally (maxVisibleProducts) and per category (maxVisiblePerCat).
  *     tags:
- *       - Seller's Listing
- *     security:
- *       - bearerAuth: []
- *     summary: Select all paid boost plans
- *     responses:
- *       200:
- *         description: List of boost plans
- *       500:
- *         description: Failed to select plan
- */
-
-
-/**
- * @swagger
- * /api/seller/boost/details:
- *   get:
- *     summary: Get boost plan details
- *     tags:
- *       - Seller's Listing
- *     security:
- *       - bearerAuth: []
- *     description: Retrieve details of a specific boost plan by providing the plan name in the request body.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               plan:
- *                 type: string
- *                 example: Gold
- *     responses:
- *       200:
- *         description: Boost plan details retrieved successfully
- *       500:
- *         description: Failed to select plan details
- */
-
-/**
- * @swagger
- * /api/seller/upgrade/boost/listing/{productId}:
- *   put:
- *     summary: Upgrade a product listing to a paid boosted ad
- *     description: Updates a product's boost listing with a paid plan and creates a notification for the user.
- *     tags:
- *       - Seller's Listing
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -790,32 +910,40 @@
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the product to upgrade
+ *         description: ID of the product to toggle.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - makeVisible
  *             properties:
- *               productName:
- *                 type: string
- *                 example: Premium Organic Honey
- *               plan:
- *                 type: string
- *                 example: Gold
- *               period:
- *                 type: string
- *                 example: 30 days
- *               price:
- *                 type: number
- *                 example: 5000
- *               placement:
- *                 type: string
- *                 example: homepage
+ *               makeVisible:
+ *                 type: boolean
+ *                 description: Set to true to make the product visible, false to hide it.
+ *                 example: true
  *     responses:
  *       200:
- *         description: Boost ad submission successful
+ *         description: Successfully updated product visibility.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "prod_12345"
+ *                 isVisible:
+ *                   type: boolean
+ *                   example: true
+ *                 visibleMarkedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2025-08-30T12:34:56.000Z"
+ *       400:
+ *         description: Bad request (e.g., limit reached, invalid body).
  *         content:
  *           application/json:
  *             schema:
@@ -823,59 +951,15 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Boost Submitted For Reviews
- *       400:
- *         description: Bad request (e.g. invalid data)
- *       401:
- *         description: Unauthorized (user not authenticated)
+ *                   example: "visible limit reached for your current subscription"
+ *       403:
+ *         description: Forbidden - seller is not the product owner.
  *       404:
- *         description: Product not found
+ *         description: Product or seller not found.
  *       500:
- *         description: Internal server error
+ *         description: Server error.
  */
 
-/**
- * @swagger
- * /api/seller/boost/ads:
- *   get:
- *     summary: Fetch all boost ads for the authenticated user
- *     tags:
- *       - Seller's Listing
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully retrieved boost ads
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     example: "boost_123"
- *                   productId:
- *                     type: string
- *                     example: "prod_456"
- *                   productName:
- *                     type: string
- *                     example: "Wireless Headphones"
- *                   plan:
- *                     type: string
- *                     example: "Premium"
- *                   period:
- *                     type: string
- *                     example: "30 days"
- *                   price:
- *                     type: number
- *                     example: 49.99
- *       401:
- *         description: Unauthorized - Missing or invalid token
- *       500:
- *         description: Failed to fetch boost ads
- */
 
 /**
  * @swagger
@@ -883,7 +967,7 @@
  *   get:
  *     summary: Get notifications for the authenticated user
  *     tags:
- *       - Notifications
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -952,4 +1036,80 @@
  *         description: Unauthorized - Missing or invalid token
  *       500:
  *         description: Failed to fetch notifications
+ */
+
+
+/**
+ * @swagger
+ * /api/seller/plan/subscription/{planId}:
+ *   post:
+ *     summary: Subscribe a seller to a subscription plan
+ *     description: >
+ *       Initiates a subscription process for the authenticated seller by creating a payment session with a provider
+ *       (e.g., Paystack, Flutterwave, Stripe). Saves the transaction in the database with status `Pending`.  
+ *       The frontend should redirect the user to the payment page if status is 200.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: planId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The subscription plan ID to subscribe to
+ *     responses:
+ *       200:
+ *         description: Payment session successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 paymentSession:
+ *                   type: object
+ *                   properties:
+ *                     reference:
+ *                       type: string
+ *                       example: txn_1693339339339
+ *                     amount:
+ *                       type: number
+ *                       example: 5000.00
+ *                     currency:
+ *                       type: string
+ *                       example: NGN
+ *                     callbackUrl:
+ *                       type: string
+ *                       example: https://yourdomain.com/api/payment/webhook
+ *       400:
+ *         description: Missing sellerId or planId in request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: sellerId and planId required
+ *       404:
+ *         description: Subscription plan not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: plan not found
+ *       500:
+ *         description: Internal server error when creating transaction or initiating payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to initiate transaction
  */

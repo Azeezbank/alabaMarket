@@ -34,7 +34,8 @@ export const UpdateInfo = async (req: AuthRequest, res: Response) => {
     })
     res.status(200).json({message: 'Profile updated successfully'});
     } catch (err: any) {
-        console.error({message: 'Failed to update admin profile'})
+        console.error({message: 'Failed to update admin profile', err})
+        return res.status(500).json({ message: 'Something went wrong, Failed to update admin profile'})
     }
 }
 
@@ -58,8 +59,10 @@ export const ChangePassword = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({message: 'Incorrect password'});
         }
 
-        await prisma.user.update({ where:  {id: userId}, data: {password: confirmedPassword}})
+        await prisma.user.update({ where:  {id: userId}, data: {password: confirmedPassword}});
+        res.status(200).json({message: 'Password changed successfully'});
     } catch (err: any) {
-        console.error('Failed to change password')
+        console.error('Failed to change password', err)
+        return res.status(500).json({ message: 'Something went wrong, Failed to change password'})
     }
 }

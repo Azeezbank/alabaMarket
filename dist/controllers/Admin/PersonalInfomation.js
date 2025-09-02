@@ -29,7 +29,8 @@ export const UpdateInfo = async (req, res) => {
         res.status(200).json({ message: 'Profile updated successfully' });
     }
     catch (err) {
-        console.error({ message: 'Failed to update admin profile' });
+        console.error({ message: 'Failed to update admin profile', err });
+        return res.status(500).json({ message: 'Something went wrong, Failed to update admin profile' });
     }
 };
 //Change password
@@ -51,8 +52,10 @@ export const ChangePassword = async (req, res) => {
             return res.status(400).json({ message: 'Incorrect password' });
         }
         await prisma.user.update({ where: { id: userId }, data: { password: confirmedPassword } });
+        res.status(200).json({ message: 'Password changed successfully' });
     }
     catch (err) {
-        console.error('Failed to change password');
+        console.error('Failed to change password', err);
+        return res.status(500).json({ message: 'Something went wrong, Failed to change password' });
     }
 };

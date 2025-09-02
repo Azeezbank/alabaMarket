@@ -5,63 +5,6 @@ import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import redis from "../../config/redisClient.js";
 
 
-//fetch all active products including the seller's store details
-// export const storeFetchActiveSellerListings = async (req: AuthRequest, res: Response) => {
-
-//   // Parse pagination query params with defaults
-//   const page = parseInt(req.query.page as string) || 1;
-//   const limit = parseInt(req.query.limit as string) || 10;
-//   const skip = (page - 1) * limit;
-
-//   const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
-
-//   try {
-//     const today = new Date();
-    
-//     // Get total count
-//     const total = await prisma.product.count({ where: { isActive: true } });
-
-//     // 1️ Check Redis cache first
-//     const cachedData = await redis.get(cacheKey);
-//     if (cachedData) {
-//       return res.status(200).json(JSON.parse(cachedData));
-//     }
-
-//     // Fetch paginated products
-//     const products = await prisma.product.findMany({
-//       where: {
-//         isActive: true // Only active listing
-//       },
-//       include: {
-//         productPhoto: true,
-//         productVideo: true,
-//         productPricing: true,
-//         _count: {
-//           select: { likes: true, love: true }
-//         }
-//       },
-//       orderBy: { createdAt: 'desc' },
-//       skip,
-//       take: limit
-//     });
-
-//     const responseData = {
-//       page,
-//       limit,
-//       total,
-//       totalPages: Math.ceil(total / limit),
-//       products,
-//     };
-
-//     await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
-
-//     res.status(200).json(responseData);
-//   } catch (err: any) {
-//     console.error("Error fetching product listings:", err);
-//     res.status(500).json({ message: "Failed to fetch product listings" });
-//   }
-// };
-
 //Filter listing by name/popular search
 export const filterpopularListings = async (req: AuthRequest, res: Response) => {
   const name = req.query.name as string;
@@ -74,7 +17,7 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
   const cacheKey = `popular_listings:page=${page}:limit=${limit}`;
   try {
     // Get total count
-    const total = await prisma.product.count({ where: { name } });
+    const total = await prisma.product.count({ where: { name, isVisible: true, status: 'Approved' } });
 
     // 1️ Check Redis cache first
     const cachedData = await redis.get(cacheKey);
@@ -85,7 +28,7 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
     // Fetch paginated products
     const products = await prisma.product.findMany({
       where: {
-        name, isActive: true
+        name, isVisible: true, status: 'Approved'
       },
       include: {
         productPhoto: true,
@@ -135,7 +78,7 @@ const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
     // Get total count
     const total = await prisma.product.count({
       where: {
-        isActive: true, productPricing: {
+        status: 'Approved', isVisible: true, productPricing: {
           price: {
             gte: fromAmount,
             lte: toAmount
@@ -194,7 +137,7 @@ export const filterListingsByLessPrice = async (req: AuthRequest, res: Response)
     // Get total count
     const total = await prisma.product.count({
       where: {
-        isActive: true, productPricing: {
+        isVisible: true, status: 'Approved', productPricing: {
           price: {
             lte: lessThan
           }
@@ -205,7 +148,7 @@ export const filterListingsByLessPrice = async (req: AuthRequest, res: Response)
     // Fetch paginated products
     const products = await prisma.product.findMany({
       where: {
-        isActive: true, productPricing: {
+        isVisible: true, status: 'Approved', productPricing: {
           price: {
             lte: lessThan
           }
@@ -240,7 +183,7 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
   try {
     // Get total count
     const total = await prisma.product.count({
-      where: {
+      where: { isVisible: true, status: 'Approved',
         productPricing: {
           price: {
             gte: greaterThan
@@ -252,7 +195,7 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
     // Fetch paginated products
     const products = await prisma.product.findMany({
       where: {
-        isActive: true, productPricing: {
+        isVisible: true, status: 'Approved', productPricing: {
           price: {
             gte: greaterThan
           }
@@ -320,7 +263,7 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
 
   try {
     // Get total count
-    const total = await prisma.product.count({ where: { isActive: true, user: { sellerVerification: { isVerified: true } } } });
+    const total = await prisma.product.count({ where: { isVisible: true, status: 'Approved', user: { sellerVerification: { isVerified: true } } } });
 
     // 1️ Check Redis cache first
     const cachedData = await redis.get(cacheKey);
@@ -330,7 +273,7 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
-      where: { isActive: true, user: { sellerVerification: { isVerified: true } } },
+      where: { isVisible: true, status: 'Approved', user: { sellerVerification: { isVerified: true } } },
       include: {
         productPhoto: true,
         productVideo: true,
@@ -368,11 +311,11 @@ export const fetchUnverifiedSellerListing = async (req: AuthRequest, res: Respon
 
   try {
     // Get total count
-    const total = await prisma.product.count({ where: { isActive: true, user: { sellerVerification: { isVerified: false } } } });
+    const total = await prisma.product.count({ where: { isVisible: true, status: 'Approved', user: { sellerVerification: { isVerified: false } } } });
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
-      where: { isActive: true, user: { sellerVerification: { isVerified: false } } },
+      where: { isVisible: true, status: 'Approved', user: { sellerVerification: { isVerified: false } } },
       include: {
         productPhoto: true,
         productVideo: true,
@@ -401,11 +344,11 @@ export const fetchSellerListingByCondition = async (req: AuthRequest, res: Respo
 
   try {
     // Get total count
-    const total = await prisma.product.count({ where: { isActive: true, productPricing: { condition } } });
+    const total = await prisma.product.count({ where: { isVisible: true, status: 'Approved', productPricing: { condition } } });
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
-      where: { isActive: true, productPricing: { condition } },
+      where: { isVisible: true, status: 'Approved', productPricing: { condition } },
       include: {
         productPhoto: true,
         productVideo: true,
@@ -429,7 +372,7 @@ export const productOwner = async (req: AuthRequest, res: Response) => {
   try {
     const productOwner = await prisma.product.findFirst({
       where: {
-        id: productId
+        id: productId, isVisible: true, status: 'Approved',
       },
       select: {
         id: true,
@@ -507,7 +450,7 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
   try {
       // Get total count for pagination
     const total = await prisma.savedProducts.count({
-      where: { userId },
+      where: { userId, product: { isVisible: true } },
     });
 
     const savedProduct = await prisma.savedProducts.findMany({
@@ -563,19 +506,9 @@ export const getActiveListing = async (req: Request, res: Response) => {
 
     const today = new Date();
 
-    const activeBoosts = await prisma.boostAd.findMany({
-      where: {
-        endDate: {
-          gte: today, // not expired yet
-        },
-        status: "Active", // optional: only approved ones
-        product: {
-    status: "Approved",              // only active products
-  },
-      },
+    const activeBoosts = await prisma.product.findMany({
+      where: { isVisible: true, status: "Approved" },
       include: {
-        product: {
-        include: {
         productPhoto: true,
         productVideo: true,
         productPricing: true,
@@ -588,8 +521,6 @@ export const getActiveListing = async (req: Request, res: Response) => {
             profile: true, // adjust what you need
           },
         },
-      },
-      },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -611,139 +542,139 @@ export const getActiveListing = async (req: Request, res: Response) => {
   }
 };
 
-// select listing by boost plan
-export const getActiveListingByPlan = async (req: Request, res: Response) => {
-  // Parse pagination query params with defaults
-  const plan = (req.query.plan as string);
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const skip = (page - 1) * limit;
+// // select listing by boost plan
+// export const getActiveListingByPlan = async (req: Request, res: Response) => {
+//   // Parse pagination query params with defaults
+//   const plan = (req.query.plan as string);
+//   const page = parseInt(req.query.page as string) || 1;
+//   const limit = parseInt(req.query.limit as string) || 10;
+//   const skip = (page - 1) * limit;
 
-  const cacheKey = `active_boostedplan=${plan}:page=${page}:limit=${limit}`;
-  try {
+//   const cacheKey = `active_boostedplan=${plan}:page=${page}:limit=${limit}`;
+//   try {
 
-       // 1️ Check Redis cache first
-    const cachedData = await redis.get(cacheKey);
-    if (cachedData) {
-      return res.status(200).json(JSON.parse(cachedData));
-    }
+//        // 1️ Check Redis cache first
+//     const cachedData = await redis.get(cacheKey);
+//     if (cachedData) {
+//       return res.status(200).json(JSON.parse(cachedData));
+//     }
 
-    const today = new Date();
+//     const today = new Date();
 
-    const activePaidBoosts = await prisma.boostAd.findMany({
-      where: {
-        endDate: {
-          gte: today, // not expired yet
-        },
-        status: "Active", // optional: only approved ones
-        plan,
-        product: {
-    status: "Approved",              // only active products
-  },
-      },
-      include: {
-        product: {
-        include: {
-        productPhoto: true,
-        productVideo: true,
-        productPricing: true,
-        _count: {
-          select: { likes: true, love: true },
-        },
-        user: {
-          select: {
-            id: true,
-            profile: true, // adjust what you need
-          },
-        },
-      },
-      },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit
-    });
+//     const activePaidBoosts = await prisma.boostAd.findMany({
+//       where: {
+//         endDate: {
+//           gte: today, // not expired yet
+//         },
+//         status: "Active", // optional: only approved ones
+//         plan,
+//         product: {
+//     status: "Approved",              // only active products
+//   },
+//       },
+//       include: {
+//         product: {
+//         include: {
+//         productPhoto: true,
+//         productVideo: true,
+//         productPricing: true,
+//         _count: {
+//           select: { likes: true, love: true },
+//         },
+//         user: {
+//           select: {
+//             id: true,
+//             profile: true, // adjust what you need
+//           },
+//         },
+//       },
+//       },
+//       },
+//       orderBy: { createdAt: 'desc' },
+//       skip,
+//       take: limit
+//     });
 
-    const responseData = {
-      page,
-      limit,
-      activePaidBoosts
-    };
+//     const responseData = {
+//       page,
+//       limit,
+//       activePaidBoosts
+//     };
 
-    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+//     await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
 
-    res.status(200).json(responseData);
-  } catch (err: any) {
-    console.error("Failed to fetch active boost ads", err);
-    res.status(500).json({ message: "Something went wrong" });
-  }
-};
+//     res.status(200).json(responseData);
+//   } catch (err: any) {
+//     console.error("Failed to fetch active boost ads", err);
+//     res.status(500).json({ message: "Something went wrong" });
+//   }
+// };
 
 
 //Select all free listing
-export const getActiveFreeListing = async (req: Request, res: Response) => {
-  // Parse pagination query params with defaults
-  const plan = 'Free'
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const skip = (page - 1) * limit;
+// export const getActiveFreeListing = async (req: Request, res: Response) => {
+//   // Parse pagination query params with defaults
+//   const plan = 'Free'
+//   const page = parseInt(req.query.page as string) || 1;
+//   const limit = parseInt(req.query.limit as string) || 10;
+//   const skip = (page - 1) * limit;
 
-  const cacheKey = `active_freeboostedplan=${plan}:page=${page}:limit=${limit}`;
-  try {
+//   const cacheKey = `active_freeboostedplan=${plan}:page=${page}:limit=${limit}`;
+//   try {
 
-       // 1️ Check Redis cache first
-    const cachedData = await redis.get(cacheKey);
-    if (cachedData) {
-      return res.status(200).json(JSON.parse(cachedData));
-    }
+//        // 1️ Check Redis cache first
+//     const cachedData = await redis.get(cacheKey);
+//     if (cachedData) {
+//       return res.status(200).json(JSON.parse(cachedData));
+//     }
 
-    const today = new Date();
+//     const today = new Date();
 
-    const activePaidBoosts = await prisma.boostAd.findMany({
-      where: {
-        endDate: {
-          gte: today, // not expired yet
-        },
-        status: "Active", // optional: only approved ones
-        type: plan,
-        product: {
-    status: "Approved",              // only active products
-  },
-      },
-      include: {
-        product: {
-        include: {
-        productPhoto: true,
-        productVideo: true,
-        productPricing: true,
-        _count: {
-          select: { likes: true, love: true },
-        },
-        user: {
-          select: {
-            id: true,
-            profile: true, // adjust what you need
-          },
-        },
-      },
-      },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit
-    });
+//     const activePaidBoosts = await prisma.boostAd.findMany({
+//       where: {
+//         endDate: {
+//           gte: today, // not expired yet
+//         },
+//         status: "Active", // optional: only approved ones
+//         type: plan,
+//         product: {
+//     status: "Approved",              // only active products
+//   },
+//       },
+//       include: {
+//         product: {
+//         include: {
+//         productPhoto: true,
+//         productVideo: true,
+//         productPricing: true,
+//         _count: {
+//           select: { likes: true, love: true },
+//         },
+//         user: {
+//           select: {
+//             id: true,
+//             profile: true, // adjust what you need
+//           },
+//         },
+//       },
+//       },
+//       },
+//       orderBy: { createdAt: 'desc' },
+//       skip,
+//       take: limit
+//     });
 
-    const responseData = {
-      page,
-      limit,
-      activePaidBoosts
-    };
+//     const responseData = {
+//       page,
+//       limit,
+//       activePaidBoosts
+//     };
 
-    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
+//     await redis.set(cacheKey, JSON.stringify(responseData), "EX", 300);
 
-    res.status(200).json(responseData);
-  } catch (err: any) {
-    console.error("Failed to fetch active boost ads", err);
-    res.status(500).json({ message: "Something went wrong" });
-  }
-};
+//     res.status(200).json(responseData);
+//   } catch (err: any) {
+//     console.error("Failed to fetch active boost ads", err);
+//     res.status(500).json({ message: "Something went wrong" });
+//   }
+// };

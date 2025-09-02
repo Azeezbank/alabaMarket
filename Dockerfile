@@ -19,14 +19,8 @@ RUN rm -rf dist && npx tsc
 # Generate Prisma client
 RUN npx prisma generate
 
-# sync schema
-# RUN npx prisma db push
-
 # Expose the port Express runs on
 EXPOSE 3000
 
 # Run db push then start the app
 CMD sh -c "npx prisma db push && npm start"
-
-# Start the app
-# CMD ["npm", "start"]

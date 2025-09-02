@@ -161,8 +161,9 @@ export const updateProductcategory = async (req, res) => {
         return res.status(500).json({ message: 'Smething went wrong, Failed to update product category' });
     }
 };
-//Fetch all seller listings including the shop details
+//Fetch seller listing details to populate update for publish
 export const FetchSellerListings = async (req, res) => {
+    const productId = req.query.productId;
     const userId = req.user?.id;
     // Parse pagination query params with defaults
     const page = parseInt(req.query.page) || 1;
@@ -174,9 +175,52 @@ export const FetchSellerListings = async (req, res) => {
         // Fetch paginated products
         const products = await prisma.product.findMany({
             where: {
-                userId, shop: {
-                    isActive: true // Only from active shops
+                userId, id: productId
+            },
+            include: {
+                productPhoto: true,
+                productVideo: true,
+                productPricing: true,
+                user: {
+                    select: {
+                        createdAt: true,
+                        sellerShop: {
+                            select: {
+                                storeName: true,
+                            }
+                        },
+                        sellerVerification: {
+                            select: { isVerified: true }
+                        }
+                    }
                 }
+            },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
+        });
+        res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
+    }
+    catch (err) {
+        console.error("Error fetching product listings:", err);
+        res.status(500).json({ message: "Failed to fetch seller's product listings" });
+    }
+};
+//Fetch all seller's listing
+export const FetchAllSellerListings = async (req, res) => {
+    const productId = req.query.productId;
+    const userId = req.user?.id;
+    // Parse pagination query params with defaults
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    try {
+        // Get total count
+        const total = await prisma.product.count({ where: { userId } });
+        // Fetch paginated products
+        const products = await prisma.product.findMany({
+            where: {
+                userId
             },
             include: {
                 productPhoto: true,
@@ -246,14 +290,6 @@ export const EditSellerListing = async (req, res) => {
                 productPhoto: true,
                 productVideo: true,
                 productPricing: true
-            }
-        });
-        await prisma.boostAd.upsert({ where: { productId },
-            update: {
-                plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
-            },
-            create: {
-                productId, userId, plan: 'Free boosting', type: 'Free', period: 'Monthly', placement: 'Homepage'
             }
         });
         res.status(200).json({ message: "Product listing updated successfully", updatedProduct });
@@ -331,82 +367,168 @@ export const PauseSellerListing = async (req, res) => {
 //   }
 // };
 //Selct all boost plan
-export const BoostPlans = async (req, res) => {
-    try {
-        const plans = await prisma.boostPackages.findMany({
-            select: {
-                id: true, plan: true,
-                // boostPackagesDetails: {
-                //   select: {
-                //     id: true, duration: true, price: true, status: true
-                //   }
-                // }
-            }
-        });
-        res.status(200).json(plans);
-    }
-    catch (err) {
-        console.error('Failed to select plan', err);
-        return res.status(500).json({ message: 'Failed to select plan' });
-    }
-};
+// export const BoostPlans = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const plans = await prisma.boostPackages.findMany({
+//       select: {
+//         id: true, plan: true,
+//         // boostPackagesDetails: {
+//         //   select: {
+//         //     id: true, duration: true, price: true, status: true
+//         //   }
+//         // }
+//       }
+//     })
+//     res.status(200).json(plans)
+//   } catch (err: any) {
+//     console.error('Failed to select plan', err)
+//     return res.status(500).json({ message: 'Failed to select plan' })
+//   }
+// };
 //Select boost plan details
-export const boostDetails = async (req, res) => {
-    const { plan } = req.body;
+// export const boostDetails = async (req: AuthRequest, res: Response) => {
+//   const { plan } = req.body;
+//   try {
+//     const boostPlanDetails = await prisma.boostPackages.findMany({ where: {plan},
+//       select: {
+//         id: true, type: true,  placement: true,
+//         boostPackagesDetails: {
+//           select: {
+//             duration: true, price: true, status: true
+//           }
+//         }
+//       }
+//     })
+//     res.status(200).json(boostPlanDetails)
+//   } catch (err: any) {
+//     console.error('Failed to select plan details', err)
+//     return res.status(500).json({ message: 'Failed to select plan details' })
+//   }
+// };
+//Upgrade Boost listing
+// export const upgradeListingBoost = async (req: AuthRequest, res: Response) => {
+//   const productId = req.params.productId;
+//   const userId = (req.user as JwtPayload)?.id;
+//   const { productName, plan, period, price, placement } = req.body;
+//   try {
+//     await prisma.boostAd.update({ where: {productId},
+//       data: {
+//         productName, plan, type: 'Paid', period, price, placement
+//       }
+//     });
+//     const message = "You have new submission for Boost Ad";
+//     const typeOfNotification = 'Boosted Ad';
+//     await prisma.notification.create({
+//       data: {
+//         senderId: userId, message, type: typeOfNotification,
+//       }
+//     })
+//     res.status(200).json({ message: 'Boost Submitted For Reviews' })
+//   } catch (err: any) {
+//     console.error('Something went wrong, Failed to submit boosting', err)
+//     return res.status(500).json({ message: 'Something went wrong, Failed to submit boosting' })
+//   }
+// };
+//Select sellers Boost adds
+// export const fetchBoostAd = async (req: AuthRequest, res: Response) => {
+//   const userId = (req.user as JwtPayload)?.id;
+//   try {
+//     const sellerBoost = await prisma.boostAd.findMany({
+//       where: { userId },
+//     });
+//     res.status(200).json(sellerBoost)
+//   } catch (err: any) {
+//     console.error('Something went wrong, Failed to select boosting', err)
+//     return res.status(500).json({ message: 'Something went wrong, Failed to select boosting' })
+//   }
+// };
+// Seller toggles visibility for a product (mark/unmark visible)
+export const toggleProductVisibility = async (req, res) => {
     try {
-        const boostPlanDetails = await prisma.boostPackages.findMany({ where: { plan },
-            select: {
-                id: true, type: true, placement: true,
-                boostPackagesDetails: {
-                    select: {
-                        duration: true, price: true, status: true
+        const { productId } = req.params;
+        let { makeVisible } = req.body; // makeVisible: true/false
+        const userId = req.user?.id;
+        if (makeVisible === 'true') {
+            makeVisible = true;
+        }
+        else if (makeVisible === 'false') {
+            makeVisible = false;
+        }
+        else {
+            return res.status(400).json({ message: 'makeVisible is required' });
+        }
+        const product = await prisma.product.findUnique({ where: { id: productId },
+            include: { category: true }
+        });
+        if (!product)
+            return res.status(404).json({ message: "product not found" });
+        if (product.userId !== userId)
+            return res.status(403).json({ message: "not product owner" });
+        if (!makeVisible) {
+            // unmark visibility
+            const updated = await prisma.product.update({
+                where: { id: productId },
+                data: { isVisible: false, visibleMarkedAt: null },
+            });
+            return res.json(updated);
+        }
+        // make visible: check seller's plan and current count
+        const seller = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                subscriptionPlan: {
+                    include: {
+                        maxVisiblePerCat: true
                     }
                 }
-            }
+            },
         });
-        res.status(200).json(boostPlanDetails);
+        if (!seller)
+            return res.status(404).json({ message: "seller not found" });
+        // determine active plan; if expired or null, default to free plan (find plan named "Free")
+        const now = new Date();
+        let plan = seller.subscriptionPlan;
+        if (!plan || (seller.subscriptionExpiresAt && seller.subscriptionExpiresAt < now)) {
+            // treat as Free plan
+            plan = await prisma.subscriptionPlan.findFirst({ where: { name: "Free" }, include: { maxVisiblePerCat: true } });
+            if (!plan) {
+                console.log('No free plan availabel');
+                return res.status(500).json({ message: "Free plan not configured in DB" });
+            }
+        }
+        if (!plan.maxVisiblePerCat) {
+            console.log('Maximun visible product not set');
+            return res.status(400).json({ message: 'Maximun visible product not set' });
+        }
+        // global visible check
+        const currentVisibleCount = await prisma.product.count({
+            where: { userId, isVisible: true },
+        });
+        if (currentVisibleCount >= plan.maxVisibleProducts) {
+            return res.status(400).json({
+                message: "visible limit reached for your current subscription",
+                maxVisible: plan.maxVisibleProducts,
+            });
+        }
+        // per-category check
+        const currentVisibleInCategory = await prisma.product.count({
+            where: { userId, isVisible: true, categoryId: product.categoryId },
+        });
+        if (currentVisibleInCategory >= plan.maxVisiblePerCat.maxVisible) {
+            console.log(`Per-category limit reached. Only ${plan.maxVisiblePerCat.maxVisible} visible in ${product.category?.name}`);
+            return res.status(400).json({
+                error: `Per-category limit reached. Only ${plan.maxVisiblePerCat.maxVisible} visible in ${product.category?.name}`,
+            });
+        }
+        // update product
+        const updated = await prisma.product.update({
+            where: { id: productId },
+            data: { isVisible: true, visibleMarkedAt: new Date() },
+        });
+        return res.json(updated);
     }
     catch (err) {
-        console.error('Failed to select plan details', err);
-        return res.status(500).json({ message: 'Failed to select plan details' });
-    }
-};
-//Upgrade Boost listing
-export const upgradeListingBoost = async (req, res) => {
-    const productId = req.params.productId;
-    const userId = req.user?.id;
-    const { productName, plan, period, price, placement } = req.body;
-    try {
-        await prisma.boostAd.update({ where: { productId },
-            data: {
-                productName, plan, type: 'Paid', period, price, placement
-            }
-        });
-        const message = "You have new submission for Boost Ad";
-        const typeOfNotification = 'Boosted Ad';
-        await prisma.notification.create({
-            data: {
-                senderId: userId, message, type: typeOfNotification,
-            }
-        });
-        res.status(200).json({ message: 'Boost Submitted For Reviews' });
-    }
-    catch (err) {
-        console.error('Something went wrong, Failed to submit boosting', err);
-        return res.status(500).json({ message: 'Something went wrong, Failed to submit boosting' });
-    }
-};
-//Select sellers Boost adds
-export const fetchBoostAd = async (req, res) => {
-    const userId = req.user?.id;
-    try {
-        const sellerBoost = await prisma.boostAd.findMany({
-            where: { userId },
-        });
-        res.status(200).json(sellerBoost);
-    }
-    catch (err) {
-        console.error('Something went wrong, Failed to select boosting', err);
-        return res.status(500).json({ message: 'Something went wrong, Failed to select boosting' });
+        console.error(err);
+        return res.status(500).json({ message: "server error" });
     }
 };

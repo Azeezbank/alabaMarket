@@ -14,6 +14,10 @@ import chat from './routes/Messages.js';
 import { registerSocketHandlers } from './routes/Video.js';
 import buyer from './routes/Buyer.js';
 import redis from './config/redisClient.js';
+import "./jobs/subscriptionExpiryJob.js";
+import payment from './routes/payment.js';
+import webhook from './routes/webhook.route.js';
+import cors from "cors";
 
 
 
@@ -23,6 +27,11 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(cors({
+  origin: true,
+  methods: ["POST", "PUT", "DELETE", "GET", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 // app.use(passport.initialize());
 
 const PORT = process.env.PORT || 3000;
@@ -53,6 +62,11 @@ app.use('/api/buyer', buyer);
 
 //Messages
 app.use('/api/chat', chat)
+//Initiate payment
+app.use('/api/initiate/payment', payment);
+
+//Payment webhook
+app.use('/api/payment/webhook', webhook)
 
 
 //Socket.io for chat and video supporting WebRTC
