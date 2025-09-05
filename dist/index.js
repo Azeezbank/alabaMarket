@@ -20,9 +20,6 @@ import cors from "cors";
 // import { isAdmin } from './middlewares/Admin.js';
 dotenv.config();
 const app = express();
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(cookieParser());
 app.use(cors({
     origin: [
         "http://localhost:3000",
@@ -31,6 +28,9 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Accept"]
 }));
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(cookieParser());
 const PORT = process.env.PORT || 3000;
 //Swagger document
 setupSwagger(app);
