@@ -103,7 +103,7 @@
  *                 description: User's password
  *             example:
  *               email: "user@example.com"
- *               phone: "09012345678"
+ *               phone: "+2349012345678"
  *               password: "mypassword123"
  *     responses:
  *       200:

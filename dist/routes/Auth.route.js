@@ -62,7 +62,6 @@ router.post("/register", async (req, res) => {
                 subject: "Verify your email",
                 html: `<p>Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
             });
-            '';
             res.status(201).json({
                 message: "User registered. Verification code sent.",
                 userId: newUser.id,
@@ -123,6 +122,10 @@ router.post("/verify", async (req, res) => {
             if (verificationCheck.status === "approved") {
                 const message = `New member ${phone} has been registerd on your platform`;
                 const type = 'User Activity';
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { sign_up_verify: true, otp: null, expiresAt: null },
+                });
                 await prisma.notification.create({
                     data: {
                         senderId: user.id, message, type
