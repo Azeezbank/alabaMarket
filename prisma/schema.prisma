@@ -475,7 +475,7 @@ model Transaction {
 model PaymentProvider {
   id        Int      @id @default(autoincrement())
   name      PaymentProviderName
-  publicKey String
+  publicKey String?
   secretKey String
   flutterWebhookSecret String @default("d8f3a7c2b9e541f0a4c7e63d9f28ac12")
   isActive  Boolean  @default(false)

@@ -1235,3 +1235,128 @@
  *       500:
  *         description: Failed to reactivate admin
  */
+
+/**
+ * @swagger
+ * /api/admin/create/payment/provider:
+ *   post:
+ *     summary: Create a new payment provider
+ *     description: Add a new payment provider (e.g., Paystack or Flutterwave). Only one provider should be active at a time.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - publicKey
+ *               - secretKey
+ *               - isActive
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: paystack
+ *               publicKey:
+ *                 type: string
+ *                 example: pk_test_xxxxxxxxxxxxxx
+ *               secretKey:
+ *                 type: string
+ *                 example: sk_test_xxxxxxxxxxxxxx
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Payment provider created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Payment provider created successfully
+ *       401:
+ *         description: Unauthorized – JWT missing or invalid
+ *       500:
+ *         description: Failed to create payment provider
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to create payment provider
+ */
+
+/**
+ * @swagger
+ * /api/admin/update/payment/provider:
+ *   put:
+ *     summary: Update an existing payment provider
+ *     description: Update a payment provider’s details by providing its name.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: flutterwave
+ *               publicKey:
+ *                 type: string
+ *                 example: FLWPUBK_TEST-xxxxxxxxxxxx
+ *               secretKey:
+ *                 type: string
+ *                 example: FLWSECK_TEST-xxxxxxxxxxxx
+ *               isActive:
+ *                 type: boolean
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: Payment provider updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Payment provider updated successfully
+ *       401:
+ *         description: Unauthorized – JWT missing or invalid
+ *       404:
+ *         description: Payment provider not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Payment provider not found
+ *       500:
+ *         description: Failed to update payment provider
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to update payment provider
+ */

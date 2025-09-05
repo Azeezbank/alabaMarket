@@ -76,7 +76,7 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
           amount: planPrice,
           currency: "NGN",
           redirect_url: "https://yourdomain/payment/verify",
-          customer: { eamil: user.email },
+          customer: { email: user.email },
         },
         { headers: { Authorization: `Bearer ${provider.secretKey}` } }
       );
@@ -172,7 +172,7 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
       console.log('Flutter body', req.body);
       // Verify Flutterwave signature
 
-      const txnF = await prisma.transaction.findUnique({ where: { reference: req.body.data.reference } });
+      const txnF = await prisma.transaction.findUnique({ where: { reference: req.body.data.tx_ref } });
       if (!txnF) return res.status(404).json({ error: "Transaction not found" });
 
       const hash = crypto
@@ -226,3 +226,37 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "Something went wrong, failed to complete webhook transaction" });
   }
 };
+
+//Create or update payment provider
+export const createPaymentProvider = async (req: AuthRequest, res: Response) => {
+  const { name, publicKey, secretKey, isActive } = req.body;  //isActive must be boolean true/false
+  try {
+      // Create new provider
+       await prisma.paymentProvider.create({
+        data: { name, publicKey, secretKey, isActive }
+      });
+      res.status(200).json({ message: "Payment provider created successfully" });
+    } catch (err: any) {
+      console.error('Error creating payment provider', err);
+      res.status(500).json({ error: "Failed to create payment provider" });
+    }
+}
+
+
+//Update payment provider
+export const updatePaymentProvider = async (req: AuthRequest, res: Response) => {
+  const { name, publicKey, secretKey, isActive } = req.body;  //isActive must be boolean true/false
+  try {
+    const existingProvider = await prisma.paymentProvider.findFirst({ where: { name } });
+    if (!existingProvider) return res.status(404).json({ message: "Payment provider not found" });
+    // Update existing provider
+    await prisma.paymentProvider.update({
+      where: { id: existingProvider.id },
+      data: { publicKey, secretKey, isActive }
+    });
+    res.status(200).json({ message: "Payment provider updated successfully" });
+  } catch (err: any) {
+    console.error('Error updating payment provider', err);
+    res.status(500).json({ error: "Failed to update payment provider" });
+  }
+}

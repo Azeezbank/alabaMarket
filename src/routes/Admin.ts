@@ -11,6 +11,7 @@ import { allListing, rejectListing, approveListing } from '../controllers/Admin/
 import { sellerVerificationReview, approveSellerVerification, rejectSellerVerification } from '../controllers/Admin/seller.verification.js';
 import { createTickets, getTickets, assignTicketAgent, openTicket, escalateTicket, markTicketAsRead } from '../controllers/Admin/Ticket.js';
 import { createSubscriptionPlan, getSubscriptionPlans, editsubscriptionplan, deletesubscriptionPlan } from '../controllers/Admin/subscription.js';
+import { createPaymentProvider, updatePaymentProvider } from '../controllers/paymentControler.js';
 
 const router = express.Router();
 
@@ -39,6 +40,8 @@ router.get("/all/sellers", authenticate, Getsellers);
 router.get('/total/active/listing', authenticate, getActiveListing);
 router.post("/create/subscription/plan", authenticate, createSubscriptionPlan);
 router.get('/subscription/plan', authenticate, getSubscriptionPlans);
+router.post('/create/payment/provider', authenticate, createPaymentProvider);
+router.put('/update/payment/provider', authenticate, updatePaymentProvider);
 router.put("/edit/subcription/plan/:planId", authenticate, editsubscriptionplan);
 router.delete("/delete/subscription/plan/:planId", authenticate, deletesubscriptionPlan);
 router.put('/edit/admin/role/:roleId', authenticate, editRole);
