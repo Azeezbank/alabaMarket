@@ -5,15 +5,16 @@
  *   description: Admin management and operations
  */
 
-
 /**
  * @swagger
- * /api/admin//create/subscription/plan:
+ * /api/admin/create/subscription/plan:
  *   post:
  *     summary: Create a new subscription plan
- *     tags: [Admin]
+ *     description: Allows an admin to create a new subscription plan with visibility and placement rules.
+ *     tags:
+ *       - Admin
  *     security:
- *       - bearerAuth: []
+ *       - bearerAuth: []   # requires JWT auth
  *     requestBody:
  *       required: true
  *       content:
@@ -26,33 +27,51 @@
  *               - duration
  *               - maxVisibleProducts
  *               - placement
- *               - maxVisible
+ *               - maxVisibleCat
  *             properties:
  *               name:
  *                 type: string
- *                 example: Free
+ *                 example: Premium Plan
  *               price:
  *                 type: number
- *                 example: 1000
+ *                 example: 5000
  *               duration:
  *                 type: string
- *                 enum: [Weekly, Monthly, Quarterly, Annually]
- *                 example: Monthly
+ *                 enum: [weekly, monthly, quarterly, annually]
+ *                 example: monthly
  *               maxVisibleProducts:
  *                 type: integer
- *                 example: 5
+ *                 example: 50
  *               placement:
  *                 type: string
- *                 example: Golden Plan
- *               maxVisible:
+ *                 example: top
+ *               maxVisibleCat:
  *                 type: integer
- *                 example: 2
+ *                 description: Maximum visible items per category
+ *                 example: 10
  *     responses:
  *       200:
- *         description: Plan created successfully
+ *         description: Subscription plan created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Plan created successfully
  *       500:
- *         description: Failed to create subscription plan
+ *         description: Failed to create subscription plan due to a server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to create subscription plan
  */
+
 
 /**
  * @swagger
@@ -60,6 +79,8 @@
  *   get:
  *     summary: Get all subscription plans
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []   # requires JWT auth
  *     responses:
  *       200:
  *         description: List of subscription plans
@@ -165,35 +186,6 @@
  *         description: Plan not found
  *       500:
  *         description: Failed to delete subscription plan
- */
-
-/**
- * @swagger
- * /api/admin/all/free/listing:
- *   get:
- *     summary: Fetch free listings
- *     description: Get all free listings with pagination. Each listing includes product and user profile details.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number for pagination
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of records per page
- *     responses:
- *       200:
- *         description: List of free listings
- *       500:
- *         description: Failed to fetch free listings
  */
 
 /**
@@ -1081,7 +1073,7 @@
 
 /**
  * @swagger
- * /api/admin/update-role:
+ * /api/admin/update/user/role:
  *   put:
  *     summary: Update user role
  *     tags: [admin]
@@ -1135,9 +1127,9 @@
 
 /**
  * @swagger
- * /api/admin/roles:
+ * /api/admin/role/management:
  *   get:
- *     summary: Get all admin roles
+ *     summary: Get all admin roles, and the role details
  *     tags: [admin]
  *     security:
  *       - bearerAuth: []
@@ -1150,7 +1142,7 @@
 
 /**
  * @swagger
- * /api/admin/roles:
+ * /api/admin/add/new/admin/role:
  *   post:
  *     summary: Create a new role
  *     tags: [admin]
@@ -1175,7 +1167,7 @@
 
 /**
  * @swagger
- * /api/admin/roles/{roleId}:
+ * /api/admin/edit/admin/role/{roleId}:
  *   put:
  *     summary: Edit admin role
  *     tags: [admin]

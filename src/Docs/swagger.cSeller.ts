@@ -744,37 +744,33 @@
  *         description: Failed to update product listing
  */
 
+
 /**
  * @swagger
- * /api/seller/listings/seller:
+ * /api/seller/all/seller/listing:
  *   get:
  *     summary: Fetch all seller's product listings
- *     description: Retrieve all product listings for the authenticated seller with pagination support.
+ *     description: Retrieves all product listings created by the authenticated seller, with pagination.
  *     tags:
  *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: productId
- *         schema:
- *           type: string
- *         description: Optional product ID to filter by (not currently applied in query).
- *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: Page number for pagination.
+ *         description: Page number for pagination
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: Number of items per page.
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: A list of seller's product listings.
+ *         description: Successfully fetched seller's listings
  *         content:
  *           application/json:
  *             schema:
@@ -788,10 +784,10 @@
  *                   example: 10
  *                 total:
  *                   type: integer
- *                   example: 25
+ *                   example: 42
  *                 totalPages:
  *                   type: integer
- *                   example: 3
+ *                   example: 5
  *                 products:
  *                   type: array
  *                   items:
@@ -803,19 +799,28 @@
  *                       createdAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2025-08-30T12:34:56.000Z"
  *                       productPhoto:
  *                         type: array
  *                         items:
  *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *                               example: "https://example.com/photo.jpg"
  *                       productVideo:
  *                         type: array
  *                         items:
  *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *                               example: "https://example.com/video.mp4"
  *                       productPricing:
- *                         type: array
- *                         items:
- *                           type: object
+ *                         type: object
+ *                         properties:
+ *                           price:
+ *                             type: number
+ *                             example: 199.99
  *                       user:
  *                         type: object
  *                         properties:
@@ -827,16 +832,23 @@
  *                             properties:
  *                               storeName:
  *                                 type: string
+ *                                 example: "Alaba Market Store"
  *                           sellerVerification:
  *                             type: object
  *                             properties:
  *                               isVerified:
  *                                 type: boolean
  *                                 example: true
- *       401:
- *         description: Unauthorized - missing or invalid token.
  *       500:
- *         description: Server error while fetching seller's product listings.
+ *         description: Failed to fetch seller's product listings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Failed to fetch seller's product listings
  */
 
 /**
@@ -894,7 +906,7 @@
 /**
  * @swagger
  * /api/seller/toggle/listing/visibility/{productId}:
- *   patch:
+ *   put:
  *     summary: Toggle product visibility
  *     description: >
  *       Seller can mark a product as visible or invisible depending on their subscription plan limits.  
@@ -1112,4 +1124,51 @@
  *                 message:
  *                   type: string
  *                   example: Something went wrong, failed to initiate transaction
+ */
+
+
+/**
+ * @swagger
+ * /api/seller/check/user/role/status:
+ *   get:
+ *     summary: Check if a user is a seller
+ *     description: Verifies whether the authenticated user has the role of "Seller".
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User is a seller
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 profile:
+ *                   type: object
+ *                   properties:
+ *                     role:
+ *                       type: string
+ *                       example: Seller
+ *       400:
+ *         description: User is not a seller
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User is not a seller, proceed to become a seller
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to check user role status
  */

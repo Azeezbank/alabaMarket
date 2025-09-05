@@ -35,14 +35,14 @@ model User {
   receivedMessages   Chat[]              @relation("ReceivedMessages")
   activities         Activities[]
   ticket             Ticket[]
-  subscriptionPlanId     String? 
+  subscriptionPlanId     String?  @unique  @db.Uuid
   subscriptionPlan       SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
   subscriptionExpiresAt  DateTime?
   transaction      Transaction[]
 }
 
 model SubscriptionPlan {
-  id          String      @id @default(uuid()) @db.Uuid
+  id          String      @id @default(uuid())   @db.Uuid
   name              String
   price       Decimal  @default(0.00) @db.Decimal(10, 2)
   duration      String?
@@ -50,7 +50,7 @@ model SubscriptionPlan {
   placement      String?
   createdAt         DateTime @default(now())
   updatedAt       DateTime             @default(now()) @updatedAt
-  users             User[]
+  users             User?
   maxVisiblePerCat     MaxVisiblePerCat?
   transaction        Transaction[]
 }
@@ -76,6 +76,11 @@ model Profile {
   googleId    String?
   isVerified  Boolean     @default(false)
   lastVisit   DateTime?   @default(now())
+}
+
+enum ProfileStatus {
+  Active
+  Inactive
 }
 
 enum ProfileRole {

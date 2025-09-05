@@ -42,13 +42,13 @@ export const productDetails = async (req: AuthRequest, res: Response) => {
         shopId,
         productPhoto: uploadedImage
           ? {
-              create: [{ url: uploadedImage.url }]
-            }
+            create: [{ url: uploadedImage.url }]
+          }
           : undefined,
         productVideo: uploadedVideo
           ? {
-              create: [{ url: uploadedVideo.url }]
-            }
+            create: [{ url: uploadedVideo.url }]
+          }
           : undefined,
       },
       include: {
@@ -74,12 +74,12 @@ export const productPricing = async (req: AuthRequest, res: Response) => {
         productPricing: {
           upsert: {
             create: {
-            price, priceStatus, condition, description
-          },
-          update: {
-            price, priceStatus, condition, description
+              price, priceStatus, condition, description
+            },
+            update: {
+              price, priceStatus, condition, description
+            }
           }
-        }
         }
       }
     })
@@ -95,7 +95,7 @@ export const productPricing = async (req: AuthRequest, res: Response) => {
 export const allproductCategory = async (req: AuthRequest, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
-  const skip = (page -1) * limit;
+  const skip = (page - 1) * limit;
 
   const cachedKey = `category:page=${page}:limit=${limit}`;
   try {
@@ -109,13 +109,13 @@ export const allproductCategory = async (req: AuthRequest, res: Response) => {
       select: {
         id: true, name: true
       },
-      orderBy: { createdAt: 'desc'},
+      orderBy: { createdAt: 'desc' },
       skip,
       take: limit
     })
 
     const responseData = {
-      total, page, limit, totalPages: Math.ceil(total / limit ), category
+      total, page, limit, totalPages: Math.ceil(total / limit), category
     }
 
     await redis.set(cachedKey, JSON.stringify(responseData), "EX", 300);
@@ -230,7 +230,6 @@ export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
 
 //Fetch all seller's listing
 export const FetchAllSellerListings = async (req: AuthRequest, res: Response) => {
-  const productId = (req.query.productId as string);
   const userId = (req.user as JwtPayload)?.id;
 
   // Parse pagination query params with defaults
@@ -283,7 +282,7 @@ export const FetchAllSellerListings = async (req: AuthRequest, res: Response) =>
 export const EditSellerListing = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
   const { productId, categoryId, subCategoryId } = req.params; // or req.body.productId
-  const { name, condition, price, priceStatus, description, categoryName,  subCategoryName } = req.body;
+  const { name, condition, price, priceStatus, description, categoryName, subCategoryName } = req.body;
 
   try {
     // Find existing product, verify ownership
@@ -509,18 +508,21 @@ export const toggleProductVisibility = async (req: AuthRequest, res: Response) =
     const { productId } = req.params;
     let { makeVisible } = req.body; // makeVisible: true/false
     const userId = (req.user as JwtPayload)?.id;
-
-    if (makeVisible === 'true') {
-      makeVisible = true
-    } else if ( makeVisible === 'false') {
-      makeVisible = false
-    } else {
-      return res.status(400).json({ message: 'makeVisible is required'})
+    
+    if (typeof makeVisible !== 'boolean') {
+      console.log('makeVisible must be a boolean');
+      return res.status(400).json({ message: "makeVisible must be a boolean" });
     }
 
-    const product = await prisma.product.findUnique({ where: { id: productId },
-    include: { category: true}
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { category: true }
     });
+
+const productsInCategory = await prisma.product.count({
+  where: { categoryId: product?.categoryId, isVisible: true, userId }
+});
+
     if (!product) return res.status(404).json({ message: "product not found" });
     if (product.userId !== userId) return res.status(403).json({ message: "not product owner" });
 
@@ -536,12 +538,12 @@ export const toggleProductVisibility = async (req: AuthRequest, res: Response) =
     // make visible: check seller's plan and current count
     const seller = await prisma.user.findUnique({
       where: { id: userId },
-      include: { 
-        subscriptionPlan: {
       include: {
-        maxVisiblePerCat: true
-      }
-    }
+        subscriptionPlan: {
+          include: {
+            maxVisiblePerCat: true
+          }
+        }
       },
     });
     if (!seller) return res.status(404).json({ message: "seller not found" });
@@ -551,7 +553,7 @@ export const toggleProductVisibility = async (req: AuthRequest, res: Response) =
     let plan = seller.subscriptionPlan;
     if (!plan || (seller.subscriptionExpiresAt && seller.subscriptionExpiresAt < now)) {
       // treat as Free plan
-      plan = await prisma.subscriptionPlan.findFirst({ where: { name: "Free" }, include: {maxVisiblePerCat: true} });
+      plan = await prisma.subscriptionPlan.findFirst({ where: { name: "Free" }, include: { maxVisiblePerCat: true } });
       if (!plan) {
         console.log('No free plan availabel')
         return res.status(500).json({ message: "Free plan not configured in DB" });
@@ -559,7 +561,7 @@ export const toggleProductVisibility = async (req: AuthRequest, res: Response) =
     }
     if (!plan.maxVisiblePerCat) {
       console.log('Maximun visible product not set')
-      return res.status(400).json({ message: 'Maximun visible product not set'})
+      return res.status(400).json({ message: 'Maximun visible product not set' })
     }
 
     // global visible check
@@ -575,13 +577,14 @@ export const toggleProductVisibility = async (req: AuthRequest, res: Response) =
     }
 
     // per-category check
-    const currentVisibleInCategory = await prisma.product.count({
-      where: { userId, isVisible: true, categoryId: product.categoryId },
-    });
-    if (currentVisibleInCategory >= plan.maxVisiblePerCat.maxVisible) {
-      console.log(`Per-category limit reached. Only ${plan.maxVisiblePerCat.maxVisible} visible in ${product.category?.name}`)
+    // const currentVisibleInCategory = await prisma.product.count({
+    //   where: { userId, isVisible: true, categoryId: product.categoryId },
+    // });
+    
+    if (plan.maxVisiblePerCat && productsInCategory >= plan.maxVisiblePerCat.maxVisible) {
+      console.log(`Per-category limit reached. Only ${plan.maxVisiblePerCat?.maxVisible} visible in ${product.category?.name}`)
       return res.status(400).json({
-        error: `Per-category limit reached. Only ${plan.maxVisiblePerCat.maxVisible} visible in ${product.category?.name}`,
+        message: `Per-category limit reached. Only ${plan.maxVisiblePerCat?.maxVisible} visible in ${product.category?.name}`,
       });
     }
 

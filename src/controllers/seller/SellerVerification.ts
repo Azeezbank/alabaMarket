@@ -80,3 +80,29 @@ export const updateVerificationIdCard = async (req: AuthRequest, res: Response) 
         return res.status(500).json({ message: "Failed to update file" });
     }
 }
+
+//Chexk if user is a seller or not
+export const isSeller = async (req: AuthRequest, res: Response) => {
+    const userId = (req.user as JwtPayload)?.id;
+    try {
+        const isSeller = await prisma.user.findUnique({ where: { id: userId},
+        select: {
+            profile: {
+                select: {
+                    role: true
+                }
+            }
+        }
+        })
+
+        const sellerRole = isSeller?.profile?.role;
+        if (!sellerRole || sellerRole !== 'Seller' ) {
+            console.log('User is not a seller, proceed to become a seller')
+            return res.status(400).json({ message: 'User is not a seller, proceed to become a seller'})
+        }
+        res.status(200).json(isSeller)
+    } catch (err: any) {
+        console.error('Something went wrong, failed to check user role status', err)
+        return res.status(500).json({message: 'Something went wrong, failed to check user role status' })
+    }
+}

@@ -10,7 +10,13 @@ const router = express.Router();
 // Resend setup
 const resend = new Resend(process.env.RESEND_API_KEY);
 // Twilio setup
-const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+// const twilioClient = twilio(
+//   process.env.TWILIO_ACCOUNT_SID!,
+//   process.env.TWILIO_AUTH_TOKEN!
+// );
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authtoken = process.env.TWILIO_AUTH_TOKEN;
+const client = twilio(accountSid, authtoken);
 const OTP_EXPIRY_MINUTES = 10;
 // Generate OTP
 function generateOtp() {
@@ -56,18 +62,21 @@ router.post("/register", async (req, res) => {
                 subject: "Verify your email",
                 html: `<p>Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
             });
-        }
-        else if (phone) {
-            await twilioClient.messages.create({
-                to: phone,
-                messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-                body: `Your AlabaMarket verification code is ${verificationOTP}.`,
+            '';
+            res.status(201).json({
+                message: "User registered. Verification code sent.",
+                userId: newUser.id,
             });
         }
-        res.status(201).json({
-            message: "User registered. Verification code sent.",
-            userId: newUser.id,
-        });
+        else if (phone) {
+            const verification = await client.verify.v2
+                .services("VAa7788291105c30d778521c37ae2e1cd7")
+                .verifications.create({
+                to: phone,
+                channel: "sms",
+            });
+            res.status(201).json({ message: "User registered. Verification code sent.", userId: newUser.id, success: true, status: verification.status });
+        }
     }
     catch (err) {
         console.error("Register error:", err);
@@ -90,25 +99,38 @@ router.post("/verify", async (req, res) => {
         });
         if (!user)
             return res.status(404).json({ message: "User not found." });
-        if (user.otp !== code) {
-            return res.status(400).json({ message: "Invalid verification code." });
-        }
-        if (user.expiresAt < new Date()) {
-            return res.status(400).json({ message: "Verification code expired." });
-        }
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { sign_up_verify: true, otp: null, expiresAt: null },
-        });
-        const userDetails = user.email || user.phone;
-        const message = `New member ${userDetails} has been registerd on your platform`;
-        const type = 'User Activity';
-        await prisma.notification.create({
-            data: {
-                senderId: user.id, message, type
+        if (email) {
+            if (user.otp !== code) {
+                return res.status(400).json({ message: "Invalid verification code." });
             }
-        });
-        res.status(200).json({ message: "Account verified successfully." });
+            if (user.expiresAt < new Date()) {
+                return res.status(400).json({ message: "Verification code expired." });
+            }
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { sign_up_verify: true, otp: null, expiresAt: null },
+            });
+            res.status(200).json({ success: true, message: "OTP verified proceed to login" });
+        }
+        if (phone) {
+            const verificationCheck = await client.verify.v2
+                .services("VAa7788291105c30d778521c37ae2e1cd7")
+                .verificationChecks
+                .create({
+                to: phone,
+                code,
+            });
+            if (verificationCheck.status === "approved") {
+                const message = `New member ${phone} has been registerd on your platform`;
+                const type = 'User Activity';
+                await prisma.notification.create({
+                    data: {
+                        senderId: user.id, message, type
+                    }
+                });
+                res.status(200).json({ success: true, message: "OTP verified proceed to login" });
+            }
+        }
     }
     catch (err) {
         console.error('Verification failed', err);
@@ -159,15 +181,17 @@ router.post("/login", async (req, res) => {
                 subject: "Your login code",
                 html: `<p>Your AlabaMarket verification code is <b>${loginOtp}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
             });
+            res.status(200).json({ message: `Login OTP sent to your ${email}`, userId: user.id });
         }
         else if (phone) {
-            await twilioClient.messages.create({
+            const verification = await client.verify.v2
+                .services("VAa7788291105c30d778521c37ae2e1cd7")
+                .verifications.create({
                 to: phone,
-                messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-                body: `Your AlabaMarket verification code is ${loginOtp}.`,
+                channel: "sms",
             });
+            res.status(200).json({ message: `Login OTP sent to your ${phone}`, userId: user.id, success: true, status: verification.status });
         }
-        return res.status(200).json({ message: `Login OTP sent to your ${phone || email}`, userId: user.id });
     }
     catch (err) {
         console.error("Login failed", err);
@@ -190,28 +214,52 @@ router.post("/login/verify", async (req, res) => {
         });
         if (!user)
             return res.status(404).json({ message: "User not found" });
-        if (user.otp !== code) {
-            return res.status(400).json({ message: "Invalid code" });
-        }
-        if (user.expiresAt < new Date()) {
-            return res.status(400).json({ message: "Code expired" });
-        }
-        const token = jwt.sign({ id: user.id, email: user.email, phone: user.phone }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { otp: null, expiresAt: null },
-        });
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                profile: {
-                    update: {
-                        lastVisit: new Date()
+        if (email) {
+            if (user.otp !== code) {
+                return res.status(400).json({ message: "Invalid code" });
+            }
+            if (user.expiresAt < new Date()) {
+                return res.status(400).json({ message: "Code expired" });
+            }
+            const token = jwt.sign({ id: user.id, email: user.email, phone: user.phone }, process.env.JWT_SECRET, { expiresIn: "1h" });
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { otp: null, expiresAt: null },
+            });
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    profile: {
+                        update: {
+                            lastVisit: new Date()
+                        }
                     }
                 }
+            });
+            res.status(200).json({ message: 'Login successful', token, userInfo: user });
+        }
+        if (phone) {
+            const verificationCheck = await client.verify.v2
+                .services("VAa7788291105c30d778521c37ae2e1cd7")
+                .verificationChecks.create({
+                code,
+                to: phone,
+            });
+            if (verificationCheck.status === "approved") {
+                const token = jwt.sign({ id: user.id, email: user.email, phone: user.phone }, process.env.JWT_SECRET, { expiresIn: "1h" });
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        profile: {
+                            update: {
+                                lastVisit: new Date()
+                            }
+                        }
+                    }
+                });
+                res.status(200).json({ message: 'Login successful', token, userInfo: user });
             }
-        });
-        res.status(200).json({ message: 'Login successful', token, userInfo: user });
+        }
     }
     catch (err) {
         console.error('Login verification failed', err);
@@ -234,28 +282,31 @@ router.post("/resend-otp-register", async (req, res) => {
         if (user.sign_up_verify) {
             return res.status(400).json({ message: "User already verified" });
         }
-        const newOtp = generateOtp();
-        const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { otp: newOtp, expiresAt: otpExpiresAt },
-        });
         if (email) {
+            const newOtp = generateOtp();
+            const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { otp: newOtp, expiresAt: otpExpiresAt },
+            });
             await resend.emails.send({
                 from: "no-reply@alabamarket.com",
                 to: email,
                 subject: "Verify your email",
                 html: `<p>Your AlabaMarket verification code is <b>${newOtp}</b>. Don't share this code with anyone; our employees will never ask for it.</p>`,
             });
+            res.status(200).json({ message: `New verification OTP sent to your ${email}` });
         }
         else if (phone) {
-            await twilioClient.messages.create({
+            const verification = await client.verify.v2
+                .services("VAa7788291105c30d778521c37ae2e1cd7")
+                .verifications
+                .create({
                 to: phone,
-                messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID.trim(),
-                body: `Your AlabaMarket verification code is ${newOtp}.`,
+                channel: "sms",
             });
+            res.status(200).json({ message: `New verification OTP sent to your ${phone}`, status: verification.status });
         }
-        res.status(200).json({ message: `New verification OTP sent to your ${phone || email}` });
     }
     catch (err) {
         console.error("Resend OTP Register failed", err);
@@ -277,13 +328,13 @@ router.post("/resend/login/otp", async (req, res) => {
         if (!user.sign_up_verify) {
             return res.status(403).json({ message: "User not verified" });
         }
-        const newOtp = generateOtp();
-        const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { otp: newOtp, expiresAt: otpExpiresAt },
-        });
         if (email) {
+            const newOtp = generateOtp();
+            const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { otp: newOtp, expiresAt: otpExpiresAt },
+            });
             await resend.emails.send({
                 from: "no-reply@alabamarket.com",
                 to: email,
@@ -292,11 +343,13 @@ router.post("/resend/login/otp", async (req, res) => {
             });
         }
         else if (phone) {
-            await twilioClient.messages.create({
+            const verification = await client.verify.v2
+                .services("VAa7788291105c30d778521c37ae2e1cd7")
+                .verifications.create({
                 to: phone,
-                messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-                body: `Your AlabaMarket verification code is ${newOtp}.`,
+                channel: "sms",
             });
+            res.status(200).json({ message: `New verification OTP sent to your ${phone}`, status: verification.status });
         }
         res.status(200).json({ message: `New OTP sent to your ${phone || email}` });
     }
@@ -312,7 +365,8 @@ router.post("/auth/google", async (req, res) => {
         if (!email)
             return res.status(400).json({ message: "Email required" });
         // Check if user exists
-        let user = await prisma.user.findFirst({ where: {
+        let user = await prisma.user.findFirst({
+            where: {
                 email,
                 profile: {
                     is: {

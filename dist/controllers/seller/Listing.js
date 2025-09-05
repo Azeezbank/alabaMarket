@@ -208,7 +208,6 @@ export const FetchSellerListings = async (req, res) => {
 };
 //Fetch all seller's listing
 export const FetchAllSellerListings = async (req, res) => {
-    const productId = req.query.productId;
     const userId = req.user?.id;
     // Parse pagination query params with defaults
     const page = parseInt(req.query.page) || 1;
@@ -448,17 +447,16 @@ export const toggleProductVisibility = async (req, res) => {
         const { productId } = req.params;
         let { makeVisible } = req.body; // makeVisible: true/false
         const userId = req.user?.id;
-        if (makeVisible === 'true') {
-            makeVisible = true;
+        if (typeof makeVisible !== 'boolean') {
+            console.log('makeVisible must be a boolean');
+            return res.status(400).json({ message: "makeVisible must be a boolean" });
         }
-        else if (makeVisible === 'false') {
-            makeVisible = false;
-        }
-        else {
-            return res.status(400).json({ message: 'makeVisible is required' });
-        }
-        const product = await prisma.product.findUnique({ where: { id: productId },
+        const product = await prisma.product.findUnique({
+            where: { id: productId },
             include: { category: true }
+        });
+        const productsInCategory = await prisma.product.count({
+            where: { categoryId: product?.categoryId, isVisible: true, userId }
         });
         if (!product)
             return res.status(404).json({ message: "product not found" });
@@ -511,13 +509,13 @@ export const toggleProductVisibility = async (req, res) => {
             });
         }
         // per-category check
-        const currentVisibleInCategory = await prisma.product.count({
-            where: { userId, isVisible: true, categoryId: product.categoryId },
-        });
-        if (currentVisibleInCategory >= plan.maxVisiblePerCat.maxVisible) {
-            console.log(`Per-category limit reached. Only ${plan.maxVisiblePerCat.maxVisible} visible in ${product.category?.name}`);
+        // const currentVisibleInCategory = await prisma.product.count({
+        //   where: { userId, isVisible: true, categoryId: product.categoryId },
+        // });
+        if (plan.maxVisiblePerCat && productsInCategory >= plan.maxVisiblePerCat.maxVisible) {
+            console.log(`Per-category limit reached. Only ${plan.maxVisiblePerCat?.maxVisible} visible in ${product.category?.name}`);
             return res.status(400).json({
-                error: `Per-category limit reached. Only ${plan.maxVisiblePerCat.maxVisible} visible in ${product.category?.name}`,
+                message: `Per-category limit reached. Only ${plan.maxVisiblePerCat?.maxVisible} visible in ${product.category?.name}`,
             });
         }
         // update product

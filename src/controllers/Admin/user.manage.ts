@@ -389,7 +389,7 @@ export const updateUserRole = async (req: AuthRequest, res: Response) => {
     });
 
     res.status(200).json({
-      message: 'Role updated to Seller successfully'
+      message: `Role updated to ${role} successfully`
     });
   } catch (err: any) {
       console.error('Internal server error', err)

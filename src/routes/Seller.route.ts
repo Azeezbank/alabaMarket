@@ -2,7 +2,7 @@ import express from "express";
 import { upload } from "../middlewares/upload.multer.js";
 import { createShop, getShopdetails, updateShopDetails, updateShopStatus, deleteShop } from "../controllers/seller/Shop.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
-import { SellerVerification, updateVerificationIdCard } from "../controllers/seller/SellerVerification.js";
+import { SellerVerification, updateVerificationIdCard, isSeller } from "../controllers/seller/SellerVerification.js";
 import { productDetails, productPricing, updateProductcategory, FetchSellerListings, FetchAllSellerListings,
     EditSellerListing, DeleteSellerListing, PauseSellerListing, allproductCategory, productSubCategory, toggleProductVisibility } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
@@ -18,6 +18,7 @@ router.post("/update/seller/vefication", authenticate, upload.fields([{ name: "i
 router.put('/listing/pause', authenticate, PauseSellerListing);
 router.get("/notifications", authenticate, getNotifications);
 router.post("/comments", authenticate, createComment);
+router.get('/check/user/role/status', authenticate, isSeller);
 router.get('/listing/category', authenticate, allproductCategory);
 router.put('/update/product/pricing', authenticate, productPricing);
 router.put("/update/shop", authenticate, upload.single('file'), updateShopDetails);

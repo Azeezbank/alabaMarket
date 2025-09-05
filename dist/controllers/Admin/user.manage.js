@@ -354,7 +354,7 @@ export const updateUserRole = async (req, res) => {
             },
         });
         res.status(200).json({
-            message: 'Role updated to Seller successfully'
+            message: `Role updated to ${role} successfully`
         });
     }
     catch (err) {

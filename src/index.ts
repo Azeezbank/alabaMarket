@@ -18,7 +18,7 @@ import "./jobs/subscriptionExpiryJob.js";
 import payment from './routes/payment.js';
 import webhook from './routes/webhook.route.js';
 import cors from "cors";
-
+// import { isAdmin } from './middlewares/Admin.js';
 
 
 dotenv.config();
@@ -28,11 +28,13 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: true,
-  methods: ["POST", "PUT", "DELETE", "GET", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  origin: [
+    "http://localhost:3000",
+    "https://frontenddev.alabamarket.com"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"]
 }));
-// app.use(passport.initialize());
 
 const PORT = process.env.PORT || 3000;
 //Swagger document
