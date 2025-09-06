@@ -73,114 +73,91 @@
  *   description: Real-time chat messaging (via Socket.IO) and chat history
  */
 
+
 /**
  * @swagger
  * /chat/socket-docs:
  *   get:
- *     summary: Socket.IO integration guide for Chat
+ *     summary: Socket.IO Chat Events Documentation
  *     description: |
- *       Use **Socket.IO** to send and receive real-time chat events.
+ *       This socket server handles **private messaging, typing indicators,**
+ *       and **message read receipts** between users.
  *
- *       ---
- *       ## 🔹 Client → Server (use `socket.emit`)
+ *       ## EVENTS
+ *       1. **register**
+ *          - Registers a user with their socket connection.  
+ *          - Client emits:
+ *            ```js
+ *            socket.emit("register", userId);
+ *            ```
  *
- *       - **register**
- *         - Purpose: Register the logged-in user with the socket server.
- *         - Payload: `{ userId: string }`
- *         - Example:
- *           ```js
- *           socket.emit("register", "USER_ID");
- *           ```
+ *       2. **check_online**
+ *          - Checks if a user is online.  
+ *          - Client emits:
+ *            ```js
+ *            socket.emit("check_online", receiverId, (online) => {
+ *              console.log("Is user online?", online);
+ *            });
+ *            ```
  *
- *       - **private_message**
- *         - Purpose: Send a message to another user.
- *         - Payload: `{ senderId: string, receiverId: string, content: string }`
- *         - Example:
- *           ```js
- *           socket.emit("private_message", {
- *             senderId: "123",
- *             receiverId: "456",
- *             content: "Hello there!"
- *           });
- *           ```
+ *       3. **private_message**
+ *          - Sends a private message from one user to another.  
+ *          - Client emits:
+ *            ```js
+ *            socket.emit("private_message", {
+ *              senderId: "user1",
+ *              receiverId: "user2",
+ *              content: "Hello!"
+ *            });
+ *            ```
+ *          - Server emits back:
+ *            ```js
+ *            socket.on("private_message", (message) => {
+ *              console.log("New message:", message);
+ *            });
+ *            ```
  *
- *       - **typing**
- *         - Purpose: Indicate that the user is typing.
- *         - Payload: `{ senderId: string, receiverId: string }`
- *         - Example:
- *           ```js
- *           socket.emit("typing", { senderId: "123", receiverId: "456" });
- *           ```
+ *       4. **typing**
+ *          - Notifies the receiver that the sender is typing.  
+ *          - Client emits:
+ *            ```js
+ *            socket.emit("typing", {
+ *              senderId: "user1",
+ *              receiverId: "user2"
+ *            });
+ *            ```
+ *          - Server emits to receiver:
+ *            ```js
+ *            socket.on("typing", ({ senderId }) => {
+ *              console.log(senderId, "is typing...");
+ *            });
+ *            ```
  *
- *       - **read_message**
- *         - Purpose: Mark all unread messages as "read".
- *         - Payload: `{ senderId: string, receiverId: string }`
- *         - Example:
- *           ```js
- *           socket.emit("read_message", { senderId: "456", receiverId: "123" });
- *           ```
+ *       5. **read_message**
+ *          - Marks all messages from a sender as read by the receiver.  
+ *          - Client emits:
+ *            ```js
+ *            socket.emit("read_message", {
+ *              senderId: "user1",   // who sent the messages
+ *              receiverId: "user2"  // who just read them
+ *            });
+ *            ```
+ *          - Server emits to sender:
+ *            ```js
+ *            socket.on("messages_read", ({ readerId }) => {
+ *              console.log("User", readerId, "read your messages");
+ *            });
+ *            ```
  *
- *       ---
- *       ## 🔹 Server → Client (use `socket.on`)
+ *       6. **disconnect**
+ *          - Automatically handled when a client disconnects.  
+ *          - Server logs and removes user from the online list.
  *
- *       - **private_message**
- *         - Fired when a new message is sent **or** received.
- *         - Payload: `{ id, senderId, receiverId, content, createdAt, isRead }`
- *         - Example:
- *           ```js
- *           socket.on("private_message", (msg) => {
- *             console.log("New message:", msg);
- *           });
- *           ```
- *
- *       - **typing**
- *         - Fired when the other user is typing.
- *         - Payload: `{ senderId }`
- *         - Example:
- *           ```js
- *           socket.on("typing", ({ senderId }) => {
- *             console.log(`${senderId} is typing...`);
- *           });
- *           ```
- *
- *       - **messages_read**
- *         - Fired when the other user has read your messages.
- *         - Payload: `{ readerId }`
- *         - Example:
- *           ```js
- *           socket.on("messages_read", ({ readerId }) => {
- *             console.log(`Messages were read by: ${readerId}`);
- *           });
- *           ```
- *
- *       ---
- *       ## 🔹 Integration Flow
- *
- *       1. Connect to the socket server:
- *          ```js
- *          import { io } from "socket.io-client";
- *          const socket = io("http://localhost:5000"); // backend URL
- *          ```
- *
- *       2. Register the logged-in user:
- *          ```js
- *          socket.emit("register", currentUserId);
- *          ```
- *
- *       3. Send and receive messages using `private_message`.
- *       4. Show "typing..." status with `typing`.
- *       5. Update read receipts with `read_message` and listen for `messages_read`.
- *
- *       ---
- *       ✅ With this setup, the frontend always knows:
- *       - When a user connects (`register`)
- *       - When a message is sent or received (`private_message`)
- *       - When the other person is typing (`typing`)
- *       - When messages were read (`messages_read`)
- *     tags: [Chat]
- *     responses:
- *       200:
- *         description: Real-time chat integration guide
+ *       ## NOTES
+ *       - Make sure to **register** after connecting to associate the userId with a socket.  
+ *       - Always listen for `private_message`, `typing`, and `messages_read` events to update the UI in real-time.
+ *     tags:
+ *       - Chat
  */
 
 /**
@@ -229,167 +206,101 @@
 
 /**
  * @swagger
- * tags:
- *   name: Video
- *   description: Real-time 1-to-1 video calling (via Socket.IO)
- */
-
-/**
- * @swagger
  * /video/socket-docs:
  *   get:
- *     summary: Socket.IO integration guide for Video Calls
+ *     summary: Socket.IO Call & Signaling Events Documentation
  *     description: |
- *       Use **Socket.IO** to initiate and manage 1-to-1 WebRTC video calls.
+ *       This server manages **real-time calling (WebRTC signaling)** between users.
+ *       It maps users to sockets, forwards call offers, answers, ICE candidates, and
+ *       handles toggling audio/video, rejecting, and ending calls.
  *
- *       --- 
- *       ## 🔹 Client → Server (use `socket.emit`)
+ *       ## USER <-> SOCKET MAPPING
+ *       - Maintains:
+ *         - `userToSocket`: Map of userId → socketId
+ *         - `socketToUser`: Map of socketId → userId
+ *       - Clients should emit `register` with their userId after connecting:
+ *         ```js
+ *         socket.emit("register", { userId });
+ *         ```
  *
- *       - **register**
- *         - Purpose: Register the logged-in user with the socket server.
- *         - Payload: `{ userId: string }`
- *         - Example:
- *           ```js
- *           socket.emit("register", { userId: "USER_ID" });
- *           ```
+ *       ## HTTP ENDPOINTS
+ *       - `GET /api/video/status/` → Health check, returns `{ ok: true, time }`.
+ *       - `GET /api/video/status/online/:userId` → Returns whether a user is online.
  *
- *       - **call-user**
- *         - Purpose: Caller initiates a call (send SDP offer)
- *         - Payload: `{ fromUserId: string, toUserId: string, sdp: object, meta?: object }`
- *         - Example:
- *           ```js
- *           socket.emit("call-user", {
- *             fromUserId: "123",
- *             toUserId: "456",
- *             sdp: offerSDP,
- *             meta: { callType: "video" }
- *           });
- *           ```
+ *       ## SOCKET EVENTS
+ *       1. **register**
+ *          - Registers the mapping between userId and socketId.
+ *          - Emits back:
+ *            ```js
+ *            socket.on("registered", ({ userId, socketId }) => { ... });
+ *            ```
  *
- *       - **accept-call**
- *         - Purpose: Receiver accepts the call and sends SDP answer
- *         - Payload: `{ fromUserId: string, toUserId: string, sdp: object }`
- *         - Example:
- *           ```js
- *           socket.emit("accept-call", {
- *             fromUserId: "456",
- *             toUserId: "123",
- *             sdp: answerSDP
- *           });
- *           ```
+ *       2. **call-user**
+ *          - Caller sends SDP offer to callee.
+ *          - Emits to target:
+ *            ```js
+ *            socket.on("incoming-call", { fromUserId, sdp, meta });
+ *            ```
  *
- *       - **decline-call**
- *         - Purpose: Receiver declines the call
- *         - Payload: `{ fromUserId: string, toUserId: string, reason?: string }`
- *         - Example:
- *           ```js
- *           socket.emit("decline-call", {
- *             fromUserId: "456",
- *             toUserId: "123",
- *             reason: "Busy"
- *           });
- *           ```
+ *       3. **make-answer**
+ *          - Callee answers call with SDP.
+ *          - Emits to caller:
+ *            ```js
+ *            socket.on("answer-made", { fromUserId, sdp });
+ *            ```
  *
- *       - **ice-candidate**
- *         - Purpose: Exchange ICE candidates between peers
- *         - Payload: `{ fromUserId: string, toUserId: string, candidate: object }`
- *         - Example:
- *           ```js
- *           socket.emit("ice-candidate", {
- *             fromUserId: "123",
- *             toUserId: "456",
- *             candidate: iceCandidate
- *           });
- *           ```
+ *       3a. **accept-call**
+ *          - Forward SDP answer to caller.
  *
- *       - **end-call**
- *         - Purpose: Notify the other user the call has ended
- *         - Payload: `{ fromUserId: string, toUserId: string, reason?: string }`
- *         - Example:
- *           ```js
- *           socket.emit("end-call", {
- *             fromUserId: "123",
- *             toUserId: "456",
- *             reason: "User hung up"
- *           });
- *           ```
+ *       3b. **decline-call**
+ *          - Notify caller that callee rejected.
+ *          - Emits:
+ *            ```js
+ *            socket.on("call-rejected", { by, reason });
+ *            ```
  *
- *       --- 
- *       ## 🔹 Server → Client (use `socket.on`)
+ *       4. **ice-candidate**
+ *          - Relays ICE candidate between peers.
+ *          - Emits to target:
+ *            ```js
+ *            socket.on("ice-candidate", { fromUserId, candidate });
+ *            ```
  *
- *       - **incoming-call**
- *         - Fired when a user receives a call
- *         - Payload: `{ fromUserId: string, sdp: object, meta?: object }`
- *         - Example:
- *           ```js
- *           socket.on("incoming-call", ({ fromUserId, sdp, meta }) => {
- *             console.log("Incoming call from:", fromUserId);
- *           });
- *           ```
+ *       5. **reject-call**
+ *          - Receiver rejects an incoming call.
  *
- *       - **answer-made**
- *         - Fired when the callee answers the call
- *         - Payload: `{ fromUserId: string, sdp: object }`
- *         - Example:
- *           ```js
- *           socket.on("answer-made", ({ fromUserId, sdp }) => {
- *             console.log("Call answered by:", fromUserId);
- *           });
- *           ```
+ *       6. **end-call**
+ *          - Ends an ongoing call (hang up).
+ *          - Emits:
+ *            ```js
+ *            socket.on("call-ended", { fromUserId, reason });
+ *            ```
  *
- *       - **call-rejected**
- *         - Fired when a user declines a call
- *         - Payload: `{ by: string, reason?: string }`
- *         - Example:
- *           ```js
- *           socket.on("call-rejected", ({ by, reason }) => {
- *             console.log(`Call rejected by ${by}. Reason: ${reason}`);
- *           });
- *           ```
+ *       7. **toggle-audio**
+ *          - Notify peer of mic mute/unmute.
+ *          - Emits:
+ *            ```js
+ *            socket.on("audio-toggled", { isMuted });
+ *            ```
  *
- *       - **ice-candidate**
- *         - Fired when receiving ICE candidates
- *         - Payload: `{ fromUserId: string, candidate: object }`
- *         - Example:
- *           ```js
- *           socket.on("ice-candidate", ({ fromUserId, candidate }) => {
- *             console.log("Received ICE candidate from", fromUserId);
- *           });
- *           ```
+ *       8. **toggle-video**
+ *          - Notify peer of camera on/off.
+ *          - Emits:
+ *            ```js
+ *            socket.on("video-toggled", { isMuted });
+ *            ```
  *
- *       - **call-ended**
- *         - Fired when the other user ends the call
- *         - Payload: `{ fromUserId: string, reason?: string }`
- *         - Example:
- *           ```js
- *           socket.on("call-ended", ({ fromUserId, reason }) => {
- *             console.log(`Call ended by ${fromUserId}. Reason: ${reason}`);
- *           });
- *           ```
+ *       9. **disconnect**
+ *          - Cleans up mappings and notifies peers that user is offline.
  *
- *       --- 
- *       ## 🔹 Integration Flow
+ *       ## ERROR HANDLING
+ *       - On invalid registration: emits `registration-error`.
+ *       - Logs unexpected socket errors with `socket.on("error")`.
  *
- *       1. Connect to the socket server:
- *          ```js
- *          import { io } from "socket.io-client";
- *          const socket = io("http://localhost:5000"); // backend URL
- *          ```
- *
- *       2. Register the logged-in user:
- *          ```js
- *          socket.emit("register", currentUserId);
- *          ```
- *
- *       3. Initiate a call using `call-user`.
- *       4. Receiver handles `incoming-call` and accepts (`accept-call`) or declines (`decline-call`).
- *       5. Exchange ICE candidates using `ice-candidate`.
- *       6. End call with `end-call`.
- *
- *       --- 
- *       ✅ This setup enables real-time 1-to-1 video calls with proper signaling and call management.
- *     tags: [Video]
- *     responses:
- *       200:
- *         description: Real-time video call integration guide
+ *       ## NOTES
+ *       - Always `register` after connection.  
+ *       - Use `online/:userId` REST endpoint to check presence.  
+ *       - Signaling data is only forwarded — actual WebRTC peer connection happens in client apps.
+ *     tags:
+ *       - Call
  */

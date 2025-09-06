@@ -1360,3 +1360,107 @@
  *                   type: string
  *                   example: Failed to update payment provider
  */
+
+
+/**
+ * @swagger
+ * /api/admin/check/payment/status:
+ *   get:
+ *     summary: Get all payment statuses
+ *     description: Fetch all payment transactions and their statuses.
+ *     tags:
+ *       - admin
+ *     security:
+ *       - bearerAuth: []   # Requires JWT authentication
+ *     responses:
+ *       200:
+ *         description: List of payment transactions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "txn_12345"
+ *                   reference:
+ *                     type: string
+ *                     example: "REF_1693928374923_ab12cd34"
+ *                   amount:
+ *                     type: number
+ *                     example: 5000
+ *                   status:
+ *                     type: string
+ *                     example: "Success"
+ *                   userId:
+ *                     type: string
+ *                     example: "user_123"
+ *                   subscriptionPlanId:
+ *                     type: string
+ *                     example: "plan_456"
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-09-05T12:30:00.000Z"
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-09-05T12:35:00.000Z"
+ *       401:
+ *         description: Unauthorized (invalid or missing token)
+ *       500:
+ *         description: Failed to fetch payment statuses
+ */
+
+/**
+ * @swagger
+ * /api/admin/edit/payment/status/{paymentId}:
+ *   put:
+ *     summary: Edit payment status
+ *     description: Update the status of a specific payment transaction by its ID.
+ *     tags:
+ *       - admin
+ *     security:
+ *       - bearerAuth: []   # Requires JWT authentication
+ *     parameters:
+ *       - in: path
+ *         name: paymentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the payment transaction to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Pending, Success, Failed, Cancelled]
+ *                 example: "Success"
+ *     responses:
+ *       200:
+ *         description: Payment status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Payment status updated successfully"
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized (invalid or missing token)
+ *       404:
+ *         description: Payment not found
+ *       500:
+ *         description: Failed to edit payment status
+ */

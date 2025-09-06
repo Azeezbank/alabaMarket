@@ -7,6 +7,7 @@ import { productDetails, productPricing, updateProductcategory, FetchSellerListi
     EditSellerListing, DeleteSellerListing, PauseSellerListing, allproductCategory, productSubCategory, toggleProductVisibility } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
 import { getNotifications } from '../controllers/seller/Notification.js';
+import { initiatePayment, checkTransactionStatus } from '../controllers/paymentControler.js';
 
 
 const router = express.Router();
@@ -27,6 +28,8 @@ router.get("/seller/listing", authenticate, FetchSellerListings);
 router.get("/all/seller/listing", authenticate, FetchAllSellerListings);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);
+router.get("/payment/status", authenticate, checkTransactionStatus);
+router.post("/plan/subscribe/:planId", authenticate, initiatePayment);
 router.put("/toggle/listing/visibility/:productId", authenticate, toggleProductVisibility);
 router.get('/listing/subcategory/:categoryId', authenticate, productSubCategory);
 router.post('/create/product/:shopId', authenticate, upload.fields([{ name: 'productImage', maxCount: 1}, { name: "productReel", maxCount: 1}]), productDetails);

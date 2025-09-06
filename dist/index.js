@@ -11,10 +11,10 @@ import { Server } from "socket.io";
 import { initializeSocket } from "./routes/Messages.js";
 import chat from './routes/Messages.js';
 import { registerSocketHandlers } from './routes/Video.js';
+import video from './routes/Video.js';
 import buyer from './routes/Buyer.js';
 import redis from './config/redisClient.js';
 import "./jobs/subscriptionExpiryJob.js";
-import payment from './routes/payment.js';
 import webhook from './routes/webhook.route.js';
 import cors from "cors";
 // import { isAdmin } from './middlewares/Admin.js';
@@ -52,10 +52,10 @@ app.use('/api/seller', seller);
 app.use('/api/buyer', buyer);
 //Messages
 app.use('/api/chat', chat);
-//Initiate payment
-app.use('/api/initiate/payment', payment);
 //Payment webhook
 app.use('/api/payment/webhook', webhook);
+//Video call signaling
+app.use('/api/video/status', video);
 //Socket.io for chat and video supporting WebRTC
 const server = http.createServer(app);
 const io = new Server(server, {

@@ -169,7 +169,7 @@ export const updateProductcategory = async (req: AuthRequest, res: Response) => 
     await prisma.product.update({
       where: { id: productId },
       data: {
-        categoryName, subCategoryName
+        categoryName, subCategoryName, categoryId, subCategoryId
       }
     })
     res.status(200).json({ message: 'Product Category updated successfully' })

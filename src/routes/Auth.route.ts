@@ -52,10 +52,18 @@ router.post("/register", async (req, res) => {
     const verificationOTP = generateOtp();
     const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-    // Create new user
+    // Send OTP
+    if (email) {
+      await resend.emails.send({
+        from: "no-reply@alabamarket.com",
+        to: email,
+        subject: "Verify your email",
+        html: `<p>Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
+      });
+
+         // Create new user
     const newUser = await prisma.user.create({
       data: {
-        phone,
         email,
         otp: verificationOTP,
         expiresAt: otpExpiresAt,
@@ -66,15 +74,6 @@ router.post("/register", async (req, res) => {
         }
       },
     });
-
-    // Send OTP
-    if (email) {
-      await resend.emails.send({
-        from: "no-reply@alabamarket.com",
-        to: email,
-        subject: "Verify your email",
-        html: `<p>Your AlabaMarket verification code is <b>${verificationOTP}</b>. Don't share this code with anyone; our employees will never ask for the code.</p>`,
-      });
 
       res.status(201).json({
         message: "User registered. Verification code sent.",
@@ -89,10 +88,22 @@ router.post("/register", async (req, res) => {
           channel: "sms",
         });
 
+           // Create new user
+    const newUser = await prisma.user.create({
+      data: {
+        phone,
+        profile: {
+          create: {
+            role: role
+          }
+        }
+      },
+    });
+
       res.status(201).json({ message: "User registered. Verification code sent.", userId: newUser.id, success: true, status: verification.status });
     }
-  } catch (err) {
-    console.error("Register error:", err);
+  } catch (err: any) {
+    console.error("Register error, please use a valid phone number, and ensure it start with +234 ", err.message);
     return res.status(500).json({ message: "Failed to register" });
   }
 });

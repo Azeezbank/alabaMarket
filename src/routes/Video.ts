@@ -1,7 +1,6 @@
 import express from 'express';
 import { Response, Request } from "express";
-import prisma from "../prisma.client";
-import { authenticate, AuthRequest } from "../middlewares/auth.middleware";
+import {  AuthRequest } from "../middlewares/auth.middleware";
 import { CallOffer, CallAnswer, IceCandidatePayload } from "../types/video.types";
 import { Server, Socket } from "socket.io";
 const router = express.Router();
@@ -137,3 +136,6 @@ socket.on("toggle-video", ({ toUserId, isMuted }) => {
   });
 });
 }
+
+
+export default router;

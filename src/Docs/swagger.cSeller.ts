@@ -1053,77 +1053,58 @@
 
 /**
  * @swagger
- * /api/seller/plan/subscription/{planId}:
+ * /api/seller/plan/subscribe/{planId}:
  *   post:
- *     summary: Subscribe a seller to a subscription plan
- *     description: >
- *       Initiates a subscription process for the authenticated seller by creating a payment session with a provider
- *       (e.g., Paystack, Flutterwave, Stripe). Saves the transaction in the database with status `Pending`.  
- *       The frontend should redirect the user to the payment page if status is 200.
+ *     summary: Initiate a payment for a subscription plan
+ *     description: |
+ *       This endpoint initializes a payment for a user based on the selected subscription plan.  
+ *       It supports both **Paystack** and **Flutterwave** as providers.  
+ *       - If Paystack is active → a transaction is initialized with Paystack.  
+ *       - If Flutterwave is active → a transaction is initialized with Flutterwave.  
+ *       The system stores a **Pending transaction** in the database with a unique reference.
  *     tags:
  *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: planId
- *         in: path
- *         required: true
+ *       - in: path
+ *         name: planId
  *         schema:
  *           type: string
- *         description: The subscription plan ID to subscribe to
+ *         required: true
+ *         description: ID of the subscription plan to pay for
  *     responses:
  *       200:
- *         description: Payment session successfully created
+ *         description: Payment initialized successfully. Returns response from the active provider.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
- *               properties:
- *                 paymentSession:
- *                   type: object
- *                   properties:
- *                     reference:
- *                       type: string
- *                       example: txn_1693339339339
- *                     amount:
- *                       type: number
- *                       example: 5000.00
- *                     currency:
- *                       type: string
- *                       example: NGN
- *                     callbackUrl:
- *                       type: string
- *                       example: https://yourdomain.com/api/payment/webhook
+ *               example:
+ *                 status: true
+ *                 message: Authorization URL created
+ *                 data:
+ *                   authorization_url: "https://checkout.paystack.com/..."
+ *                   access_code: "ACCESS_CODE"
+ *                   reference: "REF_1693847393_xxxx"
  *       400:
- *         description: Missing sellerId or planId in request
+ *         description: Missing required fields or invalid provider
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: sellerId and planId required
+ *             example:
+ *               error: "No active payment provider"
  *       404:
- *         description: Subscription plan not found
+ *         description: User or plan not found
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: plan not found
+ *             example:
+ *               message: "No user found to carry out the transaction"
  *       500:
- *         description: Internal server error when creating transaction or initiating payment
+ *         description: Server error
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Something went wrong, failed to initiate transaction
+ *             example:
+ *               error: "Failed to initiate payment"
  */
 
 
@@ -1171,4 +1152,57 @@
  *                 message:
  *                   type: string
  *                   example: Something went wrong, failed to check user role status
+ */
+
+
+/**
+ * @swagger
+ * /api/seller/payment/status:
+ *   get:
+ *     summary: Get all transactions for the logged-in user
+ *     description: Returns a list of transactions belonging to the authenticated user, ordered by most recent first.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []   # Requires JWT token
+ *     responses:
+ *       200:
+ *         description: List of user transactions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "txn_12345"
+ *                   reference:
+ *                     type: string
+ *                     example: "REF_1693928374923_ab12cd34"
+ *                   amount:
+ *                     type: number
+ *                     example: 5000
+ *                   status:
+ *                     type: string
+ *                     example: "Pending"
+ *                   userId:
+ *                     type: string
+ *                     example: "user_123"
+ *                   subscriptionPlanId:
+ *                     type: string
+ *                     example: "plan_456"
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-09-05T12:30:00.000Z"
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-09-05T12:35:00.000Z"
+ *       401:
+ *         description: Unauthorized (no or invalid token)
+ *       500:
+ *         description: Failed to fetch transactions
  */

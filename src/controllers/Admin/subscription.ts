@@ -76,4 +76,33 @@ export const deletesubscriptionPlan = async (req: AuthRequest, res: Response) =>
         console.error('failed to delete plan', err)
         return res.status(500).json({ message: 'Something went wrong, failed to delete plan'})
     }
-}
+};
+
+//Check all payment status
+export const checkPaymentstatus = async (req: AuthRequest, res: Response) => {
+    try {
+        const paymentStatus = await prisma.transaction.findMany();
+
+        res.status(200).json(paymentStatus);
+    } catch (err: any) {
+        console.error('Failed to fetch payment status', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to fetch payment status' });
+    }
+};
+
+//Edit payment status
+export const editPaymentStatus = async (req: AuthRequest, res: Response) => {
+    const status = req.body.status;
+    const paymentId = (req.params.paymentId as string);
+    try {
+        await prisma.transaction.update({ where: { id: paymentId}, 
+        data: {
+            status
+        }
+        })
+        res.status(200).json({ message: 'Payment status updayed successfully'})
+    } catch (err: any) {
+        console.error('Failed to edit payment status', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to edit payment status'})
+    }
+};

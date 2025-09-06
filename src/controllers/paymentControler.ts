@@ -23,7 +23,7 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
         name: true, secretKey: true, flutterWebhookSecret: true
       }
     });
-    
+
     if (!provider) return res.status(400).json({ error: "No active payment provider" });
 
     if (!userId || !planId) return res.status(400).json({ error: "sellerId and planId required" });
@@ -51,11 +51,14 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
     if (provider.name === "paystack") {
       response = await axios.post(
         "https://api.paystack.co/transaction/initialize",
-        { amount: planPrice * 100, email: user.email, reference: customReference },
+        { amount: planPrice * 100, currency: "NGN", 
+          email: user.email, 
+          reference: customReference, 
+          callback_url: "https://your-frontend.com/payment/success" },
         { headers: { Authorization: `Bearer ${provider.secretKey}` } }
       );
 
-        // Save pending transaction in DB
+      // Save pending transaction in DB
       await prisma.transaction.create({
         data: {
           reference: customReference,
@@ -119,16 +122,20 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
       console.log('paystack body', req.body);
       // Verify Paystack signature
 
-      const txnP = await prisma.transaction.findUnique({ where: { reference: req.body.data.reference } });
-      if (!txnP) return res.status(404).json({ error: "Transaction not found" });
-
       const hash = crypto
         .createHmac("sha512", provider.secretKey)
         .update(JSON.stringify(req.body))
         .digest("hex");
 
       if (hash !== req.headers["x-paystack-signature"]) {
+        console.log('Invalid Paystack signature');
         return res.status(401).send("Invalid Paystack signature");
+      }
+
+      const txnP = await prisma.transaction.findUnique({ where: { reference: req.body.data.reference } });
+      if (!txnP) {
+        console.log('Transaction not found');
+        return res.status(404).json({ message: "Transaction not found" });
       }
 
       const event = req.body.event;
@@ -140,13 +147,18 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
           where: { reference: payment.reference },
           data: { status: "Success" }
         });
+      } else {
+        console.log('Unhandled Paystack event:', event);
+        return res.status(400).json({ message: "Unhandled Paystack event" });
       }
 
-      const plan = await prisma.subscriptionPlan.findUnique({ where: { id: txnP.subscriptionPlanId }, 
-        include: { maxVisiblePerCat: true } });
+      const plan = await prisma.subscriptionPlan.findUnique({
+        where: { id: txnP.subscriptionPlanId },
+        include: { maxVisiblePerCat: true }
+      });
       if (!plan) {
         console.log('No  plan found')
-        return res.status(404).json({message: 'subscription plan not found'})
+        return res.status(404).json({ message: 'subscription plan not found' })
       }
       let period = 30; // default
       if (plan.duration === 'Weekly') period = 7;
@@ -165,15 +177,12 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
       });
       await enforceVisibilityLimitForSeller(txnP.userId, plan.maxVisibleProducts, plan.maxVisiblePerCat?.maxVisible ?? 0);
 
-      res.status(200).json({ received: true });
+      return res.status(200).json({ received: true });
     }
 
     if (provider.name === "flutterwave") {
       console.log('Flutter body', req.body);
       // Verify Flutterwave signature
-
-      const txnF = await prisma.transaction.findUnique({ where: { reference: req.body.data.tx_ref } });
-      if (!txnF) return res.status(404).json({ error: "Transaction not found" });
 
       const hash = crypto
         .createHmac("sha256", provider.flutterWebhookSecret)
@@ -181,10 +190,14 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
         .digest("hex");
 
       if (hash !== req.headers["verif-hash"]) {
+        console.log('Invalid Flutterwave signature');
         return res.status(401).send("Invalid Flutterwave signature");
       }
 
-      if (req.body.event === "charge.completed" && req.body.data.status === "successful") {
+      const txnF = await prisma.transaction.findUnique({ where: { reference: req.body.data.tx_ref } });
+      if (!txnF) return res.status(404).json({ error: "Transaction not found" });
+
+      if ((req.body.event === "charge.completed" || req.body.event === "transaction.completed") && req.body.data.status === "successful") {
         const payment = req.body.data;
         console.log("Flutterwave payment success:", payment);
         // Update DB with payment details
@@ -192,12 +205,15 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
           where: { reference: payment.tx_ref },
           data: { status: "Success" }
         });
+      } else {
+        console.log('Unhandled Flutterwave event:', req.body.event);
+        return res.status(400).json({ message: "Unhandled Flutterwave event" });
       }
 
       const plan = await prisma.subscriptionPlan.findUnique({ where: { id: txnF.subscriptionPlanId }, include: { maxVisiblePerCat: true } });
       if (!plan) {
         console.log('No  plan found')
-        return res.status(404).json({message: 'subscription plan not found'})
+        return res.status(404).json({ message: 'subscription plan not found' })
       }
 
       let period = 30; // default
@@ -218,7 +234,7 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
 
       await enforceVisibilityLimitForSeller(txnF.userId, plan.maxVisibleProducts, plan.maxVisiblePerCat?.maxVisible ?? 0);
 
-      res.status(200).json({ received: true });
+      return res.status(200).json({ received: true });
 
     }
   } catch (err: any) {
@@ -231,15 +247,15 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
 export const createPaymentProvider = async (req: AuthRequest, res: Response) => {
   const { name, publicKey, secretKey, isActive } = req.body;  //isActive must be boolean true/false
   try {
-      // Create new provider
-       await prisma.paymentProvider.create({
-        data: { name, publicKey, secretKey, isActive }
-      });
-      res.status(200).json({ message: "Payment provider created successfully" });
-    } catch (err: any) {
-      console.error('Error creating payment provider', err);
-      res.status(500).json({ error: "Failed to create payment provider" });
-    }
+    // Create new provider
+    await prisma.paymentProvider.create({
+      data: { name, publicKey, secretKey, isActive }
+    });
+    res.status(200).json({ message: "Payment provider created successfully" });
+  } catch (err: any) {
+    console.error('Error creating payment provider', err);
+    res.status(500).json({ error: "Failed to create payment provider" });
+  }
 }
 
 
@@ -258,5 +274,20 @@ export const updatePaymentProvider = async (req: AuthRequest, res: Response) => 
   } catch (err: any) {
     console.error('Error updating payment provider', err);
     res.status(500).json({ error: "Failed to update payment provider" });
+  }
+}
+
+//Check transaction status
+export const checkTransactionStatus = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
+  try {
+    const transactions = await prisma.transaction.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.status(200).json(transactions);
+  } catch (err: any) {
+    console.error('Error fetching transactions', err);
+    res.status(500).json({ error: "Failed to fetch transactions" });
   }
 }

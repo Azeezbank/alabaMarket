@@ -323,7 +323,7 @@
  * /api/buyer/popular/listing:
  *   get:
  *     summary: Filter listings by product name
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -353,7 +353,7 @@
  * /api/buyer/listing/price/range:
  *   get:
  *     summary: Filter listings by price range
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -387,7 +387,7 @@
  * /api/buyer/listing/price/less:
  *   get:
  *     summary: Filter listings by price less than a value
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -416,7 +416,7 @@
  * /api/buyer/listing/price/greater:
  *   get:
  *     summary: Filter listings by price greater than a value
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -445,7 +445,7 @@
  * /api/buyer/verified/seller/listing:
  *   get:
  *     summary: Fetch products from verified sellers
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -469,7 +469,7 @@
  * /api/buyer/unverified/seller/listing:
  *   get:
  *     summary: Fetch products from unverified sellers
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -493,7 +493,7 @@
  * /api/buyer/listing/condition:
  *   get:
  *     summary: Fetch products by condition (e.g., Brand new, Neatly Used)
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -522,7 +522,7 @@
  * /api/buyer/listing/owner/details/{productId}:
  *   get:
  *     summary: Fetch product owner and store details
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -544,7 +544,7 @@
  * /api/buyer/report/listing/{productId}:
  *   post:
  *     summary: Create a product report
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -576,7 +576,7 @@
  * /api/buyer/saved/listing/{productId}:
  *   post:
  *     summary: Bookmark/save a product
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -597,7 +597,7 @@
  * /api/buyer/saved/product:
  *   get:
  *     summary: Fetch all saved/bookmarked products for the user
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -625,7 +625,7 @@
  *       Fetch all active boosted listings that are not expired.  
  *       Includes product details, pricing, photos, videos, likes/loves count, and seller profile.  
  *       Results are cached in Redis for 5 minutes (300 seconds).
- *     tags: [Buyer Listings]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -731,17 +731,10 @@
 
 /**
  * @swagger
- * tags:
- *   name: Buyer Notifications
- *   description: Endpoints for managing buyer notifications
- */
-
-/**
- * @swagger
  * /api/buyer/all/notification:
  *   get:
  *     summary: Fetch all notifications for the logged-in buyer
- *     tags: [Buyer Notifications]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -767,7 +760,7 @@
  * /api/buyer/all/read/notification:
  *   get:
  *     summary: Fetch all read notifications for the logged-in buyer
- *     tags: [Buyer Notifications]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -791,7 +784,7 @@
  * /api/buyer/all/unread/notification:
  *   get:
  *     summary: Fetch all unread notifications for the logged-in buyer
- *     tags: [Buyer Notifications]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -810,20 +803,12 @@
  *         description: Failed to fetch notifications
  */
 
-
-/**
- * @swagger
- * tags:
- *   name: Buyer Questions
- *   description: Leave questions for admin or seller
- */
-
 /**
  * @swagger
  * /api/buyer/question:
  *   post:
  *     summary: Submit a question to admin or seller
- *     tags: [Buyer Questions]
+ *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
