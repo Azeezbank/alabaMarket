@@ -51,6 +51,7 @@ export const createShop = async (req: AuthRequest, res: Response) => {
 
 //Fetch shop details
 export const getShopdetails = async (req: AuthRequest, res: Response) => {
+    const userId = (req.user as JwtPayload)?.id;
     try {
 
         let cachedStores;
@@ -67,7 +68,7 @@ export const getShopdetails = async (req: AuthRequest, res: Response) => {
         }
 
         // Get all stores with owner's name
-        const stores = await prisma.sellerShop.findMany({
+        const stores = await prisma.sellerShop.findMany({ where: { userId} ,
             include: {
                 user: {
                     select: {

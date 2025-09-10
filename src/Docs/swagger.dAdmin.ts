@@ -1464,3 +1464,44 @@
  *       500:
  *         description: Failed to edit payment status
  */
+
+/**
+ * @swagger
+ * /api/admin/all/shop/details:
+ *   get:
+ *     summary: Get all seller shop details
+ *     description: Retrieve all seller shops along with their owner's email addresses.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully fetched all shop details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "a1b2c3d4-e5f6-7890-gh12-ijklmnopqrst"
+ *                   name:
+ *                     type: string
+ *                     example: "Tunde's Electronics"
+ *                   description:
+ *                     type: string
+ *                     example: "We sell quality gadgets and accessories"
+ *                   user:
+ *                     type: object
+ *                     properties:
+ *                       email:
+ *                         type: string
+ *                         example: "owner@example.com"
+ *       401:
+ *         description: Unauthorized – invalid or missing token
+ *       500:
+ *         description: Failed to fetch shop details
+ */

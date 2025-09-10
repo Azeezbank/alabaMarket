@@ -5,7 +5,7 @@ import { UpdateInfo, ChangePassword } from '../controllers/Admin/PersonalInfomat
 import { DeleteUser, UpdateUser, GetBuyers, Getsellers, SellerRating, 
     StoreActivities, AllAdmin, getUsers, getShops, getActiveListing, activities,
 newadmin, UpdateSellers, updateUserRole, paymentReminder,  adminRoleManagement, newRole, editRole,
-suspendAdmin, reactivateAdminAccess } from '../controllers/Admin/user.manage.js';
+suspendAdmin, reactivateAdminAccess, getAllShopdetails } from '../controllers/Admin/user.manage.js';
 import { productCategories, updateProductCategories, getCategories, getSubCategories, createSubCategories } from '../controllers/Admin/productCategory.js';
 import { allListing, rejectListing, approveListing } from '../controllers/Admin/listing.js';
 import { sellerVerificationReview, approveSellerVerification, rejectSellerVerification } from '../controllers/Admin/seller.verification.js';
@@ -37,6 +37,7 @@ router.put('/update/user/role', authenticate, updateUserRole);
 router.post('/new/admin', authenticate, newadmin);
 router.get("/all/users", authenticate, GetBuyers);
 router.get("/all/sellers", authenticate, Getsellers);
+router.get("/all/shop/details", authenticate, getAllShopdetails);
 router.get('/total/active/listing', authenticate, getActiveListing);
 router.post("/create/subscription/plan", authenticate, createSubscriptionPlan);
 router.get('/subscription/plan', authenticate, getSubscriptionPlans);

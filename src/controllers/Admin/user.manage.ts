@@ -507,3 +507,25 @@ export const reactivateAdminAccess = async (req: AuthRequest, res: Response) => 
         return res.status(500).json({ message: 'Something went wrong, failed to reactivate admin access'})
     }
 }
+
+// All seller's shop details
+export const getAllShopdetails = async (req: AuthRequest, res: Response) => {
+    try {
+
+        // Get all stores with owner's name
+        const stores = await prisma.sellerShop.findMany({
+            include: {
+                user: {
+                    select: {
+                        email: true,
+                    }
+                }
+            }
+        })
+
+        res.status(200).json(stores);
+    } catch (err: any) {
+        console.error("Error fetching shop details:", err);
+        return res.status(500).json({ message: "Failed to fetch shop details" });
+    }
+}

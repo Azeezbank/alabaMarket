@@ -40,6 +40,7 @@ export const createShop = async (req, res) => {
 };
 //Fetch shop details
 export const getShopdetails = async (req, res) => {
+    const userId = req.user?.id;
     try {
         let cachedStores;
         try {
@@ -53,7 +54,7 @@ export const getShopdetails = async (req, res) => {
             return res.status(200).json(JSON.parse(cachedStores));
         }
         // Get all stores with owner's name
-        const stores = await prisma.sellerShop.findMany({
+        const stores = await prisma.sellerShop.findMany({ where: { userId },
             include: {
                 user: {
                     select: {
