@@ -59,6 +59,11 @@ export const getShopdetails = async (req, res) => {
                 user: {
                     select: {
                         email: true,
+                        sellerVerification: {
+                            select: {
+                                id: true, userId: true, isVerified: true, status: true
+                            }
+                        }
                     }
                 }
             }

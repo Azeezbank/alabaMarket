@@ -1465,6 +1465,7 @@
  *         description: Failed to edit payment status
  */
 
+
 /**
  * @swagger
  * /api/admin/all/shop/details:
@@ -1472,7 +1473,7 @@
  *     summary: Get all seller shop details
  *     description: Retrieve all seller shops along with their owner's email addresses.
  *     tags:
- *       - admin
+ *       - Admin
  *     security:
  *       - bearerAuth: []
  *     responses:
