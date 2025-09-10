@@ -31,7 +31,7 @@ app.use(cors({
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Accept"]
-}));
+\}));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -41,7 +41,7 @@ const PORT = process.env.PORT || 3000;
 setupSwagger(app);
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('Welcome to Alabamarket API');
+    res.send('Welcome to Alabamarket API, testing server');
 })
 
 app.get("/redis", async (req, res) => {
