@@ -69,7 +69,7 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Something went wrong, failed to create subscription plan
+ *                   example: Something went wrong. Failed to create subscription plan
  */
 
 

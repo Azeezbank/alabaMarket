@@ -41,7 +41,7 @@ const PORT = process.env.PORT || 3000;
 setupSwagger(app);
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('Welcome to Alabamarket API, testing server');
+    res.send('Welcome to Alabamarket API');
 })
 
 app.get("/redis", async (req, res) => {
