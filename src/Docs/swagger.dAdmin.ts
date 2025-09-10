@@ -1472,7 +1472,7 @@
  *     summary: Get all seller shop details
  *     description: Retrieve all seller shops along with their owner's email addresses.
  *     tags:
- *       - Admin
+ *       - admin
  *     security:
  *       - bearerAuth: []
  *     responses:
