@@ -374,8 +374,7 @@ export const productOwner = async (req: AuthRequest, res: Response) => {
       where: {
         id: productId, isVisible: true, status: 'Approved',
       },
-      select: {
-        id: true,
+      include: {
         user: {
           select: {
             id: true,
