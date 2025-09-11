@@ -375,6 +375,12 @@ export const productOwner = async (req: AuthRequest, res: Response) => {
         id: productId, isVisible: true, status: 'Approved',
       },
       include: {
+        productPhoto: true,
+        productVideo: true,
+        productPricing: true,
+        _count: {
+          select: { likes: true, love: true },
+        },
         user: {
           select: {
             id: true,
