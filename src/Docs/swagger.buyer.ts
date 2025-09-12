@@ -807,6 +807,122 @@
  *         description: Failed to fetch seller product listings
  */
 
+/**
+ * @swagger
+ * /api/buyer/seller/active/listing/{sellerId}/{subCategoryId}:
+ *   get:
+ *     summary: Get seller listings by subcategory
+ *     description: Fetch all active, approved listings for a particular seller under a specific subcategory with pagination.
+ *     tags: [Buyer]
+ *     parameters:
+ *       - in: path
+ *         name: sellerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the seller
+ *       - in: path
+ *         name: subCategoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the subcategory
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of seller's listings in the specified subcategory
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 total:
+ *                   type: integer
+ *                   example: 25
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 3
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *                         example: iPhone 14 Pro
+ *                       status:
+ *                         type: string
+ *                         example: Approved
+ *                       isVisible:
+ *                         type: boolean
+ *                         example: true
+ *                       productPhoto:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *                               example: https://example.com/photo.jpg
+ *                       productVideo:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *                               example: https://example.com/video.mp4
+ *                       productPricing:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             price:
+ *                               type: number
+ *                               example: 500
+ *                       _count:
+ *                         type: object
+ *                         properties:
+ *                           likes:
+ *                             type: integer
+ *                             example: 15
+ *                           love:
+ *                             type: integer
+ *                             example: 7
+ *       500:
+ *         description: Something went wrong while fetching listings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to select listing with subcategory
+ */
+
 
 /**
  * @swagger
