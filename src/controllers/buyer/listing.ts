@@ -67,7 +67,7 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
-const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
+  const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
   try {
     // 1️ Check Redis cache first
     const cachedData = await redis.get(cacheKey);
@@ -183,7 +183,8 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
   try {
     // Get total count
     const total = await prisma.product.count({
-      where: { isVisible: true, status: 'Approved',
+      where: {
+        isVisible: true, status: 'Approved',
         productPricing: {
           price: {
             gte: greaterThan
@@ -453,7 +454,7 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
   const skip = (page - 1) * limit;
 
   try {
-      // Get total count for pagination
+    // Get total count for pagination
     const total = await prisma.savedProducts.count({
       where: { userId, product: { isVisible: true } },
     });
@@ -464,23 +465,23 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
         product: {
           include: {
             productPhoto: true,
-        productVideo: true,
-        productPricing: true,
-        user: {
-          select: {
-            id: true,
-            profile: {
-              select: { profile_pic: true, isVerified: true }
-            },
-            sellerShop: {
-              select: { storeName: true }
+            productVideo: true,
+            productPricing: true,
+            user: {
+              select: {
+                id: true,
+                profile: {
+                  select: { profile_pic: true, isVerified: true }
+                },
+                sellerShop: {
+                  select: { storeName: true }
+                }
+              }
             }
           }
         }
-          }
-        }
       },
-      orderBy: { createdAt: 'desc'},
+      orderBy: { createdAt: 'desc' },
       skip,
       take: limit
     });
@@ -503,7 +504,7 @@ export const getActiveListing = async (req: Request, res: Response) => {
   const cacheKey = `active_listings:page=${page}:limit=${limit}`;
   try {
 
-       // 1️ Check Redis cache first
+    // 1️ Check Redis cache first
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
       return res.status(200).json(JSON.parse(cachedData));

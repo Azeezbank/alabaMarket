@@ -8,60 +8,60 @@ datasource db {
 }
 
 model User {
-  id                 String              @id @default(uuid()) @db.Uuid
-  email              String?             @unique
-  phone              String?             @unique
-  password           String?
-  otp                String?
-  expiresAt          DateTime?
-  sign_up_verify     Boolean             @default(false)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @default(now()) @updatedAt
-  product            Product[]
-  profile            Profile?
-  productReview      ProductReview[]
-  sellerShop         SellerShop[]
-  sellerVerification SellerVerification?
-  comment            Comment[]
-  notification       Notification[]
-  likes              Likes[]
-  sellerRating       SellerRating[]      @relation("SellerRatings")
-  customerRatings    SellerRating[]      @relation("CustomerRatings")
-  storeActivities    StoreActivities[]
-  savedProducts      SavedProducts[]
-  question           Question[]
-  love               Love[]
-  sentMessages       Chat[]              @relation("SentMessages")
-  receivedMessages   Chat[]              @relation("ReceivedMessages")
-  activities         Activities[]
-  ticket             Ticket[]
-  subscriptionPlanId     String?  @unique  @db.Uuid
-  subscriptionPlan       SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
-  subscriptionExpiresAt  DateTime?
-  transaction      Transaction[]
+  id                    String              @id @default(uuid()) @db.Uuid
+  email                 String?             @unique
+  phone                 String?             @unique
+  password              String?
+  otp                   String?
+  expiresAt             DateTime?
+  sign_up_verify        Boolean             @default(false)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @default(now()) @updatedAt
+  product               Product[]
+  profile               Profile?
+  productReview         ProductReview[]
+  sellerShop            SellerShop[]
+  sellerVerification    SellerVerification?
+  comment               Comment[]
+  notification          Notification[]
+  likes                 Likes[]
+  sellerRating          SellerRating[]      @relation("SellerRatings")
+  customerRatings       SellerRating[]      @relation("CustomerRatings")
+  storeActivities       StoreActivities[]
+  savedProducts         SavedProducts[]
+  question              Question[]
+  love                  Love[]
+  sentMessages          Chat[]              @relation("SentMessages")
+  receivedMessages      Chat[]              @relation("ReceivedMessages")
+  activities            Activities[]
+  ticket                Ticket[]
+  subscriptionPlanId    String?             @unique @db.Uuid
+  subscriptionPlan      SubscriptionPlan?   @relation(fields: [subscriptionPlanId], references: [id])
+  subscriptionExpiresAt DateTime?
+  transaction           Transaction[]
 }
 
 model SubscriptionPlan {
-  id          String      @id @default(uuid())   @db.Uuid
-  name              String
-  price       Decimal  @default(0.00) @db.Decimal(10, 2)
-  duration      String?
-  maxVisibleProducts Int     @default(2)
-  placement      String?
-  createdAt         DateTime @default(now())
-  updatedAt       DateTime             @default(now()) @updatedAt
-  users             User?
-  maxVisiblePerCat     MaxVisiblePerCat?
+  id                 String            @id @default(uuid()) @db.Uuid
+  name               String
+  price              Decimal           @default(0.00) @db.Decimal(10, 2)
+  duration           String?
+  maxVisibleProducts Int               @default(2)
+  placement          String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now()) @updatedAt
+  users              User?
+  maxVisiblePerCat   MaxVisiblePerCat?
   transaction        Transaction[]
 }
 
 model MaxVisiblePerCat {
-  id          String      @id @default(uuid()) @db.Uuid
-  subscriptionPlanId    String  @unique   @db.Uuid
-  maxVisible        Int
-  createdAt         DateTime @default(now())
-  updatedAt       DateTime             @default(now()) @updatedAt
-  subscriptionPlan    SubscriptionPlan     @relation(fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  id                 String           @id @default(uuid()) @db.Uuid
+  subscriptionPlanId String           @unique @db.Uuid
+  maxVisible         Int
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @default(now()) @updatedAt
+  subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
@@ -94,7 +94,6 @@ model Product {
   name            String?
   userId          String               @db.Uuid
   isActive        Boolean              @default(true)
-  pricingStatus   ProductpricingStatus @default(Pending)
   isPause         Boolean              @default(false)
   shopId          String               @db.Uuid
   status          ProductStatus        @default(Pending)
@@ -106,7 +105,7 @@ model Product {
   productVideo    ProductVideo[]
   productPricing  ProductPricing?
   comment         Comment[]
-  isVisible      Boolean  @default(false)
+  isVisible       Boolean              @default(false)
   visibleMarkedAt DateTime?
   shop            SellerShop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
   createdAt       DateTime             @default(now())
@@ -313,33 +312,6 @@ enum SellerVerificationStatus {
   Rejected
 }
 
-
-model BoostPackages {
-  id                   String                 @id @default(uuid()) @db.Uuid
-  plan                 String
-  type                 BoostPackagesType      @default(Free)
-  placement            String
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
-  boostPackagesDetails BoostPackagesDetails[]
-}
-
-enum BoostPackagesType {
-  Paid
-  Free
-}
-
-model BoostPackagesDetails {
-  id              String        @id @default(uuid()) @db.Uuid
-  duration        String
-  price           Decimal       @default(0.00) @db.Decimal(10, 2)
-  status          Boolean       @default(true)
-  boostPackagesId String        @unique @db.Uuid
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @default(now()) @updatedAt
-  boostPackages   BoostPackages @relation(fields: [boostPackagesId], references: [id], onDelete: Cascade)
-}
-
 model StoreActivities {
   id           String   @id @default(uuid()) @db.Uuid
   activityType String?
@@ -396,27 +368,6 @@ model Chat {
   updatedAt  DateTime @default(now()) @updatedAt
 }
 
-model PromoBannerMgt {
-  id         String               @id @default(uuid()) @db.Uuid
-  image      String?
-  title      String
-  page       String
-  placement  String
-  uploadedBy String?
-  startDate  DateTime?
-  endDate    DateTime?
-  status     PromoBannerMgtStatus
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @default(now()) @updatedAt
-}
-
-enum PromoBannerMgtStatus {
-  Active
-  Expire
-  Suspended
-  Inactive
-}
-
 model Ticket {
   id          String     @id @default(uuid()) @db.Uuid
   ticketId    String     @unique
@@ -460,27 +411,27 @@ model ActionLog {
 }
 
 model Transaction {
-  id        String   @id @default(uuid())
-  reference String   @unique
-  amount    Float
-  status    String   // PENDING | SUCCESS | FAILED
-  userId    String      @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
-  subscriptionPlanId    String   @db.Uuid
-  subscriptionPlan      SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
+  id                 String           @id @default(uuid())
+  reference          String           @unique
+  amount             Float
+  status             String // PENDING | SUCCESS | FAILED
+  userId             String           @db.Uuid
+  user               User             @relation(fields: [userId], references: [id])
+  subscriptionPlanId String           @db.Uuid
+  subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @default(now()) @updatedAt
 }
 
 model PaymentProvider {
-  id        Int      @id @default(autoincrement())
-  name      PaymentProviderName
-  publicKey String?
-  secretKey String
-  flutterWebhookSecret String @default("d8f3a7c2b9e541f0a4c7e63d9f28ac12")
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())  @updatedAt
+  id                   Int                 @id @default(autoincrement())
+  name                 PaymentProviderName
+  publicKey            String?
+  secretKey            String
+  flutterWebhookSecret String              @default("d8f3a7c2b9e541f0a4c7e63d9f28ac12")
+  isActive             Boolean             @default(false)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @default(now()) @updatedAt
 }
 
 enum PaymentProviderName {
