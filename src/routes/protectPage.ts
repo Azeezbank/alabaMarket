@@ -1,6 +1,6 @@
 import express from 'express';
-import { protectPage } from '../controllers/protectPage';
-import { authenticate } from '../middlewares/auth.middleware';
+import { protectPage } from '../controllers/protectPage.js';
+import { authenticate } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 

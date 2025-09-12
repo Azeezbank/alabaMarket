@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { AuthRequest } from '../middlewares/auth.middleware';
+import { AuthRequest } from '../middlewares/auth.middleware.js';
 import { JwtPayload } from 'jsonwebtoken';
 
 export const protectPage = async (req: AuthRequest, res: Response) => {

@@ -17,6 +17,7 @@ import redis from './config/redisClient.js';
 import "./jobs/subscriptionExpiryJob.js";
 import webhook from './routes/webhook.route.js';
 import cors from "cors";
+import protectPage from './routes/protectPage.js';
 // import { isAdmin } from './middlewares/Admin.js';
 dotenv.config();
 const app = express();
@@ -56,6 +57,8 @@ app.use('/api/chat', chat);
 app.use('/api/payment/webhook', webhook);
 //Video call signaling
 app.use('/api/video/status', video);
+//Protect page from Unathorized access
+app.use('/api/protect', protectPage);
 //Socket.io for chat and video supporting WebRTC
 const server = http.createServer(app);
 const io = new Server(server, {
