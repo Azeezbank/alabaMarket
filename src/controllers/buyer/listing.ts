@@ -560,7 +560,7 @@ export const getSellerActiveListing = async (req: AuthRequest, res: Response) =>
   try {
     // Get total count
     const total = await prisma.product.count({ where: { userId: sellerId, isVisible: true, status: 'Approved' } });
-    
+
     // Fetch paginated products
     const products = await prisma.product.findMany({
       where: { userId: sellerId, isVisible: true, status: 'Approved' },
@@ -568,6 +568,15 @@ export const getSellerActiveListing = async (req: AuthRequest, res: Response) =>
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        _count: {
+          select: { likes: true, love: true },
+        },
+        user: {
+          select: {
+            id: true,
+            profile: true, // adjust what you need
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
