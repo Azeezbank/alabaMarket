@@ -44,6 +44,12 @@ export const updateVerificationIdCard = async (req, res) => {
             console.error("No file uploaded");
             return res.status(400).json({ message: "No file uploaded" });
         }
+        const sellerVerification = await prisma.sellerVerification.findUnique({
+            where: { userId: userid },
+        });
+        if (!sellerVerification) {
+            return res.status(404).json({ message: "Seller verification record not found" });
+        }
         const files = req.files;
         // Upload to ImageKit
         const idcard = await imagekit.upload({
@@ -69,7 +75,8 @@ export const updateVerificationIdCard = async (req, res) => {
 export const isSeller = async (req, res) => {
     const userId = req.user?.id;
     try {
-        const isSeller = await prisma.user.findUnique({ where: { id: userId },
+        const isSeller = await prisma.user.findUnique({
+            where: { id: userId },
             select: {
                 profile: {
                     select: {
