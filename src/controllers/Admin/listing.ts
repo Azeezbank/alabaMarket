@@ -12,8 +12,11 @@ export const allListing = async (req: AuthRequest, res: Response) => {
     try {
 
         const listing = await prisma.product.findMany({
-            select: {
-                id: true, name: true, userId: true, isActive: true, pricingStatus: true, shopId: true, status: true, categoryId: true, subCategoryId: true, isVisible: true, visibleMarkedAt: true, createdAt: true,
+            include: {
+                productPhoto: true,
+                productPricing: true,
+                productVideo: true,
+                productReview: true,
                         user: {
                             select: {
                                 profile: {
@@ -31,7 +34,7 @@ export const allListing = async (req: AuthRequest, res: Response) => {
 
         res.status(200).jsonp(listing)
     } catch (err: any) {
-        console.error({ message: 'Something went wrong, failed to select free listing', err })
+        console.error({ message: ']Something went wrong, failed to select free listing', err })
         return res.status(500).json({ message: 'Something went wrong, failed to select free listing' })
     }
 }
