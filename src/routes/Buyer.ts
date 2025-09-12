@@ -8,7 +8,7 @@ import { productrating, productReviewRatingAvg, productratingDistribution } from
 import { filterpopularListings, filterListingsByPriceRange, 
     filterListingsByLessPrice, filterListingsByGreaterPrice, fetchVerifiedSellerListing, 
     fetchUnverifiedSellerListing, fetchSellerListingByCondition, productOwner, productReport, savedProduct,
-getSavedProduct, getActiveListing } from '../controllers/buyer/listing.js';
+getSavedProduct, getActiveListing, getSellerActiveListing } from '../controllers/buyer/listing.js';
 import { getBuyerallNotifications, getBuyerReadNotifications, getBuyerUnReadNotifications } from '../controllers/buyer/notification.js';
 import { handleQuestion } from '../controllers/buyer/question.js';
 
@@ -33,6 +33,7 @@ router.get('/all/notification', authenticate, getBuyerallNotifications);
 router.get('/all/read/notification', authenticate, getBuyerReadNotifications);
 router.get('/all/unread/notification', authenticate, getBuyerUnReadNotifications);
 router.post('/question', authenticate, handleQuestion);
+router.get('/seller/active/listing/:sellerId', getSellerActiveListing);
 router.post('/like/unlike/:productId', likes);
 router.post('/saved/listing/:productId', authenticate, savedProduct);
 router.post('/love/:productId', love);

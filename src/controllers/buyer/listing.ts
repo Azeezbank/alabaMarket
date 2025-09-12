@@ -548,6 +548,37 @@ export const getActiveListing = async (req: Request, res: Response) => {
   }
 };
 
+// Get all particular seller active listing listings
+export const getSellerActiveListing = async (req: AuthRequest, res: Response) => {
+  const sellerId = req.params.sellerId as string;
+
+  // Parse pagination query params with defaults
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    // Get total count
+    const total = await prisma.product.count({ where: { userId: sellerId, isVisible: true, status: 'Approved' } });
+    // Fetch paginated products
+    const products = await prisma.product.findMany({
+      where: { userId: sellerId, isVisible: true, status: 'Approved' },
+      include: {
+        productPhoto: true,
+        productVideo: true,
+        productPricing: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit
+    });
+    res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
+  } catch (err: any) {
+    console.error("Error fetching product listings:", err);
+    res.status(500).json({ message: "Failed to fetch seller product listings" });
+  }
+}
+
 // // select listing by boost plan
 // export const getActiveListingByPlan = async (req: Request, res: Response) => {
 //   // Parse pagination query params with defaults

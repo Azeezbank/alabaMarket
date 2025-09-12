@@ -728,6 +728,85 @@
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /api/buyer/seller/active/listing/{sellerId}:
+ *   get:
+ *     summary: Get all active listings of a particular seller
+ *     description: Fetches all approved and visible product listings for a specific seller, with pagination support.
+ *     tags:
+ *       - Buyer
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sellerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the seller
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of products per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of seller's active listings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       isVisible:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       productPhoto:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       productVideo:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       productPricing:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Failed to fetch seller product listings
+ */
+
 
 /**
  * @swagger
