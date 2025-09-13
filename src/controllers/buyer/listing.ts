@@ -408,7 +408,7 @@ export const productOwner = async (req: AuthRequest, res: Response) => {
   }
 }
 
-//Create product report
+//Create product report, report a listing
 export const productReport = async (req: AuthRequest, res: Response) => {
   const productId = req.params.productId as string;
   const userId = (req.user as JwtPayload)?.id;
@@ -630,6 +630,26 @@ export const getSellerListingBySubCategory = async (req: AuthRequest, res: Respo
   } catch (err: any) {
     console.error('Failed to select listing by subcategory', err)
     return res.status(500).json({ message: 'Something went wrong, Failed to select listing with subcategory' })
+  }
+};
+
+
+//Create seller report, report a seller
+export const sellerReport = async (req: AuthRequest, res: Response) => {
+  const sellerId = req.params.sellerId as string;
+  const userId = (req.user as JwtPayload)?.id;
+  const { reason, description } = req.body;
+  try {
+    await prisma.report.create({
+      data: {
+        sellerId, userId, reason, description
+      }
+    })
+
+    res.status(200).json({ message: 'Report submitted successfully' })
+  } catch (err: any) {
+    console.error('Something went wrong, Failed to submit report', err)
+    return res.status(500).json({ message: 'Something went wrong, Failed to submit report' })
   }
 }
 

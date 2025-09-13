@@ -1029,3 +1029,62 @@
  *       500:
  *         description: Failed to submit question
  */
+
+/**
+ * @swagger
+ * /api/seller/report/seller/{sellerId}:
+ *   post:
+ *     summary: Report a seller
+ *     description: Allows an authenticated user to report a seller with a reason and description.
+ *     tags:
+ *       - Buyer
+ *     security:
+ *       - bearerAuth: []   # Requires JWT authentication
+ *     parameters:
+ *       - in: path
+ *         name: sellerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the seller being reported
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reason
+ *               - description
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 example: "Fraudulent activity"
+ *               description:
+ *                 type: string
+ *                 example: "Seller attempted to scam me during a transaction."
+ *     responses:
+ *       200:
+ *         description: Report submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Report submitted successfully
+ *       401:
+ *         description: Unauthorized, JWT token missing or invalid
+ *       500:
+ *         description: Failed to submit seller report
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to submit report
+ */

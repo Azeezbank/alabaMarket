@@ -90,30 +90,30 @@ enum ProfileRole {
 }
 
 model Product {
-  id              String               @id @default(uuid()) @db.Uuid
+  id              String          @id @default(uuid()) @db.Uuid
   name            String?
-  userId          String               @db.Uuid
-  isActive        Boolean              @default(true)
-  isPause         Boolean              @default(false)
-  shopId          String               @db.Uuid
-  status          ProductStatus        @default(Pending)
+  userId          String          @db.Uuid
+  isActive        Boolean         @default(true)
+  isPause         Boolean         @default(false)
+  shopId          String          @db.Uuid
+  status          ProductStatus   @default(Pending)
   categoryName    String?
   subCategoryName String?
-  categoryId      String?              @db.Uuid
-  subCategoryId   String?              @db.Uuid
+  categoryId      String?         @db.Uuid
+  subCategoryId   String?         @db.Uuid
   productPhoto    ProductPhoto[]
   productVideo    ProductVideo[]
   productPricing  ProductPricing?
   comment         Comment[]
-  isVisible       Boolean              @default(false)
+  isVisible       Boolean         @default(false)
   visibleMarkedAt DateTime?
-  shop            SellerShop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @default(now()) @updatedAt
+  shop            SellerShop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now()) @updatedAt
   likes           Likes[]
-  category        Category?            @relation(fields: [categoryId], references: [id])
-  subCategory     SubCategory?         @relation(fields: [subCategoryId], references: [id])
-  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        Category?       @relation(fields: [categoryId], references: [id])
+  subCategory     SubCategory?    @relation(fields: [subCategoryId], references: [id])
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   productReview   ProductReview[]
   savedProducts   SavedProducts[]
   love            Love[]
@@ -333,10 +333,11 @@ model Activities {
 
 model Report {
   id          String   @id @default(uuid()) @db.Uuid
-  productId   String   @db.Uuid
+  productId   String?  @db.Uuid
+  sellerId    String?  @db.Uuid
   userId      String   @db.Uuid
   reason      String?
-  description String
+  description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 }
