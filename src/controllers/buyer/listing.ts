@@ -583,7 +583,8 @@ export const getSellerActiveListing = async (req: AuthRequest, res: Response) =>
           select: {
             id: true,
             profile: true,
-            sellerRating: true
+            sellerRating: true,
+            sellerShop: true,
           },
         },
       },
