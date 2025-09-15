@@ -92,5 +92,3 @@ export const productratingDistribution = async (req: AuthRequest, res: Response)
         return res.status(500).json({ message: 'Something went wrong, Failed to get rating distribution' })
     }
 }
-
-//Get all product rating by a product

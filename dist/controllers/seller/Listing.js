@@ -184,11 +184,7 @@ export const FetchSellerListings = async (req, res) => {
                 user: {
                     select: {
                         createdAt: true,
-                        sellerShop: {
-                            select: {
-                                storeName: true,
-                            }
-                        },
+                        sellerShop: true,
                         sellerVerification: {
                             select: { isVerified: true }
                         }
