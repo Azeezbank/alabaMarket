@@ -175,7 +175,7 @@ model ProductPhoto {
   id        String   @id @default(uuid()) @db.Uuid
   url       String?
   productId String   @db.Uuid
-  product   Product? @relation(fields: [productId], references: [id])
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
@@ -184,7 +184,7 @@ model ProductVideo {
   id        String   @id @default(uuid()) @db.Uuid
   productId String?  @db.Uuid
   url       String?
-  product   Product? @relation(fields: [productId], references: [id])
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
@@ -197,7 +197,7 @@ model ProductPricing {
   condition   String
   description String?
   createdAt   DateTime @default(now())
-  product     Product  @relation(fields: [productId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   updatedAt   DateTime @default(now()) @updatedAt
 }
 
@@ -208,8 +208,8 @@ model SellerRating {
   customerId String   @db.Uuid
   userId     String   @db.Uuid
   createdAt  DateTime @default(now())
-  user       User     @relation("SellerRatings", fields: [userId], references: [id])
-  customer   User     @relation("CustomerRatings", fields: [customerId], references: [id])
+  user       User     @relation("SellerRatings", fields: [userId], references: [id], onDelete: Cascade)
+  customer   User     @relation("CustomerRatings", fields: [customerId], references: [id], onDelete: Cascade)
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@unique([userId, customerId])
@@ -220,9 +220,9 @@ model ProductReview {
   stars     Int?     @db.SmallInt
   comment   String?
   productId String   @unique @db.Uuid
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   userId    String   @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
@@ -235,8 +235,8 @@ model Comment {
   productId String   @db.Uuid
   userId    String   @db.Uuid
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   updatedAt DateTime @default(now()) @updatedAt
 }
 
@@ -244,9 +244,9 @@ model Likes {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
   userId    String?   @unique @db.Uuid
-  user      User?     @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId String   @unique @db.Uuid
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([userId, productId])
@@ -256,9 +256,9 @@ model Love {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
   userId    String?   @unique @db.Uuid
-  user      User?     @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId String   @unique @db.Uuid
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([userId, productId])
@@ -273,7 +273,7 @@ model Notification {
   isRead     Boolean  @default(false)
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
-  user       User     @relation(fields: [senderId], references: [id])
+  user       User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   updatedAt  DateTime @default(now()) @updatedAt
 }
 
@@ -320,7 +320,7 @@ model StoreActivities {
   description  String
   userId       String   @unique @db.Uuid
   createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   updatedAt    DateTime @default(now()) @updatedAt
 }
 
@@ -350,7 +350,7 @@ model Question {
   receiverId String?        @db.Uuid
   question   String
   status     QuestionStatus @default(Pending)
-  user       User           @relation(fields: [userId], references: [id])
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   updatedAt  DateTime       @default(now()) @updatedAt
 }
 
@@ -382,7 +382,7 @@ model Ticket {
   assignedTo  String?
   updatedAt   DateTime   @default(now()) @updatedAt
   userId      String     @db.Uuid
-  user        User       @relation(fields: [userId], references: [id])
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   actionLog   ActionLog?
 }
 
@@ -419,7 +419,7 @@ model Transaction {
   amount             Float
   status             String // PENDING | SUCCESS | FAILED
   userId             String           @db.Uuid
-  user               User             @relation(fields: [userId], references: [id])
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscriptionPlanId String           @db.Uuid
   subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
   createdAt          DateTime         @default(now())

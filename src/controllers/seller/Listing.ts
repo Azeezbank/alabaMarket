@@ -248,7 +248,7 @@ export const FetchAllSellerListings = async (req: AuthRequest, res: Response) =>
         productPricing: true,
         user: {
           select: {
-            createdAt: true,
+            id: true, createdAt: true,
             sellerShop: {
               select: {
                 storeName: true,
