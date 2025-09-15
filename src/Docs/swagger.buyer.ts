@@ -1032,7 +1032,7 @@
 
 /**
  * @swagger
- * /api/seller/report/seller/{sellerId}:
+ * /api/buyer/report/seller/{sellerId}:
  *   post:
  *     summary: Report a seller
  *     description: Allows an authenticated user to report a seller with a reason and description.

@@ -474,7 +474,7 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
                   select: { profile_pic: true, isVerified: true }
                 },
                 sellerShop: {
-                  select: { storeName: true }
+                  select: { storeName: true, storeAddress: true, storeEmail: true, phoneNumber: true }
                 }
               }
             }
