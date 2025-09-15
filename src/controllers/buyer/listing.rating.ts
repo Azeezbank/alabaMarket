@@ -1,54 +1,53 @@
 import { Response, Request } from "express";
-// import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../prisma.client.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { JwtPayload } from "jsonwebtoken";
 
 
 //Create or update product rating by buyer
-export const productrating = async (req: AuthRequest, res: Response) => {
-    const { productId } = req.params;
+export const sellerRating = async (req: AuthRequest, res: Response) => {
+    const { customerId } = req.params;
     const userId = (req.user as JwtPayload)?.id;
-    const stars = parseInt(req.body.stars);
+    const rating = parseInt(req.body.stars);
     const comment = req.body.comment;
     try {
-        await prisma.productReview.upsert({
+        await prisma.sellerRating.upsert({
             where: {
-                userId_productId: {
+                userId_customerId: {
                     userId: userId,
-                    productId: productId
+                    customerId: customerId
                 }
             },
             update: {
-                stars,
+                rating,
                 comment
             },
             create: {
-                stars,
+                rating,
                 comment,
-                productId: productId,
+                customerId: customerId,
                 userId: userId,
             }
         });
 
-        return res.status(200).json({ message: "Product rated successfully." });
+        return res.status(200).json({ message: "Seller rated successfully." });
     } catch (err: any) {
-        console.error('Something went wrong, Failed to rate product', err)
-        return res.status(500).json({ message: 'Something went wrong, Failed to rate product' })
+        console.error('Something went wrong, Failed to rate seller', err)
+        return res.status(500).json({ message: 'Something went wrong, Failed to rate seller' })
     }
 }
 
 //Get average rating for a product, such as 4.8 and the reviews
-export const productReviewRatingAvg = async (req: AuthRequest, res: Response) => {
-    const { productId } = req.params;
+export const sellerReviewRatingAvg = async (req: AuthRequest, res: Response) => {
+    const { customerId } = req.params;
     try {
-        const avg = await prisma.productReview.aggregate({
-            where: { productId },
-            _avg: { stars: true }
+        const avg = await prisma.sellerRating.aggregate({
+            where: { customerId },
+            _avg: { rating: true }
         });
 
-        const reviews = await prisma.productReview.findMany({
-            where: { productId },
+        const reviews = await prisma.sellerRating.findMany({
+            where: { customerId },
             select: {
                 comment: true,
                 createdAt: true,
@@ -70,20 +69,20 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
 
         res.status(200).json({ avg, reviews })
     } catch (err: any) {
-        console.error('Something went wrong, Failed to rate product', err)
-        return res.status(500).json({ message: 'Something went wrong, Failed to rate product' })
+        console.error('Something went wrong, Failed to rate seller', err)
+        return res.status(500).json({ message: 'Something went wrong, Failed to rate seller' })
     }
 }
 
 //Get rating distribution, numbers of 1, 2, 3, 4, 5
-export const productratingDistribution = async (req: AuthRequest, res: Response) => {
-    const { productId } = req.params;
+export const sellerRatingDistribution = async (req: AuthRequest, res: Response) => {
+    const { customerId } = req.params;
     try {
-        const distribution = await prisma.productReview.groupBy({
-            by: ['stars'],
-            where: { productId },
-            _count: { stars: true },
-            orderBy: { stars: 'asc' }
+        const distribution = await prisma.sellerRating.groupBy({
+            by: ['rating'],
+            where: { customerId },
+            _count: { rating: true },
+            orderBy: { rating: 'asc' }
         });
 
         res.status(200).json(distribution)

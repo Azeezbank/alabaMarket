@@ -203,14 +203,16 @@ model ProductPricing {
 
 model SellerRating {
   id         String   @id @default(uuid()) @db.Uuid
-  rating     Int
-  comment    String
+  rating     Int?
+  comment    String?
   customerId String   @db.Uuid
   userId     String   @db.Uuid
   createdAt  DateTime @default(now())
   user       User     @relation("SellerRatings", fields: [userId], references: [id])
   customer   User     @relation("CustomerRatings", fields: [customerId], references: [id])
   updatedAt  DateTime @default(now()) @updatedAt
+
+  @@unique([userId, customerId])
 }
 
 model ProductReview {

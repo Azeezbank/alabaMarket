@@ -4,7 +4,7 @@ import { upload } from '../middlewares/upload.multer.js';
 import { buyerSetting } from '../controllers/buyer/account.js';
 import { fetchcategories } from '../controllers/buyer/categories.js';
 import { likes, love } from '../controllers/buyer/likes_love.js';
-import { productrating, productReviewRatingAvg, productratingDistribution } from '../controllers/buyer/listing.rating.js';
+import { sellerRating, sellerReviewRatingAvg, sellerRatingDistribution } from '../controllers/buyer/listing.rating.js';
 import { filterpopularListings, filterListingsByPriceRange, 
     filterListingsByLessPrice, filterListingsByGreaterPrice, fetchVerifiedSellerListing, 
     fetchUnverifiedSellerListing, fetchSellerListingByCondition, productOwner, productReport, savedProduct,
@@ -39,9 +39,9 @@ router.post('/saved/listing/:productId', authenticate, savedProduct);
 router.post('/love/:productId', love);
 router.post('/report/listing/:productId', authenticate, productReport);
 router.post('/report/seller/:sellerId', authenticate, sellerReport);
-router.get('/average/rating/:productId', productReviewRatingAvg);
-router.get('/rating/distribution/:productId', productratingDistribution);
-router.put('/rating/:productId', authenticate, productrating);
+router.get('/average/rating/:customerId', sellerReviewRatingAvg);
+router.get('/rating/distribution/:customerId', sellerRatingDistribution);
+router.put('/rating/:customerId', authenticate, sellerRating);
 router.get('/seller/active/listing/:sellerId/:subCategoryId', getSellerListingBySubCategory);
 
 

@@ -202,15 +202,15 @@
 
 /**
  * @swagger
- * /api/buyer/rating/{productId}:
+ * /api/buyer/rating/{customerId}:
  *   put:
- *     summary: Create or update product rating by buyer
+ *     summary: Create or update product rating by buyer, the customerId is the seller Id
  *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: productId
+ *         name: customerId
  *         schema:
  *           type: string
  *         required: true
@@ -259,7 +259,7 @@
 
 /**
  * @swagger
- * /api/buyer/average/rating/{productId}:
+ * /api/buyer/average/rating/{customerId}:
  *   get:
  *     summary: Get average rating and reviews for a product
  *     tags: [Buyer]
@@ -267,7 +267,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: productId
+ *         name: customerId
  *         schema:
  *           type: string
  *         required: true
@@ -289,7 +289,7 @@
 
 /**
  * @swagger
- * /api/buyer/rating/distribution/{productId}:
+ * /api/buyer/rating/distribution/{customerId}:
  *   get:
  *     summary: Get rating distribution (number of 1–5 stars) for a product
  *     tags: [Buyer]
@@ -297,7 +297,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: productId
+ *         name: customerId
  *         schema:
  *           type: string
  *         required: true
