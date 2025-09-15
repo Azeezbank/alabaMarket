@@ -23,4 +23,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # Run db push then start the app
-CMD sh -c "npx prisma db push && npm start"
+CMD ["npm", "start"]
