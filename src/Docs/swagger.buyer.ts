@@ -214,7 +214,7 @@
  *         schema:
  *           type: string
  *         required: true
- *         description: ID of the product
+ *         description: ID of the seller
  *     requestBody:
  *       required: true
  *       content:
@@ -234,7 +234,7 @@
  *                 description: Review comment
  *     responses:
  *       200:
- *         description: Product rated successfully
+ *         description: Seller rated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -242,11 +242,11 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Product rated successfully
+ *                   example: Seller rated successfully
  *       401:
  *         description: Unauthorized
  *       500:
- *         description: Failed to rate product
+ *         description: Failed to rate seller
  *         content:
  *           application/json:
  *             schema:
@@ -254,14 +254,14 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Something went wrong, Failed to rate product
+ *                   example: Something went wrong, Failed to rate seller
  */
 
 /**
  * @swagger
  * /api/buyer/average/rating/{customerId}:
  *   get:
- *     summary: Get average rating and reviews for a product
+ *     summary: Get average rating and reviews for a seller
  *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
@@ -271,12 +271,12 @@
  *         schema:
  *           type: string
  *         required: true
- *         description: ID of the product
+ *         description: ID of the seller
  *     responses:
  *       200:
  *         description: Average rating and reviews retrieved successfully
  *       500:
- *         description: Failed to get product rating
+ *         description: Failed to get seller rating
  *         content:
  *           application/json:
  *             schema:
@@ -284,14 +284,14 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Something went wrong, Failed to rate product
+ *                   example: Something went wrong, Failed to rate seller
  */
 
 /**
  * @swagger
  * /api/buyer/rating/distribution/{customerId}:
  *   get:
- *     summary: Get rating distribution (number of 1–5 stars) for a product
+ *     summary: Get rating distribution (number of 1–5 stars) for a seller
  *     tags: [Buyer]
  *     security:
  *       - bearerAuth: []
@@ -301,7 +301,7 @@
  *         schema:
  *           type: string
  *         required: true
- *         description: ID of the product
+ *         description: ID of the seller
  *     responses:
  *       200:
  *         description: Rating distribution retrieved successfully
