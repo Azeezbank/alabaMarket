@@ -282,7 +282,7 @@ router.post("/login/verify", async (req, res) => {
       const token = jwt.sign(
         { id: user.id, email: user.email, phone: user.phone },
         process.env.JWT_SECRET!,
-        { expiresIn: "1h" }
+        { expiresIn: "10h" }
       );
 
       await prisma.user.update({
