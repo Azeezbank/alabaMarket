@@ -330,7 +330,7 @@ export const EditSellerListing = async (req: AuthRequest, res: Response) => {
 //Delete product or listing
 export const DeleteSellerListing = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
-  const productId = req.params.id; // or req.body.productId
+  const productId = req.params.productId; // or req.body.productId
 
   try {
     const existingProduct = await prisma.product.findFirst({
@@ -342,6 +342,8 @@ export const DeleteSellerListing = async (req: AuthRequest, res: Response) => {
     }
 
     if (existingProduct.userId !== userId) {
+      console.error("Not a product owner");
+      console.log('userId:', userId, 'product owner:', existingProduct.userId);
       return res.status(403).json({ message: "Not authorized to delete this product" });
     }
 
@@ -360,7 +362,7 @@ export const DeleteSellerListing = async (req: AuthRequest, res: Response) => {
 // Pause or unpause a product listing
 export const PauseSellerListing = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
-  const productId = req.params.id; // or req.body.productId
+  const productId = req.params.productId; // or req.body.productId
 
   try {
     const existingProduct = await prisma.product.findUnique({

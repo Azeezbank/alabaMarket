@@ -223,7 +223,7 @@ export const FetchAllSellerListings = async (req, res) => {
                 productPricing: true,
                 user: {
                     select: {
-                        createdAt: true,
+                        id: true, createdAt: true,
                         sellerShop: {
                             select: {
                                 storeName: true,
@@ -297,7 +297,7 @@ export const EditSellerListing = async (req, res) => {
 //Delete product or listing
 export const DeleteSellerListing = async (req, res) => {
     const userId = req.user?.id;
-    const productId = req.params.id; // or req.body.productId
+    const productId = req.params.productId; // or req.body.productId
     try {
         const existingProduct = await prisma.product.findFirst({
             where: { id: productId }
@@ -306,6 +306,8 @@ export const DeleteSellerListing = async (req, res) => {
             return res.status(404).json({ message: "Product not found" });
         }
         if (existingProduct.userId !== userId) {
+            console.error("Not a product owner");
+            console.log('userId:', userId, 'product owner:', existingProduct.userId);
             return res.status(403).json({ message: "Not authorized to delete this product" });
         }
         await prisma.product.delete({
@@ -321,7 +323,7 @@ export const DeleteSellerListing = async (req, res) => {
 // Pause or unpause a product listing
 export const PauseSellerListing = async (req, res) => {
     const userId = req.user?.id;
-    const productId = req.params.id; // or req.body.productId
+    const productId = req.params.productId; // or req.body.productId
     try {
         const existingProduct = await prisma.product.findUnique({
             where: { id: productId }

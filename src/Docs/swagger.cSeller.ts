@@ -851,30 +851,66 @@
  *                   example: Failed to fetch seller's product listings
  */
 
+
 /**
  * @swagger
  * /api/seller/delete/listing/{productId}:
  *   delete:
+ *     summary: Delete a product listing
+ *     description: Allows the authenticated seller to delete their own product listing.
  *     tags:
  *       - Seller
  *     security:
- *       - bearerAuth: []
- *     summary: Delete product or listing
+ *       - bearerAuth: [] 
  *     parameters:
- *       - name: productId
- *         in: path
+ *       - in: path
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
+ *         description: The ID of the product to be deleted
  *     responses:
  *       200:
  *         description: Product listing deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product listing deleted successfully
  *       403:
- *         description: Not authorized
+ *         description: Not authorized to delete this product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Not authorized to delete this product
  *       404:
  *         description: Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product not found
  *       500:
  *         description: Failed to delete product listing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Failed to delete product listing
  */
 
 /**
@@ -901,6 +937,70 @@
  *         description: Product not found
  *       500:
  *         description: Failed to update product listing pause status
+ */
+
+/**
+ * @swagger
+ * /api/seller/listing/pause/{productId}:
+ *   patch:
+ *     summary: Pause or unpause a product listing
+ *     description: Allows the authenticated seller to toggle the pause status of their product listing.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: [] 
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the product to pause or unpause
+ *     responses:
+ *       200:
+ *         description: Product listing pause status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product listing pause status updated
+ *                 updatedProduct:
+ *                   type: object
+ *                   description: The updated product with new pause status
+ *       403:
+ *         description: Not authorized to pause this product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Not authorized to pause this product
+ *       404:
+ *         description: Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product not found
+ *       500:
+ *         description: Failed to update product listing pause status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Failed to update product listing pause status
  */
 
 /**

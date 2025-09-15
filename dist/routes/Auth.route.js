@@ -234,7 +234,7 @@ router.post("/login/verify", async (req, res) => {
             if (user.expiresAt < new Date()) {
                 return res.status(400).json({ message: "Code expired" });
             }
-            const token = jwt.sign({ id: user.id, email: user.email, phone: user.phone }, process.env.JWT_SECRET, { expiresIn: "1h" });
+            const token = jwt.sign({ id: user.id, email: user.email, phone: user.phone }, process.env.JWT_SECRET, { expiresIn: "10h" });
             await prisma.user.update({
                 where: { id: user.id },
                 data: { otp: null, expiresAt: null },
