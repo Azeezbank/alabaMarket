@@ -32,7 +32,7 @@ export const sellerRating = async (req: AuthRequest, res: Response) => {
 
         return res.status(200).json({ message: "Seller rated successfully." });
     } catch (err: any) {
-        console.error('Something went wrong, Failed to rate seller', err)
+        console.error('Something went wrong, Failed to rate seller.', err)
         return res.status(500).json({ message: 'Something went wrong, Failed to rate seller' })
     }
 }
