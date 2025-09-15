@@ -93,4 +93,4 @@ export const productratingDistribution = async (req: AuthRequest, res: Response)
     }
 }
 
-//Get all product rating
+//Get all product rating by a product

@@ -242,7 +242,7 @@ model Likes {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
   userId    String?   @unique @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
   productId String   @unique @db.Uuid
   product   Product  @relation(fields: [productId], references: [id])
   updatedAt DateTime @default(now()) @updatedAt
@@ -254,7 +254,7 @@ model Love {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
   userId    String?   @unique @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
   productId String   @unique @db.Uuid
   product   Product  @relation(fields: [productId], references: [id])
   updatedAt DateTime @default(now()) @updatedAt
