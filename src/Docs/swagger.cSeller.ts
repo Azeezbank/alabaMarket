@@ -1306,3 +1306,60 @@
  *       500:
  *         description: Failed to fetch transactions
  */
+
+
+/**
+ * @swagger
+ * /api/seller/subscription/plans:
+ *   get:
+ *     summary: Fetch all subscription plans
+ *     description: Retrieves all available subscription plans for sellers, including category visibility limits.
+ *     tags:
+ *       - Subscription Plans
+ *     security:
+ *       - bearerAuth: []   # JWT authentication required
+ *     responses:
+ *       200:
+ *         description: List of subscription plans fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     format: uuid
+ *                   name:
+ *                     type: string
+ *                   price:
+ *                     type: number
+ *                   duration:
+ *                     type: string
+ *                     example: monthly
+ *                   maxVisibleProducts:
+ *                     type: integer
+ *                   placement:
+ *                     type: string
+ *                   maxVisiblePerCat:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         maxVisible:
+ *                           type: integer
+ *       500:
+ *         description: Failed to fetch subscription plans due to a server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: something went wrong, failed to select subscription plan
+ */

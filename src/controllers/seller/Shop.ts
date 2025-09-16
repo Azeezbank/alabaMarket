@@ -172,3 +172,19 @@ export const deleteShop = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ message: "Failed to delete shop" });
     }
 };
+
+
+//fetch all subscription plans for seller
+export const getSubscriptionPlans = async (req: AuthRequest, res: Response) => {
+    try {
+        const plans = await prisma.subscriptionPlan.findMany({
+            include: {
+                maxVisiblePerCat: true
+            }
+        })
+        res.status(200).json(plans)
+    } catch (err: any) {
+        console.error('Failed to fetch subscription plan', err)
+        return res.status(500).json({ message: 'something went wrong, failed to select subscription plan'})
+    }
+}

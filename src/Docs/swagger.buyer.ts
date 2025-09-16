@@ -1088,3 +1088,179 @@
  *                   type: string
  *                   example: Something went wrong, Failed to submit report
  */
+
+
+/**
+ * @swagger
+ * /api/buyer/listing/rating/{productId}:
+ *   post:
+ *     summary: Create or update product rating
+ *     description: Allows an authenticated buyer to create or update their rating and comment for a specific product.
+ *     tags:
+ *       - Buyer
+ *     security:
+ *       - bearerAuth: []   # JWT authentication required
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the product to rate
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - stars
+ *             properties:
+ *               stars:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 example: 5
+ *               comment:
+ *                 type: string
+ *                 example: "Great product, high quality!"
+ *     responses:
+ *       200:
+ *         description: Product rated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product rated successfully.
+ *       500:
+ *         description: Failed to rate product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to rate product
+ */
+
+
+/**
+ * @swagger
+ * /api/buyer/average/listing/rating/{productId}:
+ *   get:
+ *     summary: Get product average rating and reviews
+ *     description: Fetches the average star rating for a product along with all buyer reviews.
+ *     tags:
+ *       - Buyer
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the product
+ *     responses:
+ *       200:
+ *         description: Average rating and reviews fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 avg:
+ *                   type: object
+ *                   properties:
+ *                     stars:
+ *                       type: number
+ *                       example: 4.8
+ *                 reviews:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       comment:
+ *                         type: string
+ *                         example: "Fast delivery and high quality"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           email:
+ *                             type: string
+ *                           profile:
+ *                             type: object
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                               profile_pic:
+ *                                 type: string
+ *                                 example: "https://cdn.example.com/userpic.jpg"
+ *       500:
+ *         description: Failed to fetch product reviews
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to rate product
+ */
+
+/**
+ * @swagger
+ * /api/buyer/listing/rating/distribution/{productId}:
+ *   get:
+ *     summary: Get product rating distribution
+ *     description: Returns the count of ratings for each star level (1–5) for a given product.
+ *     tags:
+ *       - Buyer
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the product
+ *     responses:
+ *       200:
+ *         description: Rating distribution fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   stars:
+ *                     type: integer
+ *                     example: 5
+ *                   _count:
+ *                     type: object
+ *                     properties:
+ *                       stars:
+ *                         type: integer
+ *                         example: 120
+ *       500:
+ *         description: Failed to fetch rating distribution
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to get rating distribution
+ */

@@ -1,6 +1,6 @@
 import express from "express";
 import { upload } from "../middlewares/upload.multer.js";
-import { createShop, getShopdetails, updateShopDetails, updateShopStatus, deleteShop } from "../controllers/seller/Shop.js";
+import { createShop, getShopdetails, updateShopDetails, updateShopStatus, deleteShop, getSubscriptionPlans } from "../controllers/seller/Shop.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { SellerVerification, updateVerificationIdCard, isSeller } from "../controllers/seller/SellerVerification.js";
 import { productDetails, productPricing, updateProductcategory, FetchSellerListings, FetchAllSellerListings,
@@ -29,6 +29,7 @@ router.get("/all/seller/listing", authenticate, FetchAllSellerListings);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);
 router.get("/payment/status", authenticate, checkTransactionStatus);
+router.get("subscription/plans", authenticate, getSubscriptionPlans);
 router.post("/plan/subscribe/:planId", authenticate, initiatePayment);
 router.put("/toggle/listing/visibility/:productId", authenticate, toggleProductVisibility);
 router.get('/listing/subcategory/:categoryId', authenticate, productSubCategory);
