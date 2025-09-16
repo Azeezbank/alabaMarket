@@ -1315,7 +1315,7 @@
  *     summary: Fetch all subscription plans
  *     description: Retrieves all available subscription plans for sellers, including category visibility limits.
  *     tags:
- *       - Subscription Plans
+ *       - Seller
  *     security:
  *       - bearerAuth: []   # JWT authentication required
  *     responses:
