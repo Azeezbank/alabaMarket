@@ -1093,7 +1093,7 @@
 /**
  * @swagger
  * /api/buyer/listing/rating/{productId}:
- *   post:
+ *   put:
  *     summary: Create or update product rating
  *     description: Allows an authenticated buyer to create or update their rating and comment for a specific product.
  *     tags:
