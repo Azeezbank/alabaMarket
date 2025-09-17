@@ -1522,3 +1522,77 @@
  *       500:
  *         description: Server error
  */
+
+/**
+ * @swagger
+ * /api/seller/add/product/photo/{productId}:
+ *   post:
+ *     summary: Add more images to a product
+ *     description: Upload one or multiple product images and save them to the database.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productImage:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Upload one or more images
+ *     responses:
+ *       200:
+ *         description: Listing image added successfully
+ *       500:
+ *         description: Something went wrong, failed to insert listing photo
+ */
+
+/**
+ * @swagger
+ * /api/seller/add/product/video/{productId}:
+ *   post:
+ *     summary: Add more videos to a product
+ *     description: Upload one or multiple product videos (reels) and save them to the database.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the product
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productVideo:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Upload one or more videos
+ *     responses:
+ *       200:
+ *         description: Listing video reel added successfully
+ *       500:
+ *         description: Something went wrong, failed to insert listing video
+ */

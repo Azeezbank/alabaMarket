@@ -5,7 +5,7 @@ import { authenticate } from "../middlewares/auth.middleware.js";
 import { SellerVerification, updateVerificationIdCard, isSeller } from "../controllers/seller/SellerVerification.js";
 import { productDetails, productPricing, updateProductcategory, FetchSellerListings, FetchAllSellerListings,
     EditSellerListing, DeleteSellerListing, PauseSellerListing, allproductCategory, productSubCategory, toggleProductVisibility, DeleteProductImage, DeleteProductVideo,
-fetchProductImages, fetchProductVideos } from '../controllers/seller/Listing.js';
+fetchProductImages, fetchProductVideos, addMoreProductImage, addMoreProductVideo } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
 import { getNotifications } from '../controllers/seller/Notification.js';
 import { initiatePayment, checkTransactionStatus } from '../controllers/paymentControler.js';
@@ -39,6 +39,8 @@ router.post("/plan/subscribe/:planId", authenticate, initiatePayment);
 router.put("/toggle/listing/visibility/:productId", authenticate, toggleProductVisibility);
 router.get('/listing/subcategory/:categoryId', authenticate, productSubCategory);
 router.post('/create/product/:shopId', authenticate, upload.fields([{ name: 'productImage', maxCount: 10}, { name: "productReel", maxCount: 10}]), productDetails);
+router.post('/add/product/photo/:productId', authenticate, upload.fields([{ name: 'productImage', maxCount: 10}, { name: "productReel", maxCount: 10}]), productDetails);
+router.post('/add/product/video/:productId', authenticate, upload.fields([{ name: 'productImage', maxCount: 10}, { name: "productReel", maxCount: 10}]), productDetails);
 router.delete("/delete/listing/:productId", authenticate, DeleteSellerListing);
 router.get("/comments/product/:productId", getCommentsByProduct);
 router.put('/update/product/category/:categoryId/:subCategoryId', authenticate, updateProductcategory);

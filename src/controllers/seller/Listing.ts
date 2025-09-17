@@ -188,6 +188,70 @@ export const updateProductcategory = async (req: AuthRequest, res: Response) => 
   }
 }
 
+//Add more product image
+export const addMoreProductImage = async (req: AuthRequest, res: Response) => {
+  const productId = req.params.productId;
+  try {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+let uploadedImage: string[] = [];
+
+if (files?.productImage) {
+  for (const file of files.productImage) {
+    const result = await imagekit.upload({
+      file: file.buffer,
+      fileName: `${Date.now()}-${file.originalname}`,
+      folder: "/uploads/productImage",
+    });
+    uploadedImage.push(result.url);
+  }
+
+  // Save multiple photos at once
+  await prisma.productPhoto.createMany({
+    data: uploadedImage.map((url) => ({
+      url,
+      productId,
+    })),
+  });
+  res.status(200).json({ message: 'Listing image added seccessfully'})
+}
+  } catch (err: any) {
+    console.error('Failed to insert photo', err)
+    return res.status(500).json({message: 'Something went wrong, failed to insert listing photo'})
+  }
+};
+
+//Add more product video
+export const addMoreProductVideo = async (req: AuthRequest, res: Response) => {
+  const productId = req.params.productId;
+  try {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+let uploadedVideo: string[] = [];
+
+if (files?.productVideo) {
+  for (const file of files.productVideo) {
+    const result = await imagekit.upload({
+      file: file.buffer,
+      fileName: `${Date.now()}-${file.originalname}`,
+      folder: "/uploads/productVideo",
+    });
+    uploadedVideo.push(result.url);
+  }
+
+  // Save multiple photos at once
+  await prisma.productVideo.createMany({
+    data: uploadedVideo.map((url) => ({
+      url,
+      productId,
+    })),
+  });
+  res.status(200).json({ message: 'Listing video reel added seccessfully'})
+}
+  } catch (err: any) {
+    console.error('Failed to insert reel', err)
+    return res.status(500).json({message: 'Something went wrong, failed to insert listing video'})
+  }
+}
+
 //Delete product image
 export const DeleteProductImage = async (req: AuthRequest, res: Response) => {
   const imageId = req.params.imageId;
