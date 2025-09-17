@@ -1423,7 +1423,7 @@
  *     summary: Delete a product video
  *     description: Deletes a specific product video by its ID.
  *     tags:
- *       - Products
+ *       - Seller
  *     security:
  *       - bearerAuth: []
  *     parameters:
