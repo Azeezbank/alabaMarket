@@ -1264,3 +1264,58 @@
  *                   type: string
  *                   example: Something went wrong, Failed to get rating distribution
  */
+
+
+/**
+ * @swagger
+ * /api/buyer/user/account/info:
+ *   get:
+ *     summary: Get user account information
+ *     description: Returns the authenticated user's account information including profile details.
+ *     tags:
+ *       - Buyer
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user account information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "12345"
+ *                 email:
+ *                   type: string
+ *                   example: "user@example.com"
+ *                 phone:
+ *                   type: string
+ *                   example: "+2348012345678"
+ *                 profile:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     profile_pic:
+ *                       type: string
+ *                       example: "https://cdn.example.com/avatar.jpg"
+ *                     role:
+ *                       type: string
+ *                       example: "Seller"
+ *                     rank:
+ *                       type: string
+ *                       example: "Gold"
+ *                     status:
+ *                       type: string
+ *                       example: "Active"
+ *                     isVerified:
+ *                       type: boolean
+ *                       example: true
+ *       401:
+ *         description: Unauthorized, invalid or missing token
+ *       500:
+ *         description: Something went wrong, failed to select user information
+ */

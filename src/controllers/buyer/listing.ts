@@ -7,7 +7,7 @@ import redis from "../../config/redisClient.js";
 
 //Filter listing by name/popular search
 export const filterpopularListings = async (req: AuthRequest, res: Response) => {
-  const name = req.query.name as string;
+  const name = (req.query.name as string)?.toLowerCase();
 
   // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
@@ -341,7 +341,7 @@ export const fetchSellerListingByCondition = async (req: AuthRequest, res: Respo
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
-  const condition = req.query.condition as string;
+  const condition = (req.query.condition as string)?.toLowerCase();
 
   try {
     // Get total count

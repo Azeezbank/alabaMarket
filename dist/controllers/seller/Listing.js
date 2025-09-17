@@ -5,7 +5,7 @@ import redis from '../../config/redisClient.js';
 export const productDetails = async (req, res) => {
     const userId = req.user?.id;
     const shopId = req.params.shopId;
-    const { name } = req.body;
+    const name = req.body.name?.toLowerCase();
     try {
         const files = req.files;
         let uploadedImage;
@@ -56,7 +56,8 @@ export const productDetails = async (req, res) => {
 };
 //Update product pricing
 export const productPricing = async (req, res) => {
-    const { price, priceStatus, condition, description } = req.body;
+    const { price, priceStatus, description } = req.body;
+    const condition = req.body.condition?.toLowerCase();
     const productId = req.query.productId;
     try {
         await prisma.product.update({

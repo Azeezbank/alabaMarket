@@ -10,7 +10,7 @@ import redis from '../../config/redisClient.js';
 export const productDetails = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
   const shopId = req.params.shopId;
-  const { name } = req.body;
+  const name = (req.body.name as string)?.toLowerCase();
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
@@ -65,7 +65,8 @@ export const productDetails = async (req: AuthRequest, res: Response) => {
 
 //Update product pricing
 export const productPricing = async (req: AuthRequest, res: Response) => {
-  const { price, priceStatus, condition, description } = req.body;
+  const { price, priceStatus, description } = req.body;
+  const condition = (req.body.condition as string)?.toLowerCase();
   const productId = req.query.productId as string;
   try {
     await prisma.product.update({

@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { upload } from '../middlewares/upload.multer.js';
-import { buyerSetting } from '../controllers/buyer/account.js';
+import { buyerSetting, userInformation } from '../controllers/buyer/account.js';
 import { fetchcategories } from '../controllers/buyer/categories.js';
 import { likes, love } from '../controllers/buyer/likes_love.js';
 import { sellerRating, sellerReviewRatingAvg, sellerRatingDistribution, productRating, productReviewRatingAvg, productRatingDistribution } from '../controllers/buyer/listing.rating.js';
@@ -16,13 +16,12 @@ const router = express.Router();
 
 
 router.put('/account', authenticate, upload.single('file'), buyerSetting);
+router.get('/user/account/info', authenticate, userInformation);
 router.get('/listing/categories', fetchcategories);
-// router.get('/active/seller/listing', authenticate, storeFetchActiveSellerListings);
 router.get('/popular/listing', filterpopularListings);
 router.get('/listing/price/range', filterListingsByPriceRange);
 router.get('/listing/price/less', filterListingsByLessPrice);
 router.get('/listing/price/greater', filterListingsByGreaterPrice);
-// router.get('/all/listing', authenticate, FetchAllSellerListings);
 router.get('/verified/seller/listing', authenticate, fetchVerifiedSellerListing);
 router.get('/unverified/seller/listing', authenticate, fetchUnverifiedSellerListing);
 router.get('/listing/condition', fetchSellerListingByCondition);

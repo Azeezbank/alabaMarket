@@ -39,3 +39,24 @@ export const buyerSetting = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ message: 'Something went wrong, failed to update buyer profile' })
     }
 };
+
+//Get user account infomation
+export const userInformation = async (req: AuthRequest, res: Response) => {
+    const userId = (req.user as JwtPayload)?.id;
+    try {
+        const info = await prisma.user.findUnique({where: {id: userId},
+        select: {
+            id: true, email: true, phone: true,
+            profile: {
+                select: {
+                    name: true, profile_pic: true, role: true, rank: true, status: true, isVerified: true
+                }
+            }
+        }
+        });
+        res.status(200).json(info);
+    } catch (err: any) {
+        console.error('Failed to select user information', err)
+        return res.status(500).json({ message: "Something went wrong, failed to select user information"})
+    }
+};
