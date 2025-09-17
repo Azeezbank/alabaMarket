@@ -25,7 +25,6 @@ router.get('/listing/category', authenticate, allproductCategory);
 router.put('/update/product/pricing', authenticate, productPricing);
 router.put("/update/shop", authenticate, upload.single('file'), updateShopDetails);
 router.get("/seller/listing", authenticate, FetchSellerListings);
-// router.get('/active/listing', authenticate, activeListing);
 router.get("/all/seller/listing", authenticate, FetchAllSellerListings);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);
