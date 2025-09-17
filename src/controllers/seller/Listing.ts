@@ -14,40 +14,48 @@ export const productDetails = async (req: AuthRequest, res: Response) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    let uploadedImage;
-    let uploadedVideo;
+    let uploadedImage: string[] = [];
+    let uploadedVideo: string[] = [];
 
-    // Upload image if provided
-    if (files?.productImage?.[0]) {
-      uploadedImage = await imagekit.upload({
-        file: files.productImage[0].buffer,
-        fileName: files.productImage[0].originalname,
-        folder: "/uploads/productImage"
-      });
+     // Upload images (one or multiple)
+    if (files?.productImage) {
+      for (const file of files.productImage) {
+        const result = await imagekit.upload({
+          file: file.buffer,
+          fileName: `${Date.now()}-${file.originalname}`,
+          folder: "/uploads/productImage",
+        });
+        uploadedImage.push(result.url);
+      }
     }
 
-    // Upload video if provided
-    if (files?.productVideo?.[0]) {
-      uploadedVideo = await imagekit.upload({
-        file: files.productVideo[0].buffer,
-        fileName: files.productVideo[0].originalname,
-        folder: "/uploads/productVideo"
-      });
+
+      // Upload videos (one or multiple)
+    if (files?.productVideo) {
+      for (const file of files.productVideo) {
+        const result = await imagekit.upload({
+          file: file.buffer,
+          fileName: `${Date.now()}-${file.originalname}`,
+          folder: "/uploads/productVideo",
+        });
+        uploadedVideo.push(result.url);
+      }
     }
+    
 
     const newProduct = await prisma.product.create({
       data: {
         name,
         userId,
         shopId,
-        productPhoto: uploadedImage
+        productPhoto: uploadedImage.length
           ? {
-            create: [{ url: uploadedImage.url }]
+            create: uploadedImage.map((url) => ({ url})),
           }
           : undefined,
-        productVideo: uploadedVideo
+        productVideo: uploadedVideo.length
           ? {
-            create: [{ url: uploadedVideo.url }]
+            create: uploadedVideo.map((url) => ({ url }) ),
           }
           : undefined,
       },
@@ -177,6 +185,34 @@ export const updateProductcategory = async (req: AuthRequest, res: Response) => 
   } catch (err: any) {
     console.error('Smething went wrong, Failed to update product category', err)
     return res.status(500).json({ message: 'Smething went wrong, Failed to update product category' })
+  }
+}
+
+//Delete product image
+export const DeleteProductImage = async (req: AuthRequest, res: Response) => {
+  const imageId = req.params.imageId;
+  try {
+    await prisma.productPhoto.delete({
+      where: { id: imageId }
+    })
+    res.status(200).json({ message: 'Product image deleted successfully' })
+  } catch (err: any) {
+    console.error('Failed to delete product image', err)
+    return res.status(500).json({ message: 'Something went wrong, failed to delete product image' })
+  }
+}
+
+//Delete product video
+export const DeleteProductVideo = async (req: AuthRequest, res: Response) => {
+  const videoId = req.params.videoId;
+  try {
+    await prisma.productVideo.delete({
+      where: { id: videoId }
+    })
+    res.status(200).json({ message: 'Product video deleted successfully' })
+  } catch (err: any) {
+    console.error('Failed to delete product video', err)
+    return res.status(500).json({ message: 'Something went wrong, failed to delete product video' })
   }
 }
 

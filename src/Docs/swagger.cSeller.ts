@@ -348,23 +348,25 @@
  */
 
 
-
 /**
  * @swagger
  * /api/seller/create/product/{shopId}:
  *   post:
+ *     summary: Create a new product with images and videos
+ *     description: |
+ *       Allows an authenticated seller to create a product in a shop. 
+ *       Supports uploading one or multiple product images and/or videos.
  *     tags:
  *       - Seller
  *     security:
  *       - bearerAuth: []
- *     summary: Create product details
  *     parameters:
- *       - name: shopId
- *         in: path
- *         required: true
+ *       - in: path
+ *         name: shopId
  *         schema:
  *           type: string
- *           example: "shop123"
+ *         required: true
+ *         description: The ID of the shop where the product will be created.
  *     requestBody:
  *       required: true
  *       content:
@@ -374,17 +376,39 @@
  *             properties:
  *               name:
  *                 type: string
+ *                 description: The product name.
  *               productImage:
- *                 type: string
- *                 format: binary
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: One or more product images.
  *               productVideo:
- *                 type: string
- *                 format: binary
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: One or more product videos.
  *     responses:
  *       200:
- *         description: Product details inserted
+ *         description: Product created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: product details inserted
+ *                 newProduct:
+ *                   type: object
+ *                   description: The newly created product with associated images and videos.
+ *       400:
+ *         description: Invalid input or missing files.
+ *       401:
+ *         description: Unauthorized. Missing or invalid JWT token.
  *       500:
- *         description: Something went wrong, failed to insert details
+ *         description: Server error.
  */
 
 /**
@@ -1362,4 +1386,60 @@
  *                 message:
  *                   type: string
  *                   example: something went wrong, failed to select subscription plan
+ */
+
+/**
+ * @swagger
+ * /api/seller/delete/product/image/{imageId}:
+ *   delete:
+ *     summary: Delete a product image
+ *     description: Deletes a specific product image by its ID.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: imageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the product image to delete.
+ *     responses:
+ *       200:
+ *         description: Product image deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product image not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/seller/delete/product/video/{videoId}:
+ *   delete:
+ *     summary: Delete a product video
+ *     description: Deletes a specific product video by its ID.
+ *     tags:
+ *       - Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: videoId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the product video to delete.
+ *     responses:
+ *       200:
+ *         description: Product video deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product video not found
+ *       500:
+ *         description: Server error
  */
