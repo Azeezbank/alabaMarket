@@ -8,37 +8,43 @@ export const productDetails = async (req, res) => {
     const name = req.body.name?.toLowerCase();
     try {
         const files = req.files;
-        let uploadedImage;
-        let uploadedVideo;
-        // Upload image if provided
-        if (files?.productImage?.[0]) {
-            uploadedImage = await imagekit.upload({
-                file: files.productImage[0].buffer,
-                fileName: files.productImage[0].originalname,
-                folder: "/uploads/productImage"
-            });
+        let uploadedImage = [];
+        let uploadedVideo = [];
+        // Upload images (one or multiple)
+        if (files?.productImage) {
+            for (const file of files.productImage) {
+                const result = await imagekit.upload({
+                    file: file.buffer,
+                    fileName: `${Date.now()}-${file.originalname}`,
+                    folder: "/uploads/productImage",
+                });
+                uploadedImage.push(result.url);
+            }
         }
-        // Upload video if provided
-        if (files?.productVideo?.[0]) {
-            uploadedVideo = await imagekit.upload({
-                file: files.productVideo[0].buffer,
-                fileName: files.productVideo[0].originalname,
-                folder: "/uploads/productVideo"
-            });
+        // Upload videos (one or multiple)
+        if (files?.productVideo) {
+            for (const file of files.productVideo) {
+                const result = await imagekit.upload({
+                    file: file.buffer,
+                    fileName: `${Date.now()}-${file.originalname}`,
+                    folder: "/uploads/productVideo",
+                });
+                uploadedVideo.push(result.url);
+            }
         }
         const newProduct = await prisma.product.create({
             data: {
                 name,
                 userId,
                 shopId,
-                productPhoto: uploadedImage
+                productPhoto: uploadedImage.length
                     ? {
-                        create: [{ url: uploadedImage.url }]
+                        create: uploadedImage.map((url) => ({ url })),
                     }
                     : undefined,
-                productVideo: uploadedVideo
+                productVideo: uploadedVideo.length
                     ? {
-                        create: [{ url: uploadedVideo.url }]
+                        create: uploadedVideo.map((url) => ({ url })),
                     }
                     : undefined,
             },
@@ -160,6 +166,124 @@ export const updateProductcategory = async (req, res) => {
     catch (err) {
         console.error('Smething went wrong, Failed to update product category', err);
         return res.status(500).json({ message: 'Smething went wrong, Failed to update product category' });
+    }
+};
+//Add more product image
+export const addMoreProductImage = async (req, res) => {
+    const productId = req.params.productId;
+    try {
+        const files = req.files;
+        let uploadedImage = [];
+        if (files?.productImage) {
+            for (const file of files.productImage) {
+                const result = await imagekit.upload({
+                    file: file.buffer,
+                    fileName: `${Date.now()}-${file.originalname}`,
+                    folder: "/uploads/productImage",
+                });
+                uploadedImage.push(result.url);
+            }
+            // Save multiple photos at once
+            await prisma.productPhoto.createMany({
+                data: uploadedImage.map((url) => ({
+                    url,
+                    productId,
+                })),
+            });
+            res.status(200).json({ message: 'Listing image added seccessfully' });
+        }
+    }
+    catch (err) {
+        console.error('Failed to insert photo', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to insert listing photo' });
+    }
+};
+//Add more product video
+export const addMoreProductVideo = async (req, res) => {
+    const productId = req.params.productId;
+    try {
+        const files = req.files;
+        let uploadedVideo = [];
+        if (files?.productVideo) {
+            for (const file of files.productVideo) {
+                const result = await imagekit.upload({
+                    file: file.buffer,
+                    fileName: `${Date.now()}-${file.originalname}`,
+                    folder: "/uploads/productVideo",
+                });
+                uploadedVideo.push(result.url);
+            }
+            // Save multiple photos at once
+            await prisma.productVideo.createMany({
+                data: uploadedVideo.map((url) => ({
+                    url,
+                    productId,
+                })),
+            });
+            res.status(200).json({ message: 'Listing video reel added seccessfully' });
+        }
+    }
+    catch (err) {
+        console.error('Failed to insert reel', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to insert listing video' });
+    }
+};
+//Delete product image
+export const DeleteProductImage = async (req, res) => {
+    const imageId = req.params.imageId;
+    try {
+        await prisma.productPhoto.delete({
+            where: { id: imageId }
+        });
+        res.status(200).json({ message: 'Product image deleted successfully' });
+    }
+    catch (err) {
+        console.error('Failed to delete product image', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to delete product image' });
+    }
+};
+//Delete product video
+export const DeleteProductVideo = async (req, res) => {
+    const videoId = req.params.videoId;
+    try {
+        await prisma.productVideo.delete({
+            where: { id: videoId }
+        });
+        res.status(200).json({ message: 'Product video deleted successfully' });
+    }
+    catch (err) {
+        console.error('Failed to delete product video', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to delete product video' });
+    }
+};
+//Fetch product images
+export const fetchProductImages = async (req, res) => {
+    const productId = req.params.productId;
+    try {
+        const images = await prisma.productPhoto.findMany({
+            where: { productId },
+            select: { id: true, url: true }
+        });
+        res.status(200).json(images);
+    }
+    catch (err) {
+        console.error('Failed to fetch product images', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to fetch product images' });
+    }
+};
+//Fetch product videos
+export const fetchProductVideos = async (req, res) => {
+    const productId = req.params.productId;
+    try {
+        const videos = await prisma.productVideo.findMany({
+            where: { productId },
+            select: { id: true, url: true }
+        });
+        res.status(200).json(videos);
+    }
+    catch (err) {
+        console.error('Failed to fetch product videos', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to fetch product videos' });
     }
 };
 //Fetch seller listing details to populate update for publish
