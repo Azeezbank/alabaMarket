@@ -1443,3 +1443,82 @@
  *       500:
  *         description: Server error
  */
+
+
+/**
+ * @swagger
+ * /api/seller/product/images/{productId}:
+ *   get:
+ *     summary: Fetch product images
+ *     description: Retrieve all images belonging to a specific product by its ID.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the product to fetch images for.
+ *     responses:
+ *       200:
+ *         description: Successfully fetched product images
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   url:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/seller/product/videos/{productId}:
+ *   get:
+ *     summary: Fetch product videos
+ *     description: Retrieve all videos belonging to a specific product by its ID.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the product to fetch videos for.
+ *     responses:
+ *       200:
+ *         description: Successfully fetched product videos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   url:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */

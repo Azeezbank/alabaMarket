@@ -4,7 +4,8 @@ import { createShop, getShopdetails, updateShopDetails, updateShopStatus, delete
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { SellerVerification, updateVerificationIdCard, isSeller } from "../controllers/seller/SellerVerification.js";
 import { productDetails, productPricing, updateProductcategory, FetchSellerListings, FetchAllSellerListings,
-    EditSellerListing, DeleteSellerListing, PauseSellerListing, allproductCategory, productSubCategory, toggleProductVisibility, DeleteProductImage, DeleteProductVideo } from '../controllers/seller/Listing.js';
+    EditSellerListing, DeleteSellerListing, PauseSellerListing, allproductCategory, productSubCategory, toggleProductVisibility, DeleteProductImage, DeleteProductVideo,
+fetchProductImages, fetchProductVideos } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
 import { getNotifications } from '../controllers/seller/Notification.js';
 import { initiatePayment, checkTransactionStatus } from '../controllers/paymentControler.js';
@@ -32,6 +33,8 @@ router.get("/payment/status", authenticate, checkTransactionStatus);
 router.get("subscription/plans", authenticate, getSubscriptionPlans);
 router.delete("/delete/product/image/:imageId", authenticate, DeleteProductImage);
 router.delete("/delete/product/video/:videoId", authenticate, DeleteProductVideo);
+router.get("/product/images/:productId", authenticate, fetchProductImages);
+router.get("/product/videos/:productId", authenticate, fetchProductVideos);
 router.post("/plan/subscribe/:planId", authenticate, initiatePayment);
 router.put("/toggle/listing/visibility/:productId", authenticate, toggleProductVisibility);
 router.get('/listing/subcategory/:categoryId', authenticate, productSubCategory);

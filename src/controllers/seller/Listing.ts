@@ -216,6 +216,36 @@ export const DeleteProductVideo = async (req: AuthRequest, res: Response) => {
   }
 }
 
+//Fetch product images
+export const fetchProductImages = async (req: AuthRequest, res: Response) => {
+  const productId = req.params.productId;
+  try {
+    const images = await prisma.productPhoto.findMany({
+      where: { productId },
+      select: { id: true, url: true }
+    })
+    res.status(200).json(images)
+  } catch (err: any) {
+    console.error('Failed to fetch product images', err)
+    return res.status(500).json({ message: 'Something went wrong, failed to fetch product images' })
+  }
+}
+
+//Fetch product videos
+export const fetchProductVideos = async (req: AuthRequest, res: Response) => {
+  const productId = req.params.productId;
+  try {
+    const videos = await prisma.productVideo.findMany({
+      where: { productId },
+      select: { id: true, url: true }
+    })
+    res.status(200).json(videos)
+  } catch (err: any) {
+    console.error('Failed to fetch product videos', err)
+    return res.status(500).json({ message: 'Something went wrong, failed to fetch product videos' })
+  }
+}
+
 //Fetch seller listing details to populate update for publish
 export const FetchSellerListings = async (req: AuthRequest, res: Response) => {
   const productId = (req.query.productId as string);
