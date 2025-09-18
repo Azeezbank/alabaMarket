@@ -172,8 +172,8 @@ export const updateProductcategory = async (req: AuthRequest, res: Response) => 
       }
     })
 
-    const categoryName = category?.name ?? null;
-    const subCategoryName = subCategory?.name ?? null;
+    const categoryName = (category?.name)?.toLowerCase() ?? null;
+    const subCategoryName = (subCategory?.name)?.toLowerCase() ?? null;
 
     await prisma.product.update({
       where: { id: productId },

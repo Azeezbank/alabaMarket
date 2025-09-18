@@ -5,7 +5,7 @@ import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import redis from "../../config/redisClient.js";
 
 
-//Filter listing by name/popular search
+//Filter listing by name
 export const filterpopularListings = async (req: AuthRequest, res: Response) => {
   const name = (req.query.name as string)?.toLowerCase();
 
@@ -17,7 +17,10 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
   const cacheKey = `popular_listings:page=${page}:limit=${limit}`;
   try {
     // Get total count
-    const total = await prisma.product.count({ where: { name, isVisible: true, status: 'Approved' } });
+    const total = await prisma.product.count({ where: { OR: [
+       { name, isVisible: true, status: 'Approved' },
+       {categoryName: name, isVisible: true, status: 'Approved'}
+      ] }});
 
     // 1️ Check Redis cache first
     const cachedData = await redis.get(cacheKey);
@@ -27,8 +30,10 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
-      where: {
-        name, isVisible: true, status: 'Approved'
+      where: { OR: [
+        { name, isVisible: true, status: 'Approved'},
+        {categoryName: name, isVisible: true, status: 'Approved'}
+      ]
       },
       include: {
         productPhoto: true,
@@ -218,39 +223,6 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
     res.status(500).json({ message: "Failed to fetch product listings" });
   }
 };
-
-
-// //fetch all products active or no active
-// export const FetchAllSellerListings = async (req: AuthRequest, res: Response) => {
-
-//   // Parse pagination query params with defaults
-//   const page = parseInt(req.query.page as string) || 1;
-//   const limit = parseInt(req.query.limit as string) || 10;
-//   const skip = (page - 1) * limit;
-
-//   try {
-//     // Get total count
-//     const total = await prisma.product.count();
-
-//     // Fetch paginated products
-//     const products = await prisma.product.findMany({
-//       where: { isActive: true },
-//       include: {
-//         productPhoto: true,
-//         productVideo: true,
-//         productPricing: true
-//       },
-//       orderBy: { createdAt: 'desc' },
-//       skip,
-//       take: limit
-//     });
-
-//     res.status(200).json({ page, limit, total, totalPages: Math.ceil(total / limit), products });
-//   } catch (err: any) {
-//     console.error("Error fetching product listings:", err);
-//     res.status(500).json({ message: "Failed to fetch product listings" });
-//   }
-// };
 
 //Fetch listing from verified seller
 export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response) => {
