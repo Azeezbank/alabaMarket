@@ -39,6 +39,7 @@ model User {
   subscriptionPlan      SubscriptionPlan?   @relation(fields: [subscriptionPlanId], references: [id])
   subscriptionExpiresAt DateTime?
   transaction           Transaction[]
+  reviewComment         ReviewComment[]
 }
 
 model SubscriptionPlan {
@@ -225,8 +226,23 @@ model ProductReview {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+  reviewComment     ReviewComment[]
 
   @@unique([userId, productId])
+}
+
+model ReviewComment {
+  id        String   @id @default(uuid()) @db.Uuid
+  content   String
+  productReview    ProductReview @relation(fields: [productReviewId], references: [id], onDelete: Cascade)
+  productReviewId  String @db.Uuid
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.Uuid
+  parent    ReviewComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String?    @db.Uuid
+  replies   ReviewComment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Comment {

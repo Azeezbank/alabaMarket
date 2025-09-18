@@ -104,7 +104,7 @@ export const productRating = async (req: AuthRequest, res: Response) => {
             where: {
                 userId_productId: {
                     userId: userId,
-                     productId:  productId
+                    productId: productId
                 }
             },
             update: {
@@ -114,7 +114,7 @@ export const productRating = async (req: AuthRequest, res: Response) => {
             create: {
                 stars,
                 comment,
-                 productId:  productId,
+                productId: productId,
                 userId: userId,
             }
         });
@@ -138,6 +138,7 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
         const reviews = await prisma.productReview.findMany({
             where: { productId },
             select: {
+                id: true,
                 comment: true,
                 createdAt: true,
                 user: {
@@ -148,6 +149,107 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
                             select: {
                                 name: true,
                                 profile_pic: true
+                            }
+                        }
+                    }
+                },
+                reviewComment: {
+                    where: { parentId: null },
+                    select: {
+                        id: true, content: true,
+                        user: {
+                            select: {
+                                id: true,
+                                profile: {
+                                    select: {
+                                        name: true, profile_pic: true,
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    include: {
+                        replies: {
+                            select: {
+                                id: true, content: true,
+                                user: {
+                                    select: {
+                                        id: true,
+                                        profile: {
+                                            select: {
+                                                name: true, profile_pic: true,
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            include: {
+                                replies: {
+                                    select: {
+                                        id: true, content: true,
+                                        user: {
+                                            select: {
+                                                id: true,
+                                                profile: {
+                                                    select: {
+                                                        name: true, profile_pic: true,
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    include: {
+                                        replies: {
+                                            select: {
+                                                id: true, content: true,
+                                                user: {
+                                                    select: {
+                                                        id: true,
+                                                        profile: {
+                                                            select: {
+                                                                name: true, profile_pic: true,
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            include: {
+                                                replies: {
+                                                    select: {
+                                                        id: true, content: true,
+                                                        user: {
+                                                            select: {
+                                                                id: true,
+                                                                profile: {
+                                                                    select: {
+                                                                        name: true, profile_pic: true,
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    include: {
+                                                        replies: {
+                                                            select: {
+                                                                id: true, content: true,
+                                                                user: {
+                                                                    select: {
+                                                                        id: true,
+                                                                        profile: {
+                                                                            select: {
+                                                                                name: true, profile_pic: true,
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -163,7 +265,7 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
     }
 }
 
-//Get rating distribution, numbers of 1, 2, 3, 4, 5
+//Get product rating distribution, numbers of 1, 2, 3, 4, 5
 export const productRatingDistribution = async (req: AuthRequest, res: Response) => {
     const productId = req.params.productId;
     try {
@@ -180,3 +282,33 @@ export const productRatingDistribution = async (req: AuthRequest, res: Response)
         return res.status(500).json({ message: 'Something went wrong, Failed to get rating distribution' })
     }
 }
+
+//Submit comment for buyer product rating
+export const addProductReviewComment = async (req: AuthRequest, res: Response) => {
+    const reviewId = req.params.reviewId;
+    const { content, parentId } = req.body; // parentId optional
+    const userId = (req.user as JwtPayload)?.id;
+
+    try {
+        const review = await prisma.productReview.findUnique({
+            where: { id: reviewId },
+        });
+
+        if (!review) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+
+        const comment = await prisma.reviewComment.create({
+            data: {
+                content,
+                productReviewId: review.id,
+                userId,
+                parentId: parentId ? parentId : null,
+            },
+        });
+
+        return res.status(201).json(comment);
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to add comment", error });
+    }
+};

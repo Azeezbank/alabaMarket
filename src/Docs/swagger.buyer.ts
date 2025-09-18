@@ -1153,8 +1153,10 @@
  * @swagger
  * /api/buyer/average/listing/rating/{productId}:
  *   get:
- *     summary: Get product average rating and reviews
- *     description: Fetches the average star rating for a product along with all buyer reviews.
+ *     summary: Get average product rating and all reviews with nested replies
+ *     description: >
+ *       Returns the average rating (e.g., 4.8) for a given product along with 
+ *       all product reviews, reviewer information, and nested review comments with replies.
  *     tags:
  *       - Buyer
  *     parameters:
@@ -1163,11 +1165,10 @@
  *         required: true
  *         schema:
  *           type: string
- *           format: uuid
  *         description: The ID of the product
  *     responses:
  *       200:
- *         description: Average rating and reviews fetched successfully
+ *         description: Successfully fetched average rating and product reviews
  *         content:
  *           application/json:
  *             schema:
@@ -1176,17 +1177,21 @@
  *                 avg:
  *                   type: object
  *                   properties:
- *                     stars:
- *                       type: number
- *                       example: 4.8
+ *                     _avg:
+ *                       type: object
+ *                       properties:
+ *                         stars:
+ *                           type: number
+ *                           example: 4.8
  *                 reviews:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
+ *                       id:
+ *                         type: string
  *                       comment:
  *                         type: string
- *                         example: "Fast delivery and high quality"
  *                       createdAt:
  *                         type: string
  *                         format: date-time
@@ -1195,7 +1200,6 @@
  *                         properties:
  *                           id:
  *                             type: string
- *                             format: uuid
  *                           email:
  *                             type: string
  *                           profile:
@@ -1205,18 +1209,136 @@
  *                                 type: string
  *                               profile_pic:
  *                                 type: string
- *                                 example: "https://cdn.example.com/userpic.jpg"
+ *                       reviewComment:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                             content:
+ *                               type: string
+ *                             user:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: string
+ *                                 profile:
+ *                                   type: object
+ *                                   properties:
+ *                                     name:
+ *                                       type: string
+ *                                     profile_pic:
+ *                                       type: string
+ *                             replies:
+ *                               type: array
+ *                               items:
+ *                                 type: object
+ *                                 properties:
+ *                                   id:
+ *                                     type: string
+ *                                   content:
+ *                                     type: string
+ *                                   user:
+ *                                     type: object
+ *                                     properties:
+ *                                       id:
+ *                                         type: string
+ *                                       profile:
+ *                                         type: object
+ *                                         properties:
+ *                                           name:
+ *                                             type: string
+ *                                           profile_pic:
+ *                                             type: string
+ *                                   replies:
+ *                                     type: array
+ *                                     items:
+ *                                       type: object
+ *                                       properties:
+ *                                         id:
+ *                                           type: string
+ *                                         content:
+ *                                           type: string
+ *                                         user:
+ *                                           type: object
+ *                                           properties:
+ *                                             id:
+ *                                               type: string
+ *                                             profile:
+ *                                               type: object
+ *                                               properties:
+ *                                                 name:
+ *                                                   type: string
+ *                                                 profile_pic:
+ *                                                   type: string
+ *                                         replies:
+ *                                           type: array
+ *                                           items:
+ *                                             type: object
+ *                                             properties:
+ *                                               id:
+ *                                                 type: string
+ *                                               content:
+ *                                                 type: string
+ *                                               user:
+ *                                                 type: object
+ *                                                 properties:
+ *                                                   id:
+ *                                                     type: string
+ *                                                   profile:
+ *                                                     type: object
+ *                                                     properties:
+ *                                                       name:
+ *                                                         type: string
+ *                                                       profile_pic:
+ *                                                         type: string
+ *                                               replies:
+ *                                                 type: array
+ *                                                 items:
+ *                                                   type: object
+ *                                                   properties:
+ *                                                     id:
+ *                                                       type: string
+ *                                                     content:
+ *                                                       type: string
+ *                                                     user:
+ *                                                       type: object
+ *                                                       properties:
+ *                                                         id:
+ *                                                           type: string
+ *                                                         profile:
+ *                                                           type: object
+ *                                                           properties:
+ *                                                             name:
+ *                                                               type: string
+ *                                                             profile_pic:
+ *                                                               type: string
+ *                                                     replies:
+ *                                                       type: array
+ *                                                       items:
+ *                                                         type: object
+ *                                                         properties:
+ *                                                           id:
+ *                                                             type: string
+ *                                                           content:
+ *                                                             type: string
+ *                                                           user:
+ *                                                             type: object
+ *                                                             properties:
+ *                                                               id:
+ *                                                                 type: string
+ *                                                               profile:
+ *                                                                 type: object
+ *                                                                 properties:
+ *                                                                   name:
+ *                                                                     type: string
+ *                                                                   profile_pic:
+ *                                                                     type: string
  *       500:
  *         description: Failed to fetch product reviews
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Something went wrong, Failed to rate product
  */
+
 
 /**
  * @swagger
@@ -1263,6 +1385,74 @@
  *                 message:
  *                   type: string
  *                   example: Something went wrong, Failed to get rating distribution
+ */
+
+
+/**
+ * @swagger
+ * /api/buyer/reply/rating/:reviewId:
+ *   post:
+ *     summary: Submit a comment on a buyer product review
+ *     description: >
+ *       Allows a user (buyer or seller) to submit a comment under a product review.  
+ *       Supports nested replies by providing an optional `parentId`.  
+ *       If `parentId` is omitted, the comment is added directly under the review.
+ *     tags:
+ *       - Buyer
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reviewId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the review to comment on
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: "Thanks for your feedback!"
+ *               parentId:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "cm12345xyz"
+ *     responses:
+ *       201:
+ *         description: Comment successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "cm6789xyz"
+ *                 content:
+ *                   type: string
+ *                   example: "Thanks for your feedback!"
+ *                 productReviewId:
+ *                   type: string
+ *                   example: "rv12345abc"
+ *                 userId:
+ *                   type: string
+ *                   example: "us98765zyx"
+ *                 parentId:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: Review not found
+ *       500:
+ *         description: Failed to add comment
  */
 
 

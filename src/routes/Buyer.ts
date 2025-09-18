@@ -4,7 +4,7 @@ import { upload } from '../middlewares/upload.multer.js';
 import { buyerSetting, userInformation } from '../controllers/buyer/account.js';
 import { fetchcategories } from '../controllers/buyer/categories.js';
 import { likes, love } from '../controllers/buyer/likes_love.js';
-import { sellerRating, sellerReviewRatingAvg, sellerRatingDistribution, productRating, productReviewRatingAvg, productRatingDistribution } from '../controllers/buyer/listing.rating.js';
+import { sellerRating, sellerReviewRatingAvg, sellerRatingDistribution, productRating, productReviewRatingAvg, productRatingDistribution, addProductReviewComment } from '../controllers/buyer/listing.rating.js';
 import { filterpopularListings, filterListingsByPriceRange, 
     filterListingsByLessPrice, filterListingsByGreaterPrice, fetchVerifiedSellerListing, 
     fetchUnverifiedSellerListing, fetchSellerListingByCondition, productOwner, productReport, savedProduct,
@@ -32,6 +32,7 @@ router.get('/all/notification', authenticate, getBuyerallNotifications);
 router.get('/all/read/notification', authenticate, getBuyerReadNotifications);
 router.get('/all/unread/notification', authenticate, getBuyerUnReadNotifications);
 router.post('/question', authenticate, handleQuestion);
+router.post('/reply/rating/:reviewId', authenticate, addProductReviewComment)
 router.get('/seller/active/listing/:sellerId', getSellerActiveListing);
 router.post('/like/unlike/:productId', likes);
 router.post('/saved/listing/:productId', authenticate, savedProduct);
