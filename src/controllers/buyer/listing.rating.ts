@@ -137,10 +137,10 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
 
         const reviews = await prisma.productReview.findMany({
             where: { productId },
-            include: {
-              //  id: true,
-              //  comment: true,
-              //  createdAt: true,
+            select: {
+                id: true,
+                comment: true,
+                createdAt: true,
                 user: {
                     select: {
                         id: true,
@@ -166,9 +166,9 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
                                     }
                                 }
                             }
-                        }
-                    },
-                    include: {
+                        },
+                    
+                       
                         replies: {
                             select: {
                                 id: true, content: true,
@@ -181,9 +181,9 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
                                             }
                                         }
                                     }
-                                }
+                                
                             },
-                            include: {
+                            
                                 replies: {
                                     select: {
                                         id: true, content: true,
@@ -196,9 +196,9 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
                                                     }
                                                 }
                                             }
-                                        }
+                                        
                                     },
-                                    include: {
+                                    
                                         replies: {
                                             select: {
                                                 id: true, content: true,
@@ -211,9 +211,9 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
                                                             }
                                                         }
                                                     }
-                                                }
+                                                
                                             },
-                                            include: {
+                                            
                                                 replies: {
                                                     select: {
                                                         id: true, content: true,
@@ -226,9 +226,9 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
                                                                     }
                                                                 }
                                                             }
-                                                        }
-                                                    },
-                                                    include: {
+                                                        },
+                                                    
+                                                    
                                                         replies: {
                                                             select: {
                                                                 id: true, content: true,
@@ -244,11 +244,16 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
                                                                 }
                                                             }
                                                         }
-                                                    }
-                                                }
-                                            }
                                         }
-                                    }
+                                                }
+                                                }
+                                                }
+                                                }
+                                                    
+                                                
+                                            
+                                        
+                                    
                                 }
                             }
                         }
