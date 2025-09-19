@@ -268,7 +268,7 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
         console.error('Something went wrong, Failed to rate product', err)
         return res.status(500).json({ message: 'Something went wrong, Failed to rate product' })
     }
-}
+};
 
 //Get product rating distribution, numbers of 1, 2, 3, 4, 5
 export const productRatingDistribution = async (req: AuthRequest, res: Response) => {
