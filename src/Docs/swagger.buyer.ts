@@ -1390,7 +1390,7 @@
 
 /**
  * @swagger
- * /api/buyer/reply/rating/:reviewId:
+ * /api/buyer/reply/rating/{reviewId}:
  *   post:
  *     summary: Submit a comment on a buyer product review
  *     description: >
