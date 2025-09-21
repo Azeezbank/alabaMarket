@@ -1451,7 +1451,7 @@
 
 /**
  * @swagger
- * /update/listing/video/{videoId}:
+ * /api/seller/update/listing/video/{videoId}:
  *   put:
  *     summary: Edit a product video
  *     description: Updates the URL of an existing product video. The new video file must be uploaded as multipart/form-data.
