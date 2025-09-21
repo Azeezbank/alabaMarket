@@ -32,7 +32,7 @@ router.get("/product/videos/:productId", authenticate, fetchProductVideos);
 router.post("/plan/subscribe/:planId", authenticate, initiatePayment);
 router.put("/toggle/listing/visibility/:productId", authenticate, toggleProductVisibility);
 router.get('/listing/subcategory/:categoryId', authenticate, productSubCategory);
-router.post('/create/product/:shopId', authenticate, upload.fields([{ name: 'productImage', maxCount: 10 }, { name: "productReel", maxCount: 10 }]), productDetails);
+router.post('/create/product/:shopId', authenticate, upload.fields([{ name: 'productImage', maxCount: 10 }, { name: "productVideo", maxCount: 10 }]), productDetails);
 router.post('/add/product/photo/:productId', authenticate, upload.fields([{ name: 'productImage', maxCount: 10 }]), addMoreProductImage);
 router.post('/add/product/video/:productId', authenticate, upload.fields([{ name: 'productVideo', maxCount: 10 }]), addMoreProductVideo);
 router.put("/update/listing/photo/:imageId", authenticate, upload.fields([{ name: "productImage", maxCount: 1 }]), EditProductImage);
