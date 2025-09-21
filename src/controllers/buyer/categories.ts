@@ -12,6 +12,11 @@ export const fetchcategories = async (req: AuthRequest, res: Response) => {
                     select: {
                         product: true
                     }
+                },
+                subCategory: {
+                    select: {
+                        id: true, name: true, image: true
+                    }
                 }
             }
         });

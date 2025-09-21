@@ -447,35 +447,132 @@
  *         description: Failed to fetch subcategories
  */
 
+
 /**
  * @swagger
  * /api/admin/create/subcategory:
  *   post:
- *     summary: Create a new subcategory
- *     description: Allows an admin to create a subcategory under a parent category.
- *     tags: [Admin]
+ *     summary: Create a new sub-category
+ *     description: Creates a new sub-category under a parent category with a name and image. The image file must be uploaded as multipart/form-data.
+ *     tags:
+ *       - Admin
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               parentCategory:
  *                 type: string
- *                 example: "Electronics"
+ *                 description: Name of the parent category
  *               name:
  *                 type: string
- *                 example: "Smartphones"
+ *                 description: Name of the sub-category to create
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file for the sub-category
  *     responses:
  *       200:
- *         description: Subcategory created successfully
+ *         description: Sub-category created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Sub Category created successfully
  *       400:
- *         description: No category id found
+ *         description: Bad request, missing file or category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
  *       500:
- *         description: Failed to create subcategory
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to create sub category
+ */
+
+/**
+ * @swagger
+ * /api/admin/update/subcategory/{subcategoryId}:
+ *   put:
+ *     summary: Update a sub-category
+ *     description: Updates the name, status, and image of an existing sub-category. The image file must be uploaded as multipart/form-data.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the sub-category to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               subCategoryName:
+ *                 type: string
+ *                 description: New name for the sub-category
+ *               status:
+ *                 type: boolean
+ *                 description: Status of the sub-category (true = active, false = inactive)
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file for the sub-category
+ *     responses:
+ *       200:
+ *         description: Sub-category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Sub-category updated
+ *       400:
+ *         description: No file uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to update sub category
  */
 
 
@@ -942,7 +1039,7 @@
 
 /**
  * @swagger
- * /api/admin/user/{customerId}:
+ * /api/admin/delete/user/{customerId}:
  *   delete:
  *     summary: Delete a user (admin only)
  *     tags: [admin]
@@ -965,7 +1062,7 @@
 
 /**
  * @swagger
- * /api/admin/user/{customerId}:
+ * /api/admin/update/user/{customerId}:
  *   put:
  *     summary: Update user information
  *     tags: [admin]
@@ -997,7 +1094,7 @@
 
 /**
  * @swagger
- * /api/admin/seller/{customerId}:
+ * /api/admin/update/seller/info/{customerId}:
  *   put:
  *     summary: Update seller information
  *     tags: [admin]
@@ -1031,7 +1128,7 @@
 
 /**
  * @swagger
- * /api/admin/seller/{sellerId}/ratings:
+ * /api/admin/seller/rating/{sellerId}:
  *   get:
  *     summary: Get seller ratings
  *     tags: [admin]
@@ -1052,7 +1149,7 @@
 
 /**
  * @swagger
- * /api/admin/seller/{sellerId}/activities:
+ * /api/admin/seller/store/activity/{sellerId}:
  *   get:
  *     summary: Get seller's store activities
  *     tags: [admin]

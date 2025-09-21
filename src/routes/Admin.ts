@@ -6,7 +6,7 @@ import { DeleteUser, UpdateUser, GetBuyers, Getsellers, SellerRating,
     StoreActivities, AllAdmin, getUsers, getShops, getActiveListing, activities,
 newadmin, UpdateSellers, updateUserRole, paymentReminder,  adminRoleManagement, newRole, editRole,
 suspendAdmin, reactivateAdminAccess, getAllShopdetails } from '../controllers/Admin/user.manage.js';
-import { productCategories, updateProductCategories, getCategories, getSubCategories, createSubCategories } from '../controllers/Admin/productCategory.js';
+import { productCategories, updateProductCategories, getCategories, getSubCategories, createSubCategories, updateProductSubCategories } from '../controllers/Admin/productCategory.js';
 import { allListing, rejectListing, approveListing } from '../controllers/Admin/listing.js';
 import { sellerVerificationReview, approveSellerVerification, rejectSellerVerification } from '../controllers/Admin/seller.verification.js';
 import { createTickets, getTickets, assignTicketAgent, openTicket, escalateTicket, markTicketAsRead } from '../controllers/Admin/Ticket.js';
@@ -23,7 +23,7 @@ router.put('/change/password', authenticate, ChangePassword);
 router.post('/create/category', authenticate, upload.single('file'), productCategories);
 router.get('/all/categories', authenticate, getCategories);
 router.get('/all/subcategories', authenticate, getSubCategories);
-router.post('/create/subcategory', authenticate, createSubCategories);
+router.post('/create/subcategory', authenticate, upload.single('file'), createSubCategories);
 router.get('/seller/verification', authenticate, sellerVerificationReview);
 router.post('/create/ticket', authenticate, createTickets);
 router.get('/tickets', authenticate, getTickets);
@@ -63,6 +63,7 @@ router.put('/mark/ticket/read/:ticketId', authenticate, markTicketAsRead);
 router.put('/approve/seller/verification/:verificationId', authenticate, approveSellerVerification);
 router.put('/reject/seller/verification/:verificationId', authenticate, rejectSellerVerification)
 router.put('/update/category/:categoryId', authenticate, upload.single('file'), updateProductCategories);
+router.put('/update/subcategory/:subcategoryId', authenticate, upload.single('file'), updateProductSubCategories);
 
 
 export default router;

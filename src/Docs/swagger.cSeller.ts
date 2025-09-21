@@ -1390,6 +1390,128 @@
 
 /**
  * @swagger
+ * /api/seller/update/listing/photo/{imageId}:
+ *   put:
+ *     summary: Edit a product image
+ *     description: Updates the URL of an existing product image. The new image file must be uploaded as multipart/form-data.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: imageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the product image to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: New image file for the product
+ *     responses:
+ *       200:
+ *         description: Product image updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product image updated successfully
+ *       400:
+ *         description: No file uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to update product image
+ */
+
+/**
+ * @swagger
+ * /update/listing/video/{videoId}:
+ *   put:
+ *     summary: Edit a product video
+ *     description: Updates the URL of an existing product video. The new video file must be uploaded as multipart/form-data.
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: videoId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the product video to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: New video file for the product
+ *     responses:
+ *       200:
+ *         description: Product video updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product video updated successfully
+ *       400:
+ *         description: No file uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to update product video
+ */
+
+/**
+ * @swagger
  * /api/seller/delete/product/image/{imageId}:
  *   delete:
  *     summary: Delete a product image

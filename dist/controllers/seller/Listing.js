@@ -153,8 +153,8 @@ export const updateProductcategory = async (req, res) => {
                 name: true
             }
         });
-        const categoryName = category?.name ?? null;
-        const subCategoryName = subCategory?.name ?? null;
+        const categoryName = (category?.name)?.toLowerCase() ?? null;
+        const subCategoryName = (subCategory?.name)?.toLowerCase() ?? null;
         await prisma.product.update({
             where: { id: productId },
             data: {
@@ -226,6 +226,54 @@ export const addMoreProductVideo = async (req, res) => {
     catch (err) {
         console.error('Failed to insert reel', err);
         return res.status(500).json({ message: 'Something went wrong, failed to insert listing video' });
+    }
+};
+//Edit product images
+export const EditProductImage = async (req, res) => {
+    const imageId = req.params.imageId;
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        // Upload file buffer to ImageKit
+        const result = await imagekit.upload({
+            file: req.file.buffer,
+            fileName: req.file.originalname,
+            folder: "/uploads/productImage",
+        });
+        await prisma.productPhoto.update({
+            where: { id: imageId },
+            data: { url: result.url }
+        });
+        res.status(200).json({ message: 'Product image updated successfully' });
+    }
+    catch (err) {
+        console.error('Failed to update product image', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to update product image' });
+    }
+};
+//Edit product video
+export const EditProductVideo = async (req, res) => {
+    const videoId = req.params.videoId;
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        // Upload file buffer to ImageKit
+        const result = await imagekit.upload({
+            file: req.file.buffer,
+            fileName: req.file.originalname,
+            folder: "/uploads/productVideo",
+        });
+        await prisma.productVideo.update({
+            where: { id: videoId },
+            data: { url: result.url }
+        });
+        res.status(200).json({ message: 'Product video updated successfully' });
+    }
+    catch (err) {
+        console.error('Failed to update product video', err);
+        return res.status(500).json({ message: 'Something went wrong, failed to update product video' });
     }
 };
 //Delete product image

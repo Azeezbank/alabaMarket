@@ -1163,7 +1163,7 @@
  *       - in: path
  *         name: productId
  *         required: true
- *         schema:
+ *         schema:*
  *           type: string
  *         description: The ID of the product
  *     responses:
