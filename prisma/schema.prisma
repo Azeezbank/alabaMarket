@@ -49,11 +49,17 @@ model SubscriptionPlan {
   duration           String?
   maxVisibleProducts Int               @default(2)
   placement          String?
+  status             SubscriptionPlanStatus    @default(Active)
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
   users              User?
   maxVisiblePerCat   MaxVisiblePerCat?
   transaction        Transaction[]
+}
+
+enum SubscriptionPlanStatus {
+  Active
+  Inactive
 }
 
 model MaxVisiblePerCat {

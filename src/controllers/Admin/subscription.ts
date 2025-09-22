@@ -5,11 +5,11 @@ import { AuthRequest } from "../../middlewares/auth.middleware.js";
 
 //CREATE SUBSCRIPTION PLANS
 export const createSubscriptionPlan = async (req: AuthRequest, res: Response) => {
-    const { name, price, duration, maxVisibleProducts, placement, maxVisibleCat } = req.body;  // Duration: weekly, Monthly, quarterky, or Annually
+    const { name, price, duration, maxVisibleProducts, placement, maxVisibleCat, status } = req.body;  // Duration: weekly, Monthly, quarterky, or Annually
     try {
         await prisma.subscriptionPlan.create({
             data: {
-                name, price, duration, maxVisibleProducts, placement,
+                name, price, duration, maxVisibleProducts, placement, status,
                 maxVisiblePerCat: {
                     create: {
                         maxVisible: maxVisibleCat
@@ -42,12 +42,12 @@ export const getSubscriptionPlans = async (req: AuthRequest, res: Response) => {
 
 //Edit subscription plan
 export const editsubscriptionplan = async (req: AuthRequest, res: Response) => {
-    const { name, price, duration, maxVisibleProducts, placement, maxVisible } = req.body;
+    const { name, price, duration, maxVisibleProducts, placement, maxVisible, status } = req.body;
     const planId = req.params.planId;
     try {
         await prisma.subscriptionPlan.update({ where: { id: planId },
         data: {
-            name, price, duration, maxVisibleProducts, placement,
+            name, price, duration, maxVisibleProducts, placement, status,
             maxVisiblePerCat: {
                 update: {
                     where: { id: planId },

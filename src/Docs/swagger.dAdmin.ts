@@ -27,6 +27,7 @@
  *               - duration
  *               - maxVisibleProducts
  *               - placement
+ *               - status
  *               - maxVisibleCat
  *             properties:
  *               name:
@@ -45,6 +46,9 @@
  *               placement:
  *                 type: string
  *                 example: top
+ *               status:
+ *                 type: string
+ *                 example: Active
  *               maxVisibleCat:
  *                 type: integer
  *                 description: Maximum visible items per category
@@ -103,6 +107,8 @@
  *                   maxVisibleProducts:
  *                     type: integer
  *                   placement:
+ *                     type: string
+ *                   status:
  *                     type: string
  *                   maxVisiblePerCat:
  *                     type: array
