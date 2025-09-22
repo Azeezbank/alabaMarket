@@ -29,7 +29,7 @@ router.get("/all/seller/listing", authenticate, FetchAllSellerListings);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);
 router.get("/payment/status", authenticate, checkTransactionStatus);
-router.get("subscription/plans", authenticate, getSubscriptionPlans);
+router.get("/subscription/plans", authenticate, getSubscriptionPlans);
 router.delete("/delete/product/image/:imageId", authenticate, DeleteProductImage);
 router.delete("/delete/product/video/:videoId", authenticate, DeleteProductVideo);
 router.get("/product/images/:productId", authenticate, fetchProductImages);
