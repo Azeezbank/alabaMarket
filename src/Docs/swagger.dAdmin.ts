@@ -1400,6 +1400,71 @@
 
 /**
  * @swagger
+ * /api/admin/all/payment/provider:
+ *   get:
+ *     summary: Get all payment providers (Admin only)
+ *     description: Retrieve all configured payment providers. Only accessible to users with Admin role.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved list of payment providers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "prov_12345"
+ *                   name:
+ *                     type: string
+ *                     example: "Paystack"
+ *                   publicKey:
+ *                     type: string
+ *                     example: "pk_test_xxxxxxxxxxxxx"
+ *                   secretKey:
+ *                     type: string
+ *                     example: "sk_test_xxxxxxxxxxxxx"
+ *                   isActive:
+ *                     type: boolean
+ *                     example: true
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-09-20T12:34:56.000Z"
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-09-22T10:15:30.000Z"
+ *       403:
+ *         description: Access denied. Only admins can access this resource
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Access denied. Admins only."
+ *       500:
+ *         description: Failed to fetch providers due to server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Something went wrong, failed to select provider"
+ */
+
+/**
+ * @swagger
  * /api/admin/update/payment/provider:
  *   put:
  *     summary: Update an existing payment provider

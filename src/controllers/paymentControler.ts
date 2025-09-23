@@ -54,7 +54,7 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
         { amount: planPrice * 100, currency: "NGN", 
           email: user.email, 
           reference: customReference, 
-          callback_url: "https://your-frontend.com/payment/success" },
+          callback_url: "https://frontenddev.alabamarket.com/payment-confirmation" },
         { headers: { Authorization: `Bearer ${provider.secretKey}` } }
       );
 
@@ -78,7 +78,7 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
           tx_ref: customReference,
           amount: planPrice,
           currency: "NGN",
-          redirect_url: "https://yourdomain/payment/verify",
+          redirect_url: "https://frontenddev.alabamarket.com/payment-confirmation",
           customer: { email: user.email },
         },
         { headers: { Authorization: `Bearer ${provider.secretKey}` } }
@@ -276,6 +276,38 @@ export const updatePaymentProvider = async (req: AuthRequest, res: Response) => 
     res.status(500).json({ error: "Failed to update payment provider" });
   }
 }
+
+//Get all payment providers
+export const getAllPaymentProvider = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
+  try {
+
+    const isAdmin = await prisma.user.findUnique({where: {id: userId},
+      select: { 
+        id: true,
+        profile: {
+          select: {
+            role: true
+          }
+        }
+      }
+    });
+    if (!isAdmin || isAdmin.profile?.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
+    }
+
+    const providers = await prisma.paymentProvider.findMany({
+      select: {
+        id: true, name: true, publicKey: true, secretKey: true, isActive: true, createdAt: true, updatedAt: true
+      }
+    })
+
+    res.status(200).json(providers)
+  } catch (err: any) {
+    console.error('Failed to select provider', err)
+    return res.status(500).json({message: 'Something went wrong, failed to select provider'})
+  }
+};
 
 //Check transaction status
 export const checkTransactionStatus = async (req: AuthRequest, res: Response) => {

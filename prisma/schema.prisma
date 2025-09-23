@@ -40,6 +40,7 @@ model User {
   subscriptionExpiresAt DateTime?
   transaction           Transaction[]
   reviewComment         ReviewComment[]
+  sellerRatingComment   SellerRatingComment[]
 }
 
 model SubscriptionPlan {
@@ -219,15 +220,30 @@ model SellerRating {
   user       User     @relation("SellerRatings", fields: [userId], references: [id], onDelete: Cascade)
   customer   User     @relation("CustomerRatings", fields: [customerId], references: [id], onDelete: Cascade)
   updatedAt  DateTime @default(now()) @updatedAt
+  sellerRatingComment      SellerRatingComment[]
 
   @@unique([userId, customerId])
+}
+
+model SellerRatingComment {
+  id        String   @id @default(uuid()) @db.Uuid
+  content   String
+  sellerRating    SellerRating @relation(fields: [sellerRatingId], references: [id], onDelete: Cascade)
+  sellerRatingId  String @db.Uuid
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.Uuid
+  parent    SellerRatingComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String?    @db.Uuid
+  replies   SellerRatingComment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model ProductReview {
   id        String   @id @default(uuid()) @db.Uuid
   stars     Int?     @db.SmallInt
   comment   String?
-  productId String   @unique @db.Uuid
+  productId String   @db.Uuid
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
