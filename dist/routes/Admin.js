@@ -8,7 +8,7 @@ import { allListing, rejectListing, approveListing } from '../controllers/Admin/
 import { sellerVerificationReview, approveSellerVerification, rejectSellerVerification } from '../controllers/Admin/seller.verification.js';
 import { createTickets, getTickets, assignTicketAgent, openTicket, escalateTicket, markTicketAsRead } from '../controllers/Admin/Ticket.js';
 import { createSubscriptionPlan, getSubscriptionPlans, editsubscriptionplan, deletesubscriptionPlan, checkPaymentstatus, editPaymentStatus } from '../controllers/Admin/subscription.js';
-import { createPaymentProvider, updatePaymentProvider } from '../controllers/paymentControler.js';
+import { createPaymentProvider, updatePaymentProvider, getAllPaymentProvider } from '../controllers/paymentControler.js';
 const router = express.Router();
 router.get('/all/listing', authenticate, allListing);
 router.put('/reject/listing/:productId', authenticate, rejectListing);
@@ -38,6 +38,7 @@ router.post("/create/subscription/plan", authenticate, createSubscriptionPlan);
 router.get('/subscription/plan', authenticate, getSubscriptionPlans);
 router.post('/create/payment/provider', authenticate, createPaymentProvider);
 router.put('/update/payment/provider', authenticate, updatePaymentProvider);
+router.get('/all/payment/provider', authenticate, getAllPaymentProvider);
 router.get('/check/payment/status', authenticate, checkPaymentstatus);
 router.put('/edit/payment/status/:paymentId', authenticate, editPaymentStatus);
 router.put("/edit/subcription/plan/:planId", authenticate, editsubscriptionplan);
