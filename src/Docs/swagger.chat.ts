@@ -7,7 +7,7 @@
  *     tags:
  *       - Chat
  *     security:
- *       - bearerAuth: []   # JWT authentication
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: receiverId
@@ -166,6 +166,8 @@
  *   get:
  *     summary: Get chat messages between two users
  *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: senderId
