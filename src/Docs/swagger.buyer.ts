@@ -454,7 +454,7 @@
 
 /**
  * @swagger
- * /api/buyer/reply/seller/rating/{ratingIdt}:
+ * /api/buyer/reply/seller/rating/{ratingId}:
  *   post:
  *     summary: Submit a comment for a seller rating
  *     description: Allows an authenticated user to add a comment (or reply) to a seller rating.
