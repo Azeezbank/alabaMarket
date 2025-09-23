@@ -468,7 +468,7 @@
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the seller rating to comment on
+ *         description: The ID of the seller rating to comment on.
  *     requestBody:
  *       required: true
  *       content:
