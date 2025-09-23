@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /api/chat/audio/record/{receiverId}:
+ * /api/chat/audio/record/{receiverId}/{productId}:
  *   post:
  *     summary: Upload and send a voice note
  *     description: Records and uploads a voice note to ImageKit, saves it as a chat message, and returns the audio URL.
@@ -11,6 +11,9 @@
  *     parameters:
  *       - in: path
  *         name: receiverId
+ *         required: true
+ *       - in: path
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
@@ -108,6 +111,7 @@
  *              senderId: "user1",
  *              receiverId: "user2",
  *              content: "Hello!"
+ *              productId: "product1"
  *            });
  *            ```
  *          - Server emits back:
@@ -162,7 +166,7 @@
 
 /**
  * @swagger
- * /api/chat/{senderId}/{receiverId}:
+ * /api/chat/{senderId}/{receiverId}/{productId}:
  *   get:
  *     summary: Get chat messages between two users
  *     tags: [Chat]
@@ -181,6 +185,12 @@
  *         schema:
  *           type: string
  *         description: The ID of the receiver.
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the product.
  *     responses:
  *       200:
  *         description: List of messages between the two users
@@ -198,6 +208,8 @@
  *                   senderId:
  *                     type: string
  *                   receiverId:
+ *                     type: string
+ *                   productId:
  *                     type: string
  *                   isRead:
  *                     type: boolean

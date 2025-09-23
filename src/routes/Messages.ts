@@ -16,6 +16,7 @@ type PrivateMessagePayload = {
   senderId: string;
   receiverId: string;
   content: string;
+  productId: string;
 };
 
 type TypingPayload = {
@@ -47,12 +48,12 @@ export const initializeSocket = (io: Server) => {
 
     // Send text message
     socket.on("private_message", async (payload: PrivateMessagePayload) => {
-      const { senderId, receiverId, content } = payload;
+      const { senderId, receiverId, content, productId } = payload;
 
       try {
         // Save message in DB
         const newMessage = await prisma.chat.create({
-          data: { senderId, receiverId, content },
+          data: { senderId, receiverId, content, productId },
         });
 
         // Emit to sender (so it shows in their chat immediately)
@@ -114,14 +115,14 @@ export const initializeSocket = (io: Server) => {
 };
 
 //Fetch messges
-router.get('/:senderId/:receiverId', authenticate, async (req: AuthRequest, res: Response) => {
-  const { senderId, receiverId } = req.params;
+router.get('/:senderId/:receiverId/:productId', authenticate, async (req: AuthRequest, res: Response) => {
+  const { senderId, receiverId, productId } = req.params;
   try {
     const messages = await prisma.chat.findMany({
       where: {
         OR: [
-          { senderId, receiverId },
-          { senderId: receiverId, receiverId: senderId }
+          { senderId, receiverId, productId },
+          { senderId: receiverId, receiverId: senderId, productId: productId }
         ]
       },
       include: {
@@ -161,9 +162,10 @@ router.get('/:senderId/:receiverId', authenticate, async (req: AuthRequest, res:
 });
 
 // Audio recording
-router.post('/audio/record/:receiverId', authenticate, upload.single("file"), async (req: AuthRequest, res: Response) => {
+router.post('/audio/record/:receiverId/:productId', authenticate, upload.single("file"), async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
   const receiverId = req.params.receiverId as string;
+  const productId = req.params.productId as string;
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -181,7 +183,7 @@ router.post('/audio/record/:receiverId', authenticate, upload.single("file"), as
   
     await prisma.chat.create({
       data: {
-        senderId: userId, receiverId, content: result.url
+        senderId: userId, receiverId, content: result.url, productId
       }
     })
 

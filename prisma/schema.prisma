@@ -403,6 +403,7 @@ model Chat {
   senderId   String   @db.Uuid
   receiverId String   @db.Uuid
   content    String?
+  productId  String   @db.Uuid
   isRead     Boolean  @default(false)
   createdAt  DateTime @default(now())
   sender     User     @relation("SentMessages", fields: [senderId], references: [id])
