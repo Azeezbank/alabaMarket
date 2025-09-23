@@ -76,52 +76,65 @@
  *                   example: Something went wrong. Failed to create subscription plan
  */
 
-
 /**
  * @swagger
  * /api/admin/subscription/plan:
  *   get:
- *     summary: Get all subscription plans
- *     tags: [Admin]
+ *     summary: Fetch all subscription plans
+ *     description: Retrieve a paginated list of all subscription plans with optional query parameters for pagination.
+ *     tags:
+ *       - Admin
  *     security:
  *       - bearerAuth: []   # requires JWT auth
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of subscription plans
+ *         description: Successfully fetched subscription plans
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     format: uuid
- *                   name:
- *                     type: string
- *                   price:
- *                     type: number
- *                   duration:
- *                     type: string
- *                   maxVisibleProducts:
- *                     type: integer
- *                   placement:
- *                     type: string
- *                   status:
- *                     type: string
- *                   maxVisiblePerCat:
- *                     type: array
- *                     items:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           format: uuid
- *                         maxVisible:
- *                           type: integer
+ *               type: object
+ *               properties:
+ *                 plans:
+ *                   type: array
+ *                   description: List of subscription plans
+ *                   items:
+ *                     type: object
+ *                     description: Subscription plan details
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 total:
+ *                   type: integer
+ *                   example: 50
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
  *       500:
  *         description: Failed to fetch subscription plans
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: something went wrong, failed to select subscription plan
  */
 
 /**
@@ -421,36 +434,163 @@
  *         description: Failed to update category
  */
 
+
 /**
  * @swagger
  * /api/admin/all/categories:
  *   get:
  *     summary: Fetch all product categories
- *     description: Retrieve all categories with counts of related subcategories and products.
- *     tags: [Admin]
+ *     description: Retrieve a paginated list of all categories including counts of sub-categories and products.
+ *     tags:
+ *       - Admin
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of categories
+ *         description: Successfully fetched categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 categories:
+ *                   type: array
+ *                   description: List of categories
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       status:
+ *                         type: boolean
+ *                       _count:
+ *                         type: object
+ *                         properties:
+ *                           subCategory:
+ *                             type: integer
+ *                             description: Number of sub-categories under this category
+ *                           product:
+ *                             type: integer
+ *                             description: Number of products under this category
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 total:
+ *                   type: integer
+ *                   example: 50
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
  *       500:
  *         description: Failed to fetch categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to fetch all category
  */
+
 
 /**
  * @swagger
  * /api/admin/all/subcategories:
  *   get:
- *     summary: Fetch all subcategories
- *     description: Retrieve all subcategories with their parent category name and product counts.
- *     tags: [Admin]
+ *     summary: Fetch all product sub-categories
+ *     description: Retrieve a paginated list of all sub-categories including related category name and product counts.
+ *     tags:
+ *       - Admin
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of subcategories
+ *         description: Successfully fetched sub-categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 subCategories:
+ *                   type: array
+ *                   description: List of sub-categories
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       status:
+ *                         type: boolean
+ *                       _count:
+ *                         type: object
+ *                         properties:
+ *                           product:
+ *                             type: integer
+ *                             description: Number of products under this sub-category
+ *                       category:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                             description: Parent category name
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 total:
+ *                   type: integer
+ *                   example: 50
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
  *       500:
- *         description: Failed to fetch subcategories
+ *         description: Failed to fetch sub-categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, failed to fetch all category
  */
 
 

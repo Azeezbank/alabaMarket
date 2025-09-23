@@ -76,7 +76,11 @@ export const updateProductCategories = async (req: AuthRequest, res: Response) =
 
 //Fetch all category
 export const getCategories = async (req: AuthRequest, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
     try {
+        const total = await prisma.category.count();
         const categories = await prisma.category.findMany({
             select: {
                 id: true, image: true, name: true, status: true,
@@ -87,9 +91,12 @@ export const getCategories = async (req: AuthRequest, res: Response) => {
                     }
                 }
             },
+             orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
         })
 
-        res.status(200).json(categories)
+        res.status(200).json({categories, page, limit, total, totalPages: Math.ceil(total / limit)})
     } catch (err: any) {
         console.error('Something went wrong', err)
         return res.status(500).json({ message: 'Something went wrong, failed to fetch all category' })
@@ -98,7 +105,12 @@ export const getCategories = async (req: AuthRequest, res: Response) => {
 
 //Fetch all subcategoty
 export const getSubCategories = async (req: AuthRequest, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
     try {
+
+        const total = await prisma.subCategory.count();
         const subCategories = await prisma.subCategory.findMany({
             select: {
                 id: true, name: true, status: true,
@@ -112,10 +124,13 @@ export const getSubCategories = async (req: AuthRequest, res: Response) => {
                         name: true
                     }
                 }
-            }
+            },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
         })
 
-        res.status(200).json(subCategories)
+        res.status(200).json({subCategories, page, limit, total, totalPages: Math.ceil(total / limit)})
     } catch (err: any) {
         console.error('Something went wrong', err)
         return res.status(500).json({ message: 'Something went wrong, failed to fetch all category' })
