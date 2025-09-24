@@ -39,6 +39,10 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -105,7 +109,11 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
       include: {
         productPhoto: true,
         productVideo: true,
-        productPricing: true
+        productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -163,6 +171,10 @@ export const filterListingsByLessPrice = async (req: AuthRequest, res: Response)
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -211,6 +223,10 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -251,6 +267,10 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -292,7 +312,11 @@ export const fetchUnverifiedSellerListing = async (req: AuthRequest, res: Respon
       include: {
         productPhoto: true,
         productVideo: true,
-        productPricing: true
+        productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -326,6 +350,10 @@ export const fetchSellerListingByCondition = async (req: AuthRequest, res: Respo
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -353,6 +381,10 @@ export const productOwner = async (req: AuthRequest, res: Response) => {
         productPricing: true,
         _count: {
           select: { likes: true, love: true },
+        },
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {id: true}
         },
         user: {
           select: {
@@ -467,7 +499,7 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
 };
 
 //Select only non expire, active free and paid boosted listing
-export const getActiveListing = async (req: Request, res: Response) => {
+export const getActiveListing = async (req: AuthRequest, res: Response) => {
   // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
@@ -492,6 +524,12 @@ export const getActiveListing = async (req: Request, res: Response) => {
         productPricing: true,
         _count: {
           select: { likes: true, love: true },
+        },
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {
+            id: true
+          }
         },
         user: {
           select: {
@@ -540,6 +578,12 @@ export const getSellerActiveListing = async (req: AuthRequest, res: Response) =>
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {
+            id: true
+          }
+        },
         category: {
           select: {
             id: true, name: true,
@@ -590,6 +634,12 @@ export const getSellerListingBySubCategory = async (req: AuthRequest, res: Respo
         productPhoto: true,
         productVideo: true,
         productPricing: true,
+        savedProducts: {
+          where: { userId: (req.user as JwtPayload)?.id },
+          select: {
+            id: true
+          }
+        },
         _count: {
           select: { likes: true, love: true },
         },
