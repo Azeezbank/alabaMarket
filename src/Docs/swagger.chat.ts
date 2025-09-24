@@ -324,7 +324,7 @@
  * @swagger
  * /api/chat/list/{receiverId}:
  *   get:
- *     summary: Get latest chat list with a receiver grouped by product
+ *     summary: Get latest chat list with a receiver grouped by product.
  *     description: |
  *       Fetch the latest chat entries for each product between the authenticated user (sender)
  *       and the specified receiver. Includes product details with photo.
