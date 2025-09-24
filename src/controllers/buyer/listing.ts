@@ -437,13 +437,24 @@ export const savedProduct = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
   const productId = req.params.productId as string;
   try {
+    const existing = await prisma.savedProducts.findUnique({
+      where: { userId_productId: { userId, productId } }
+    });
+
+    if (existing) {
+      await prisma.savedProducts.delete({
+        where: { userId_productId: { userId, productId } }
+      });
+      return res.status(200).json({ message: 'Product unsaved successfully' });
+    } else {
     await prisma.savedProducts.create({
       data: {
         userId, productId
       }
-    })
-
+    });
     res.status(201).json({ message: 'Product saved successfully' })
+  }
+
   } catch (err: any) {
     console.error('Something went wrong, Failed to bookmarked product', err)
     return res.status(500).json({ message: 'Something went wrong, Failed to bookmarked product' })

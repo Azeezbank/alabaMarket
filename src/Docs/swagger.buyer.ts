@@ -787,25 +787,58 @@
  *         description: Failed to submit report
  */
 
+
 /**
  * @swagger
  * /api/buyer/saved/listing/{productId}:
  *   post:
- *     summary: Bookmark/save a product
- *     tags: [Buyer]
+ *     summary: Toggle save/unsave a product (bookmark)
+ *     description: >
+ *       This endpoint allows a user to save (bookmark) or unsave a product.
+ *       If the product is already saved by the user, calling this will unsave it.
+ *       If the product is not saved, calling this will save it.
+ *     tags:
+ *       - Buyer
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: productId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
+ *         description: The ID of the product to save/unsave
  *     responses:
  *       201:
  *         description: Product saved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product saved successfully
+ *       200:
+ *         description: Product unsaved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product unsaved successfully
  *       500:
- *         description: Failed to bookmark product
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong, Failed to bookmark product
  */
 
 /**
