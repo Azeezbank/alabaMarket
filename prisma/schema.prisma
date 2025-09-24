@@ -126,6 +126,8 @@ model Product {
   savedProducts   SavedProducts[]
   love            Love[]
   actionLog       ActionLog?
+  chat            Chat[]
+  
 
   //Pending
   power    String?
@@ -406,6 +408,7 @@ model Chat {
   productId  String   @db.Uuid
   isRead     Boolean  @default(false)
   createdAt  DateTime @default(now())
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   sender     User     @relation("SentMessages", fields: [senderId], references: [id])
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   updatedAt  DateTime @default(now()) @updatedAt

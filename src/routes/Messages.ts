@@ -114,6 +114,62 @@ export const initializeSocket = (io: Server) => {
   });
 };
 
+
+//Chat list
+router.get('/list/:receiverId', authenticate, async (req: AuthRequest, res: Response) => {
+  const receiverId = req.params.receiverId;
+  const senderId = (req.user as JwtPayload)?.id as string;
+
+  try {
+    // Step 1: get latest createdAt per product
+const grouped = await prisma.chat.groupBy({
+  by: ['productId'],
+  where: {
+  OR: [
+    { senderId: senderId, receiverId: receiverId },
+    { senderId: receiverId, receiverId: senderId }
+  ]
+},
+  _max: { createdAt: true },
+});
+
+if (!grouped.length) {
+      return res.status(200).json([]);
+    }
+
+// Step 2: fetch full chat rows including product
+const latestChats = await prisma.chat.findMany({
+  where: {
+    OR: grouped
+      .filter((g): g is { productId: string; _max: { createdAt: Date } } => g._max.createdAt !== null) // filter out nulls
+      .map(g => ({
+        productId: g.productId,
+        createdAt: g._max.createdAt!, // non-null assertion
+      })),
+  },
+  include: {
+    product: {
+      select: {
+        id: true,
+        name: true,
+        productPhoto: {
+          select: {
+            url: true
+          }
+        }
+      },
+    },
+  },
+  orderBy: { createdAt: 'desc' },
+});
+ res.status(200).json(latestChats);
+  } catch (err: any) {
+    console.error('Failed to fetch chat list', err)
+    return res.status(500).json({ message: 'Something went wrong, Failed to fetch chat list' })
+  }
+});
+
+
 //Fetch messges
 router.get('/:senderId/:receiverId/:productId', authenticate, async (req: AuthRequest, res: Response) => {
   const { senderId, receiverId, productId } = req.params;
@@ -193,6 +249,7 @@ router.post('/audio/record/:receiverId/:productId', authenticate, upload.single(
     console.error("Voice upload error:", error);
     return res.status(500).json({ message: 'Failed to send voice record', error });
   }
-})
+});
+
 
 export default router;

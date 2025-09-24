@@ -318,3 +318,65 @@
  *     tags:
  *       - Call
  */
+
+
+/**
+ * @swagger
+ * /api/chat/list/{receiverId}:
+ *   get:
+ *     summary: Get latest chat list with a receiver grouped by product
+ *     description: |
+ *       Fetch the latest chat entries for each product between the authenticated user (sender)
+ *       and the specified receiver. Includes product details with photo.
+ *     tags:
+ *       - Chat
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: receiverId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the receiver user
+ *     responses:
+ *       200:
+ *         description: Latest chat list with product details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     description: Chat ID
+ *                   senderId:
+ *                     type: string
+ *                   receiverId:
+ *                     type: string
+ *                   productId:
+ *                     type: string
+ *                   message:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   product:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       productPhoto:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *       500:
+ *         description: Failed to fetch chat list
+ */
