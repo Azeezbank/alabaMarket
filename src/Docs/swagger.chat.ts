@@ -322,7 +322,7 @@
 
 /**
  * @swagger
- * /api/chat/list/{receiverId}:
+ * /api/chat/list:
  *   get:
  *     summary: Get latest chat list with a receiver grouped by product.
  *     description: |

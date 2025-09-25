@@ -114,10 +114,41 @@ export const initializeSocket = (io: Server) => {
   });
 };
 
+//Select chat list for buyer
+// export const getChatListForBuyer = async (req: AuthRequest, res: Response) => {
+//   const userId = (req.user as JwtPayload)?.id;
+//   if (!userId) {
+//     return res.status(401).json({ message: 'Unauthorized' });
+//   }
+//   try {
+//     // Get latest chat per product]
+// const chats = await prisma.chat.findMany({
+//   where: {
+//     OR: [
+//       { senderId: userId },
+//       { receiverId: userId },
+//     ],
+//   },
+//   orderBy: {
+//     createdAt: 'desc',
+//   },
+//   distinct: ['productId'], // ensures only one per product (latest, because of orderBy)
+//   // include: {
+//   //   product: true,
+//   //   sender: true,
+//   //   receiver: true,
+//   // },
+// });
+// return res.status(200).json({ message: 'Chat list fetched successfully', chats });
+//   } catch (err: any) {
+//     console.error('Failed to fetch chat list for buyer', err)
+//     return res.status(500).json({ message: 'Something went wrong, Failed to fetch chat list for buyer' })
+//   }
+// }
+
 
 //Chat list
-router.get('/list/:receiverId', authenticate, async (req: AuthRequest, res: Response) => {
-  const receiverId = req.params.receiverId;
+router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
   const senderId = (req.user as JwtPayload)?.id as string;
 
   try {
@@ -126,8 +157,8 @@ const grouped = await prisma.chat.groupBy({
   by: ['productId'],
   where: {
   OR: [
-    { senderId: senderId, receiverId: receiverId },
-    { senderId: receiverId, receiverId: senderId }
+    { senderId: senderId },
+    { receiverId: senderId }
   ]
 },
   _max: { createdAt: true },
@@ -174,6 +205,32 @@ const latestChats = await prisma.chat.findMany({
 router.get('/:senderId/:receiverId/:productId', authenticate, async (req: AuthRequest, res: Response) => {
   const { senderId, receiverId, productId } = req.params;
   try {
+
+    const productDetails = await prisma.product.findUnique({ where: { id: productId },
+      select: { id: true, name: true, 
+        productPricing: {
+          select: { price: true }
+        },
+        productPhoto: { select: { url: true } } }
+    });
+
+    const sellerDetails = await prisma.user.findUnique({
+      where: { id: receiverId },
+      select: {
+        id: true, email: true,
+        profile: { select: { name: true, profile_pic: true } }
+      }
+    });
+
+    const senderDetails = await prisma.user.findUnique({
+      where: { id: senderId },
+      select: {
+        id: true, email: true,
+        profile: { select: { name: true, profile_pic: true } }
+      }
+    });
+
+
     const messages = await prisma.chat.findMany({
       where: {
         OR: [
@@ -210,7 +267,7 @@ router.get('/:senderId/:receiverId/:productId', authenticate, async (req: AuthRe
       orderBy: { createdAt: "asc" }
     });
 
-    res.status(200).json(messages)
+    res.status(200).json({productDetails, sellerDetails, senderDetails, messages});
   } catch (err: any) {
     console.error('Failed to select messages', err)
     return res.status(500).json({ message: 'Something went wrong, Failed to select messages' })
