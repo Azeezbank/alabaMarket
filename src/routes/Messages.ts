@@ -152,48 +152,48 @@ router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
   const senderId = (req.user as JwtPayload)?.id as string;
 
   try {
-    // Step 1: get latest createdAt per product
-const grouped = await prisma.chat.groupBy({
-  by: ['productId'],
-  where: {
-  OR: [
-    { senderId: senderId },
-    { receiverId: senderId }
-  ]
-},
-  _max: { createdAt: true },
-});
+    // Step 1: get latest createdAt per products
+    const grouped = await prisma.chat.groupBy({
+      by: ['productId'],
+      where: {
+        OR: [
+          { senderId: senderId },
+          { receiverId: senderId }
+        ]
+      },
+      _max: { createdAt: true },
+    });
 
-if (!grouped.length) {
+    if (!grouped.length) {
       return res.status(200).json([]);
     }
 
-// Step 2: fetch full chat rows including product
-const latestChats = await prisma.chat.findMany({
-  where: {
-    OR: grouped
-      .filter((g): g is { productId: string; _max: { createdAt: Date } } => g._max.createdAt !== null) // filter out nulls
-      .map(g => ({
-        productId: g.productId,
-        createdAt: g._max.createdAt!, // non-null assertion
-      })),
-  },
-  include: {
-    product: {
-      select: {
-        id: true,
-        name: true,
-        productPhoto: {
-          select: {
-            url: true
-          }
-        }
+    // Step 2: fetch full chat rows including product
+    const latestChats = await prisma.chat.findMany({
+      where: {
+        OR: grouped
+          .filter((g): g is { productId: string; _max: { createdAt: Date } } => g._max.createdAt !== null) // filter out nulls
+          .map(g => ({
+            productId: g.productId,
+            createdAt: g._max.createdAt!, // non-null assertion
+          })),
       },
-    },
-  },
-  orderBy: { createdAt: 'desc' },
-});
- res.status(200).json(latestChats);
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            productPhoto: {
+              select: {
+                url: true
+              }
+            }
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.status(200).json(latestChats);
   } catch (err: any) {
     console.error('Failed to fetch chat list', err)
     return res.status(500).json({ message: 'Something went wrong, Failed to fetch chat list' })
@@ -206,12 +206,15 @@ router.get('/:senderId/:receiverId/:productId', authenticate, async (req: AuthRe
   const { senderId, receiverId, productId } = req.params;
   try {
 
-    const productDetails = await prisma.product.findUnique({ where: { id: productId },
-      select: { id: true, name: true, 
+    const productDetails = await prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true, name: true,
         productPricing: {
           select: { price: true }
         },
-        productPhoto: { select: { url: true } } }
+        productPhoto: { select: { url: true } }
+      }
     });
 
     const sellerDetails = await prisma.user.findUnique({
@@ -267,7 +270,7 @@ router.get('/:senderId/:receiverId/:productId', authenticate, async (req: AuthRe
       orderBy: { createdAt: "asc" }
     });
 
-    res.status(200).json({productDetails, sellerDetails, senderDetails, messages});
+    res.status(200).json({ productDetails, sellerDetails, senderDetails, messages });
   } catch (err: any) {
     console.error('Failed to select messages', err)
     return res.status(500).json({ message: 'Something went wrong, Failed to select messages' })
@@ -293,7 +296,7 @@ router.post('/audio/record/:receiverId/:productId', authenticate, upload.single(
       fileName, // give unique name
       folder: "/voice_notes" // optional folder
     });
-  
+
     await prisma.chat.create({
       data: {
         senderId: userId, receiverId, content: result.url, productId
