@@ -8,7 +8,8 @@ import { productDetails, productPricing, updateProductcategory, FetchSellerListi
 fetchProductImages, fetchProductVideos, addMoreProductImage, addMoreProductVideo, EditProductImage, EditProductVideo } from '../controllers/seller/Listing.js';
 import { createComment, getCommentsByProduct } from '../controllers/seller/listing.comment.js';
 import { getNotifications } from '../controllers/seller/Notification.js';
-import { initiatePayment, checkTransactionStatus } from '../controllers/paymentControler.js';
+import { initiatePayment, checkTransactionStatus, initiateBannerPayment } from '../controllers/paymentControler.js';
+import { allBannerPackages } from '../controllers/seller/banner.js';
 
 
 const router = express.Router();
@@ -29,12 +30,14 @@ router.get("/all/seller/listing", authenticate, FetchAllSellerListings);
 router.delete('/shop/delete', authenticate, deleteShop);
 router.put("/shop/status/update", authenticate, updateShopStatus);
 router.get("/payment/status", authenticate, checkTransactionStatus);
+router.get("/banner/packages", authenticate, allBannerPackages);
 router.get("/subscription/plans", authenticate, getSubscriptionPlans);
 router.delete("/delete/product/image/:imageId", authenticate, DeleteProductImage);
 router.delete("/delete/product/video/:videoId", authenticate, DeleteProductVideo);
 router.get("/product/images/:productId", authenticate, fetchProductImages);
 router.get("/product/videos/:productId", authenticate, fetchProductVideos);
 router.post("/plan/subscribe/:planId", authenticate, initiatePayment);
+router.post("/banner/payment/:planId", authenticate, initiateBannerPayment);
 router.put("/toggle/listing/visibility/:productId", authenticate, toggleProductVisibility);
 router.get('/listing/subcategory/:categoryId', authenticate, productSubCategory);
 router.post('/create/product/:shopId', authenticate, upload.fields([{ name: 'productImage', maxCount: 10}, { name: "productVideo", maxCount: 10}]), productDetails);

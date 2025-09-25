@@ -1814,3 +1814,368 @@
  *       500:
  *         description: Failed to fetch shop details
  */
+
+
+/**
+ * @swagger
+ * /api/admin/all/banner:
+ *   get:
+ *     summary: Get all promotional banners
+ *     description: Retrieve a paginated list of promotional banners with metadata such as total, totalPage, etc.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of records per page
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved list of banners
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 totalPage:
+ *                   type: integer
+ *                 banner:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       page:
+ *                         type: string
+ *                       placement:
+ *                         type: string
+ *                       uploadedBy:
+ *                         type: string
+ *                       startDate:
+ *                         type: string
+ *                         format: date-time
+ *                       endDate:
+ *                         type: string
+ *                         format: date-time
+ *                       status:
+ *                         type: string
+ *                         enum: [Active, Scheduled, Expired, Inactive]
+ *       500:
+ *         description: Failed to select banners
+ */
+
+/**
+ * @swagger
+ * /api/admin/create/banner:
+ *   post:
+ *     summary: Upload a new promotional banner
+ *     description: Allows admin users to upload a new promotional banner with an image and metadata.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *               - title
+ *               - page
+ *               - placement
+ *               - startDate
+ *               - endDate
+ *               - status
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Banner image file
+ *               title:
+ *                 type: string
+ *               page:
+ *                 type: string
+ *               placement:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Scheduled, Expired, Inactive]
+ *     responses:
+ *       201:
+ *         description: Banner created successfully
+ *       400:
+ *         description: Invalid request (missing fields, invalid date, no file provided)
+ *       404:
+ *         description: Unauthorized, available for admin only
+ *       500:
+ *         description: Failed to create banner
+ */
+
+/**
+ * @swagger
+ * /api/admin/update/banner/:bannerId:
+ *   put:
+ *     summary: Update promotional banner
+ *     description: Allows admin users to update an existing promotional banner with new details.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bannerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the banner to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *               - title
+ *               - page
+ *               - placement
+ *               - startDate
+ *               - endDate
+ *               - status
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Updated banner image file
+ *               title:
+ *                 type: string
+ *               page:
+ *                 type: string
+ *               placement:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Scheduled, Expired, Inactive]
+ *     responses:
+ *       200:
+ *         description: Banner updated successfully
+ *       400:
+ *         description: Invalid request (missing fields, invalid date, no file provided)
+ *       404:
+ *         description: Unauthorized, available for admin only
+ *       500:
+ *         description: Failed to update banner
+ */
+
+/**
+ * @swagger
+ * /api/admin/delete/banner/:bannerId:
+ *   delete:
+ *     summary: Delete a promotional banner
+ *     description: Permanently deletes a banner by ID.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bannerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the banner to delete
+ *     responses:
+ *       200:
+ *         description: Banner deleted successfully
+ *       500:
+ *         description: Failed to delete banner
+ */
+
+/**
+ * @swagger
+ * /api/admin/create/banner/package:
+ *   post:
+ *     summary: Create banner package and pricing
+ *     description: Allows admins to create a new banner package with name, price, duration, placement, and status.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *               - duration
+ *               - placement
+ *               - status
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               duration:
+ *                 type: integer
+ *                 description: Duration in days
+ *               placement:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Inactive]
+ *     responses:
+ *       201:
+ *         description: New banner package created successfully
+ *       500:
+ *         description: Failed to create banner package
+ */
+
+/**
+ * @swagger
+ * /api/admin/edit/banner/package/:bannerId:
+ *   put:
+ *     summary: Edit banner package and pricing
+ *     description: Update the details of an existing banner package.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bannerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the banner package to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *               - duration
+ *               - placement
+ *               - status
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               duration:
+ *                 type: integer
+ *                 description: Duration in days
+ *               placement:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Inactive]
+ *     responses:
+ *       200:
+ *         description: Banner package updated successfully
+ *       500:
+ *         description: Failed to edit banner package
+ */
+
+/**
+ * @swagger
+ * /api/admin/all/banner/package:
+ *   get:
+ *     summary: Get all banner packages
+ *     description: Retrieve a list of all available banner packages.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved banner packages
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   price:
+ *                     type: number
+ *                   duration:
+ *                     type: integer
+ *                   placement:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                     enum: [Active, Inactive]
+ *       500:
+ *         description: Failed to select banner packages
+ */
+
+/**
+ * @swagger
+ * /api/admin/delete/banner/package/:bannerId:
+ *   delete:
+ *     summary: Delete banner package
+ *     description: Permanently deletes a banner package by ID.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bannerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the banner package to delete
+ *     responses:
+ *       200:
+ *         description: Banner package deleted successfully
+ *       500:
+ *         description: Failed to delete banner package
+ */

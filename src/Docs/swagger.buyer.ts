@@ -1728,3 +1728,91 @@
  *       500:
  *         description: Something went wrong, failed to select user information
  */
+
+
+/**
+ * @swagger
+ * /api/buyer/active/banner:
+ *   get:
+ *     summary: Get all active promotional banners
+ *     description: Retrieve all banners that have started and are not expired yet. Supports pagination.
+ *     tags:
+ *       - Buyer
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of banners per page
+ *     responses:
+ *       200:
+ *         description: A list of active banners
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 total:
+ *                   type: integer
+ *                   example: 25
+ *                 totalPage:
+ *                   type: integer
+ *                   example: 3
+ *                 banners:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "banner_123"
+ *                       title:
+ *                         type: string
+ *                         example: "Flash Sale Banner"
+ *                       image:
+ *                         type: string
+ *                         format: uri
+ *                         example: "https://ik.imagekit.io/demo/banner.png"
+ *                       page:
+ *                         type: string
+ *                         example: "Home"
+ *                       placement:
+ *                         type: string
+ *                         example: "Top"
+ *                       uploadedBy:
+ *                         type: string
+ *                         example: "Admin (John Doe)"
+ *                       startDate:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-09-20T08:00:00.000Z"
+ *                       endDate:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-09-25T23:59:59.000Z"
+ *                       status:
+ *                         type: string
+ *                         enum: [Active, Scheduled, Expired, Inactive]
+ *                         example: "Active"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-09-19T14:30:00.000Z"
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Something went wrong while fetching banners
+ */

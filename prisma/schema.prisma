@@ -458,12 +458,15 @@ model ActionLog {
 
 model Transaction {
   id                 String           @id @default(uuid())
+  name               String?
   reference          String           @unique
   amount             Float
   status             String // PENDING | SUCCESS | FAILED
   userId             String           @db.Uuid
   user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionPlanName    String?
   subscriptionPlanId String           @db.Uuid
+  bannerName         String?
   subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @default(now()) @updatedAt
@@ -483,4 +486,41 @@ model PaymentProvider {
 enum PaymentProviderName {
   paystack
   flutterwave
+}
+
+model Banner {
+  id      String      @id     @default(uuid())
+  image    String
+  title   String
+  page    String
+  placement       String?
+  uploadedBy    String
+  startDate     DateTime?
+  endDate       DateTime?
+  status        Bannerstatus
+  createdAt     DateTime     @default(now())
+  updatedAt            DateTime            @default(now()) @updatedAt
+}
+
+enum Bannerstatus {
+  Active
+  Scheduled
+  Expired
+  Inactive
+}
+
+model BannerPlans {
+  id                 String            @id @default(uuid()) @db.Uuid
+  name               String
+  price              Decimal           @default(0.00) @db.Decimal(10, 2)
+  duration           String?
+  placement          String?
+  status             BannerPlansStatus    @default(Active)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now()) @updatedAt
+}
+
+enum BannerPlansStatus {
+  Active
+  Inactive
 }

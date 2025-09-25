@@ -11,6 +11,7 @@ import { filterpopularListings, filterListingsByPriceRange,
 getSavedProduct, getActiveListing, getSellerActiveListing, getSellerListingBySubCategory, sellerReport } from '../controllers/buyer/listing.js';
 import { getBuyerallNotifications, getBuyerReadNotifications, getBuyerUnReadNotifications } from '../controllers/buyer/notification.js';
 import { handleQuestion } from '../controllers/buyer/question.js';
+import { getActiveBanners } from '../controllers/buyer/banner.js';
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ router.get('/all/notification', authenticate, getBuyerallNotifications);
 router.get('/all/read/notification', authenticate, getBuyerReadNotifications);
 router.get('/all/unread/notification', authenticate, getBuyerUnReadNotifications);
 router.post('/question', authenticate, handleQuestion);
+router.get('/active/banner', getActiveBanners);
 router.post('/reply/rating/:reviewId', authenticate, addProductReviewComment);
 router.post('/reply/seller/rating/:ratingId', authenticate, addSellerRatingComment);
 router.get('/seller/active/listing/:sellerId', getSellerActiveListing);

@@ -1718,3 +1718,101 @@
  *       500:
  *         description: Something went wrong, failed to insert listing video
  */
+
+
+/**
+ * @swagger
+ * /api/seller/banner/packages:
+ *   get:
+ *     summary: Get all active banner packages
+ *     description: Fetch all banner packages with status 'Active', ordered by creation date (newest first).
+ *     tags:
+ *       - Seller
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of active banner packages
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "pkg_12345"
+ *                   name:
+ *                     type: string
+ *                     example: "Homepage Top Banner"
+ *                   price:
+ *                     type: number
+ *                     example: 49.99
+ *                   duration:
+ *                     type: integer
+ *                     example: 30
+ *                   status:
+ *                     type: string
+ *                     example: "Active"
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-09-23T19:15:00.000Z"
+ *       500:
+ *         description: Something went wrong while fetching banner packages
+ */
+
+
+/**
+ * @swagger
+ * /api/seller/banner/payment/{planId}:
+ *   post:
+ *     summary: Initiate payment for a banner plan
+ *     description: Creates a pending transaction and initializes payment with the active provider (Paystack or Flutterwave) for the specified banner plan.
+ *     tags:
+ *       - Seller
+ *     parameters:
+ *       - in: path
+ *         name: planId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the banner plan to pay for
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Payment initialized successfully, provider response returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Bad request (missing parameters, no active provider, or invalid provider)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       404:
+ *         description: User or plan not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */

@@ -12,6 +12,7 @@ import { sellerVerificationReview, approveSellerVerification, rejectSellerVerifi
 import { createTickets, getTickets, assignTicketAgent, openTicket, escalateTicket, markTicketAsRead } from '../controllers/Admin/Ticket.js';
 import { createSubscriptionPlan, getSubscriptionPlans, editsubscriptionplan, deletesubscriptionPlan, checkPaymentstatus, editPaymentStatus } from '../controllers/Admin/subscription.js';
 import { createPaymentProvider, updatePaymentProvider, getAllPaymentProvider } from '../controllers/paymentControler.js';
+import { getBannerMgt, createBanner, updateBanner, deleteBanner, createBannerPackages, editbannerPackage, allBannerPackages, deleteBannerPackage } from '../controllers/Admin/PromotionMtg.js';
 
 const router = express.Router();
 
@@ -45,6 +46,14 @@ router.post('/create/payment/provider', authenticate, createPaymentProvider);
 router.put('/update/payment/provider', authenticate, updatePaymentProvider);
 router.get('/all/payment/provider', authenticate, getAllPaymentProvider);
 router.get('/check/payment/status', authenticate, checkPaymentstatus);
+router.get('/all/banner', authenticate, getBannerMgt);
+router.post('/create/banner', authenticate, upload.single('file'), createBanner);
+router.put('/update/banner/:bannerId', authenticate, upload.single('file'), updateBanner);
+router.delete('/delete/banner/:bannerId', authenticate, deleteBanner);
+router.post('/create/banner/package', authenticate, createBannerPackages);
+router.put('/edit/banner/package/:bannerId', authenticate, editbannerPackage);
+router.get('/all/banner/package', authenticate, allBannerPackages);
+router.delete('/delete/banner/package/:bannerId', authenticate, deleteBannerPackage);
 router.put('/edit/payment/status/:paymentId', authenticate, editPaymentStatus);
 router.put("/edit/subcription/plan/:planId", authenticate, editsubscriptionplan);
 router.delete("/delete/subscription/plan/:planId", authenticate, deletesubscriptionPlan);

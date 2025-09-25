@@ -31,7 +31,10 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
-        email: true
+        email: true,
+        profile: {
+          select: { name: true }
+        }
       }
     });
 
@@ -42,7 +45,8 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
 
     const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
     if (!plan) return res.status(404).json({ error: "plan not found" });
-    const planPrice = Number(plan.price)
+    const planPrice = Number(plan.price);
+    const planName = plan.name;
 
     const customReference = `REF_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
 
@@ -61,10 +65,12 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
       // Save pending transaction in DB
       await prisma.transaction.create({
         data: {
+          name: user.profile?.name,
           reference: customReference,
           amount: planPrice,
           status: "Pending",
           userId: userId,
+          subscriptionPlanName: planName,
           subscriptionPlanId: plan.id
         }
       });
@@ -87,10 +93,116 @@ export const initiatePayment = async (req: AuthRequest, res: Response) => {
       // Save pending transaction in DB
       await prisma.transaction.create({
         data: {
+          name: user.profile?.name,
           reference: customReference,
           amount: planPrice,
           status: "Pending",
           userId: userId,
+          subscriptionPlanName: planName,
+          subscriptionPlanId: plan.id
+        }
+      });
+
+      return res.json(response.data);
+
+    } else {
+      return res.status(400).json({ error: "Invalid provider" });
+    }
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+// INITIATE PAYMENT
+export const initiateBannerPayment = async (req: AuthRequest, res: Response) => {
+  const planId = req.params.planId;
+  const userId = (req.user as JwtPayload)?.id;
+
+  try {
+    // Get active provider from DB
+    const provider = await prisma.paymentProvider.findFirst({
+      where: { isActive: true },
+      select: {
+        name: true, secretKey: true, flutterWebhookSecret: true
+      }
+    });
+
+    if (!provider) return res.status(400).json({ error: "No active payment provider" });
+
+    if (!userId || !planId) return res.status(400).json({ error: "sellerId and planId required" });
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        email: true,
+        profile: {
+          select: { name: true }
+        }
+      }
+    });
+
+    if (!user) {
+      console.log('No user found');
+      return res.status(404).json({ message: 'No user found to carryout the transaction' })
+    }
+
+    const plan = await prisma.bannerPlans.findUnique({ where: { id: planId } });
+    if (!plan) return res.status(404).json({ error: "plan not found" });
+    const planPrice = Number(plan.price);
+    const planName = plan.name;
+
+    const customReference = `BNREF_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+
+    let response;
+
+    if (provider.name === "paystack") {
+      response = await axios.post(
+        "https://api.paystack.co/transaction/initialize",
+        { amount: planPrice * 100, currency: "NGN", 
+          email: user.email, 
+          reference: customReference, 
+          callback_url: "https://frontenddev.alabamarket.com/payment-confirmation" },
+        { headers: { Authorization: `Bearer ${provider.secretKey}` } }
+      );
+
+      // Save pending transaction in DB
+      await prisma.transaction.create({
+        data: {
+          name: user.profile?.name,
+          reference: customReference,
+          amount: planPrice,
+          status: "Pending",
+          userId: userId,
+          bannerName: planName,
+          subscriptionPlanId: plan.id
+        }
+      });
+
+      return res.json(response.data);
+
+    } else if (provider.name === "flutterwave") {
+      response = await axios.post(
+        "https://api.flutterwave.com/v3/payments",
+        {
+          tx_ref: customReference,
+          amount: planPrice,
+          currency: "NGN",
+          redirect_url: "https://frontenddev.alabamarket.com/payment-confirmation",
+          customer: { email: user.email },
+        },
+        { headers: { Authorization: `Bearer ${provider.secretKey}` } }
+      );
+
+      // Save pending transaction in DB
+      await prisma.transaction.create({
+        data: {
+          name: user.profile?.name,
+          reference: customReference,
+          amount: planPrice,
+          status: "Pending",
+          userId: userId,
+          bannerName: planName,
           subscriptionPlanId: plan.id
         }
       });
@@ -152,6 +264,11 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
         return res.status(400).json({ message: "Unhandled Paystack event" });
       }
 
+      const isBanner = await prisma.subscriptionPlan.findUnique({ where: { id: txnP.subscriptionPlanId}});
+      if (!isBanner) {
+        return res.status(200).json({ received: true })
+      }
+
       const plan = await prisma.subscriptionPlan.findUnique({
         where: { id: txnP.subscriptionPlanId },
         include: { maxVisiblePerCat: true }
@@ -208,6 +325,11 @@ export const paymentWebhook = async (req: AuthRequest, res: Response) => {
       } else {
         console.log('Unhandled Flutterwave event:', req.body.event);
         return res.status(400).json({ message: "Unhandled Flutterwave event" });
+      }
+
+      const isBanner = await prisma.subscriptionPlan.findUnique({ where: { id: txnF.subscriptionPlanId}});
+      if (!isBanner) {
+        return res.status(200).json({ received: true })
       }
 
       const plan = await prisma.subscriptionPlan.findUnique({ where: { id: txnF.subscriptionPlanId }, include: { maxVisiblePerCat: true } });
