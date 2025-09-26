@@ -7,6 +7,7 @@ import redis from "../../config/redisClient.js";
 
 //Filter listing by name
 export const filterpopularListings = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   const name = (req.query.name as string)?.toLowerCase();
 
   // Parse pagination query params with defaults
@@ -41,7 +42,7 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false
@@ -70,6 +71,7 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
 
 //Filter listing by price range
 export const filterListingsByPriceRange = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   const fromAmount = Number(req.query.fromAmount);
   const toAmount = Number(req.query.toAmount);
 
@@ -114,7 +116,7 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId:  (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false
@@ -143,6 +145,7 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
 
 //Filter listeing by price less than
 export const filterListingsByLessPrice = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   const lessThan = Number(req.query.fromAmount);
 
   // Parse pagination query params with defaults
@@ -177,7 +180,7 @@ export const filterListingsByLessPrice = async (req: AuthRequest, res: Response)
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false
@@ -196,6 +199,7 @@ export const filterListingsByLessPrice = async (req: AuthRequest, res: Response)
 
 //Filter listing by price greater than 
 export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   const greaterThan = Number(req.query.fromAmount);
 
   // Parse pagination query params with defaults
@@ -231,7 +235,7 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false
@@ -250,6 +254,7 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
 
 //Fetch listing from verified seller
 export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
 
   // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
@@ -277,7 +282,7 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false
@@ -306,6 +311,7 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
 
 //Fecth unverified user listing
 export const fetchUnverifiedSellerListing = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
 
   // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
@@ -325,7 +331,7 @@ export const fetchUnverifiedSellerListing = async (req: AuthRequest, res: Respon
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false
@@ -344,6 +350,7 @@ export const fetchUnverifiedSellerListing = async (req: AuthRequest, res: Respon
 
 //Fectch listing by condition e.g Brand new, Neatly Used
 export const fetchSellerListingByCondition = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
 
   // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
@@ -364,7 +371,7 @@ export const fetchSellerListingByCondition = async (req: AuthRequest, res: Respo
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false
@@ -383,6 +390,7 @@ export const fetchSellerListingByCondition = async (req: AuthRequest, res: Respo
 
 //Select listen owner details
 export const productOwner = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   const productId = req.params.productId as string;
   try {
     const productOwner = await prisma.product.findFirst({
@@ -398,10 +406,10 @@ export const productOwner = async (req: AuthRequest, res: Response) => {
         },
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
-      : false
+      : false,
         user: {
           select: {
             id: true,
@@ -527,6 +535,7 @@ export const getSavedProduct = async (req: AuthRequest, res: Response) => {
 
 //Select only non expire, active free and paid boosted listing
 export const getActiveListing = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
@@ -554,7 +563,7 @@ export const getActiveListing = async (req: AuthRequest, res: Response) => {
         },
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false,
@@ -587,6 +596,7 @@ export const getActiveListing = async (req: AuthRequest, res: Response) => {
 
 // Get all particular seller active listing listings
 export const getSellerActiveListing = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   const sellerId = req.params.sellerId as string;
 
   // Parse pagination query params with defaults
@@ -607,11 +617,10 @@ export const getSellerActiveListing = async (req: AuthRequest, res: Response) =>
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
-      : false
-        },
+      : false,
         category: {
           select: {
             id: true, name: true,
@@ -645,6 +654,7 @@ export const getSellerActiveListing = async (req: AuthRequest, res: Response) =>
 
 //Fects seller listing with subCategory
 export const getSellerListingBySubCategory = async (req: AuthRequest, res: Response) => {
+  const userId = (req.user as JwtPayload)?.id;
   const sellerId = req.params.sellerId as string;
   const subCategoryId = req.params.subCategoryId as string;
   // Parse pagination query params with defaults
@@ -664,7 +674,7 @@ export const getSellerListingBySubCategory = async (req: AuthRequest, res: Respo
         productPricing: true,
         savedProducts: userId
       ? {
-          where: { userId: (req.user as JwtPayload)?.id || null },
+          where: { userId },
           select: { id: true }
         }
       : false,
