@@ -851,7 +851,7 @@
  * @swagger
  * /api/buyer/all/active/listing:
  *   get:
- *     summary: Get active free and paid boosted listings
+ *     summary: Get active free and paid boosted listings.
  *     description: >
  *       Fetch all active boosted listings that are not expired.  
  *       Includes product details, pricing, photos, videos, likes/loves count, and seller profile.  
