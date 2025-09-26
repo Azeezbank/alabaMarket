@@ -8,14 +8,14 @@ import redis from "../../config/redisClient.js";
 //Filter listing by name
 export const filterpopularListings = async (req: AuthRequest, res: Response) => {
   const userId = (req.user as JwtPayload)?.id;
-  const name = (req.query.name as string)?.toLowerCase();
+  const name = (req.query.name as string)?.toLowerCase() || "";
 
   // Parse pagination query params with defaults
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
-  const cacheKey = `popular_listings:page=${page}:limit=${limit}`;
+  const cacheKey = `popular_listings:page=${page}:limit=${limit}:name=${name}`;
   try {
     // Get total count
     const total = await prisma.product.count({ where: { OR: [
