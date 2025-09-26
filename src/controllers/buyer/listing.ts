@@ -18,10 +18,14 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
   const cacheKey = `popular_listings:page=${page}:limit=${limit}:name=${name}`;
   try {
     // Get total count
-    const total = await prisma.product.count({ where: { OR: [
-       { name, isVisible: true, status: 'Approved' },
-       {categoryName: name, isVisible: true, status: 'Approved'}
-      ] }});
+    const total = await prisma.product.count({
+      where: {
+        OR: [
+          { name, isVisible: true, status: 'Approved' },
+          { categoryName: name, isVisible: true, status: 'Approved' }
+        ]
+      }
+    });
 
     // 1️ Check Redis cache first
     const cachedData = await redis.get(cacheKey);
@@ -31,21 +35,24 @@ export const filterpopularListings = async (req: AuthRequest, res: Response) => 
 
     // Fetch paginated products
     const products = await prisma.product.findMany({
-      where: { OR: [
-        { name, isVisible: true, status: 'Approved'},
-        {categoryName: name, isVisible: true, status: 'Approved'}
-      ]
+      where: {
+        isVisible: true,
+        status: "Approved",
+        OR: [
+          { name: { contains: name, mode: "insensitive" } },
+          { categoryName: { contains: name, mode: "insensitive" } }
+        ]
       },
       include: {
         productPhoto: true,
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -80,7 +87,7 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
-  const cacheKey = `active_seller_listings:page=${page}:limit=${limit}`;
+  const cacheKey = `active_seller_listings:page=${page}:limit=${limit}:fromAmount=${fromAmount}:toAmount=${toAmount}`;
   try {
     // 1️ Check Redis cache first
     const cachedData = await redis.get(cacheKey);
@@ -115,11 +122,11 @@ export const filterListingsByPriceRange = async (req: AuthRequest, res: Response
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -179,11 +186,11 @@ export const filterListingsByLessPrice = async (req: AuthRequest, res: Response)
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -234,11 +241,11 @@ export const filterListingsByGreaterPrice = async (req: AuthRequest, res: Respon
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -281,11 +288,11 @@ export const fetchVerifiedSellerListing = async (req: AuthRequest, res: Response
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -330,11 +337,11 @@ export const fetchUnverifiedSellerListing = async (req: AuthRequest, res: Respon
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -370,11 +377,11 @@ export const fetchSellerListingByCondition = async (req: AuthRequest, res: Respo
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -405,11 +412,11 @@ export const productOwner = async (req: AuthRequest, res: Response) => {
           select: { likes: true, love: true },
         },
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false,
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false,
         user: {
           select: {
             id: true,
@@ -471,13 +478,13 @@ export const savedProduct = async (req: AuthRequest, res: Response) => {
       });
       return res.status(200).json({ message: 'Product unsaved successfully' });
     } else {
-    await prisma.savedProducts.create({
-      data: {
-        userId, productId
-      }
-    });
-    res.status(201).json({ message: 'Product saved successfully' })
-  }
+      await prisma.savedProducts.create({
+        data: {
+          userId, productId
+        }
+      });
+      res.status(201).json({ message: 'Product saved successfully' })
+    }
 
   } catch (err: any) {
     console.error('Something went wrong, Failed to bookmarked product', err)
@@ -562,11 +569,11 @@ export const getActiveListing = async (req: AuthRequest, res: Response) => {
           select: { likes: true, love: true },
         },
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false,
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false,
         user: {
           select: {
             id: true,
@@ -616,11 +623,11 @@ export const getSellerActiveListing = async (req: AuthRequest, res: Response) =>
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false,
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false,
         category: {
           select: {
             id: true, name: true,
@@ -673,11 +680,11 @@ export const getSellerListingBySubCategory = async (req: AuthRequest, res: Respo
         productVideo: true,
         productPricing: true,
         savedProducts: userId
-      ? {
-          where: { userId },
-          select: { id: true }
-        }
-      : false,
+          ? {
+            where: { userId },
+            select: { id: true }
+          }
+          : false,
         _count: {
           select: { likes: true, love: true },
         },
