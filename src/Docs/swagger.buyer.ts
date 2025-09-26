@@ -74,8 +74,6 @@
  *   get:
  *     summary: Fetch all product categories
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of categories retrieved successfully
@@ -540,8 +538,6 @@
  *   get:
  *     summary: Filter listings by product name
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: name
@@ -570,8 +566,6 @@
  *   get:
  *     summary: Filter listings by price range
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: fromAmount
@@ -604,8 +598,6 @@
  *   get:
  *     summary: Filter listings by price less than a value
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: fromAmount
@@ -633,8 +625,6 @@
  *   get:
  *     summary: Filter listings by price greater than a value
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: fromAmount
@@ -662,8 +652,6 @@
  *   get:
  *     summary: Fetch products from verified sellers
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -686,8 +674,6 @@
  *   get:
  *     summary: Fetch products from unverified sellers
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -710,8 +696,6 @@
  *   get:
  *     summary: Fetch products by condition (e.g., Brand new, Neatly Used)
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: condition
@@ -739,8 +723,6 @@
  *   get:
  *     summary: Fetch product owner and store details
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: productId
@@ -875,8 +857,6 @@
  *       Includes product details, pricing, photos, videos, likes/loves count, and seller profile.  
  *       Results are cached in Redis for 5 minutes (300 seconds).
  *     tags: [Buyer]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -985,8 +965,6 @@
  *     description: Fetches all approved and visible product listings for a specific seller, with pagination support.
  *     tags:
  *       - Buyer
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: sellerId
