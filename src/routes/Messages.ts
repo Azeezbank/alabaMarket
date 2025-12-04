@@ -169,30 +169,61 @@ router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
     }
 
     // Step 2: fetch full chat rows including product
+
+    // const latestChats = await prisma.chat.findMany({
+    //   where: {
+    //     OR: grouped
+    //       .filter((g): g is { productId: string; _max: { createdAt: Date } } => g._max.createdAt !== null) // filter out nulls
+    //       .map((g: { productId: string; _max: { createdAt: Date }}) => ({
+    //         productId: g.productId,
+    //         createdAt: g._max.createdAt, // non-null assertion
+    //       })),
+    //   },
+    //   include: {
+    //     product: {
+    //       select: {
+    //         id: true,
+    //         name: true,
+    //         productPhoto: {
+    //           select: {
+    //             url: true
+    //           }
+    //         }
+    //       },
+    //     },
+    //   },
+    //   orderBy: { createdAt: 'desc' },
+    // });
+
     const latestChats = await prisma.chat.findMany({
-      where: {
-        OR: grouped
-          .filter((g): g is { productId: string; _max: { createdAt: Date } } => g._max.createdAt !== null) // filter out nulls
-          .map((g: { productId: string; _max: { createdAt: Date }}) => ({
-            productId: g.productId,
-            createdAt: g._max.createdAt, // non-null assertion
-          })),
-      },
-      include: {
-        product: {
+  where: {
+    OR: grouped
+      .filter(
+        (g): g is { productId: string; _max: { createdAt: Date } } =>
+          g._max.createdAt !== null // filter out nulls
+      )
+      .map(
+        (g: { productId: string; _max: { createdAt: Date } }) => ({
+          productId: g.productId,
+          createdAt: g._max.createdAt!, // non-null assertion
+        })
+      ),
+  },
+  include: {
+    product: {
+      select: {
+        id: true,
+        name: true,
+        productPhoto: {
           select: {
-            id: true,
-            name: true,
-            productPhoto: {
-              select: {
-                url: true
-              }
-            }
+            url: true,
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
-    });
+    },
+  },
+  orderBy: { createdAt: 'desc' },
+});
     res.status(200).json(latestChats);
   } catch (err: any) {
     console.error('Failed to fetch chat list', err)
