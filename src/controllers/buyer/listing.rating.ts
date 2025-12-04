@@ -69,7 +69,7 @@ async function getSellerRatingReplies(commentId: string): Promise<CommentWithRep
   });
 
   return Promise.all(
-    replies.map(async (reply) => ({
+    replies.map(async (reply: { id: string } & any) => ({
       ...reply,
       replies: await getSellerRatingReplies(reply.id),
     }))
@@ -126,9 +126,11 @@ export const sellerReviewRatingAvg = async (req: AuthRequest, res: Response) => 
 
     // attach recursive replies
     const ratingsWithReplies = await Promise.all(
-      ratings.map(async (rating) => {
+      ratings.map(async (rating: {
+    sellerRatingComment: CommentWithReplies[];
+  } & any) => {
         const rootComments: CommentWithReplies[] = await Promise.all(
-          rating.sellerRatingComment.map(async (comment) => ({
+          rating.sellerRatingComment.map(async (comment: CommentWithReplies) => ({
             ...comment,
             replies: await getSellerRatingReplies(comment.id),
           }))
@@ -249,7 +251,7 @@ async function getReplies(commentId: string): Promise<CommentWithReplies[]> {
     });
 
     return Promise.all(
-        replies.map(async (reply) => ({
+        replies.map(async (reply: { id: string } & any) => ({
             ...reply,
             replies: await getReplies(reply.id),
         }))
@@ -306,9 +308,11 @@ export const productReviewRatingAvg = async (req: AuthRequest, res: Response) =>
 
         // attach recursive replies
         const reviewsWithReplies = await Promise.all(
-            reviews.map(async (review) => {
+            reviews.map(async (review: {
+    reviewComment: CommentWithReplies[];
+  } & any) => {
                 const reviewComments: CommentWithReplies[] = await Promise.all(
-                    review.reviewComment.map(async (comment) => ({
+                    review.reviewComment.map(async (comment: CommentWithReplies) => ({
                         ...comment,
                         replies: await getReplies(comment.id),
                     }))
