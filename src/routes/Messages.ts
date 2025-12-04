@@ -173,7 +173,7 @@ router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
       where: {
         OR: grouped
           .filter((g): g is { productId: string; _max: { createdAt: Date } } => g._max.createdAt !== null) // filter out nulls
-          .map(g => ({
+          .map((g: { productId: string; _max: { createdAt: Date }}) => ({
             productId: g.productId,
             createdAt: g._max.createdAt!, // non-null assertion
           })),
