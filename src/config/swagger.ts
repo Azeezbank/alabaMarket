@@ -16,7 +16,7 @@ const options: swaggerJSDoc.Options = {
         description: "Local development",
       },
       {
-        url: "https://api.alabamarket.com/",
+        url: "https://alabamarket.onrender.com/",
         description: "Production server",
       },
     ],
