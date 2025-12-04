@@ -148,6 +148,63 @@ export const initializeSocket = (io: Server) => {
 
 
 //Chat list
+// router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
+//   const senderId = (req.user as JwtPayload)?.id as string;
+
+//   try {
+//     // Step 1: get latest createdAt per products
+//     const grouped = await prisma.chat.groupBy({
+//       by: ['productId'],
+//       where: {
+//         OR: [
+//           { senderId: senderId },
+//           { receiverId: senderId }
+//         ]
+//       },
+//       _max: { createdAt: true },
+//     });
+
+//     if (!grouped.length) {
+//       return res.status(200).json([]);
+//     }
+
+//     const latestChats = await prisma.chat.findMany({
+//   where: {
+//     OR: grouped
+//       .filter(
+//         (g): g is { productId: string; _max: { createdAt: Date } } =>
+//           g._max.createdAt !== null // filter out nulls
+//       )
+//       .map(
+//         (g: { productId: string; _max: { createdAt: Date } }) => ({
+//           productId: g.productId,
+//           createdAt: g._max.createdAt!, // non-null assertion
+//         })
+//       ),
+//   },
+//   include: {
+//     product: {
+//       select: {
+//         id: true,
+//         name: true,
+//         productPhoto: {
+//           select: {
+//             url: true,
+//           },
+//         },
+//       },
+//     },
+//   },
+//   orderBy: { createdAt: 'desc' },
+// });
+//     res.status(200).json(latestChats);
+//   } catch (err: any) {
+//     console.error('Failed to fetch chat list', err)
+//     return res.status(500).json({ message: 'Something went wrong, Failed to fetch chat list' })
+//   }
+// });
+
+// Chat list
 router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
   const senderId = (req.user as JwtPayload)?.id as string;
 
@@ -158,8 +215,8 @@ router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
       where: {
         OR: [
           { senderId: senderId },
-          { receiverId: senderId }
-        ]
+          { receiverId: senderId },
+        ],
       },
       _max: { createdAt: true },
     });
@@ -168,66 +225,46 @@ router.get('/list', authenticate, async (req: AuthRequest, res: Response) => {
       return res.status(200).json([]);
     }
 
+    // Define type for grouped item
+    type GroupedChat = { productId: string; _max: { createdAt: Date | null } };
+
     // Step 2: fetch full chat rows including product
-
-    // const latestChats = await prisma.chat.findMany({
-    //   where: {
-    //     OR: grouped
-    //       .filter((g): g is { productId: string; _max: { createdAt: Date } } => g._max.createdAt !== null) // filter out nulls
-    //       .map((g: { productId: string; _max: { createdAt: Date }}) => ({
-    //         productId: g.productId,
-    //         createdAt: g._max.createdAt, // non-null assertion
-    //       })),
-    //   },
-    //   include: {
-    //     product: {
-    //       select: {
-    //         id: true,
-    //         name: true,
-    //         productPhoto: {
-    //           select: {
-    //             url: true
-    //           }
-    //         }
-    //       },
-    //     },
-    //   },
-    //   orderBy: { createdAt: 'desc' },
-    // });
-
     const latestChats = await prisma.chat.findMany({
-  where: {
-    OR: grouped
-      .filter(
-        (g): g is { productId: string; _max: { createdAt: Date } } =>
-          g._max.createdAt !== null // filter out nulls
-      )
-      .map(
-        (g: { productId: string; _max: { createdAt: Date } }) => ({
-          productId: g.productId,
-          createdAt: g._max.createdAt!, // non-null assertion
-        })
-      ),
-  },
-  include: {
-    product: {
-      select: {
-        id: true,
-        name: true,
-        productPhoto: {
+      where: {
+        OR: grouped
+          .filter(
+            (g): g is { productId: string; _max: { createdAt: Date } } =>
+              g._max.createdAt !== null // filter out nulls
+          )
+          .map(
+            (g: { productId: string; _max: { createdAt: Date } }) => ({
+              productId: g.productId,
+              createdAt: g._max.createdAt!, // non-null assertion
+            })
+          ),
+      },
+      include: {
+        product: {
           select: {
-            url: true,
+            id: true,
+            name: true,
+            productPhoto: {
+              select: {
+                url: true,
+              },
+            },
           },
         },
       },
-    },
-  },
-  orderBy: { createdAt: 'desc' },
-});
+      orderBy: { createdAt: 'desc' },
+    });
+
     res.status(200).json(latestChats);
   } catch (err: any) {
-    console.error('Failed to fetch chat list', err)
-    return res.status(500).json({ message: 'Something went wrong, Failed to fetch chat list' })
+    console.error('Failed to fetch chat list', err);
+    return res.status(500).json({
+      message: 'Something went wrong, Failed to fetch chat list',
+    });
   }
 });
 
